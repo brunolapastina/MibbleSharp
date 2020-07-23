@@ -328,18 +328,18 @@ namespace MibbleSharp
             int errors = this.log.ErrorCount;
 
             // Validate all symbols
-            foreach (MibSymbol symbol in this.symbolList)
+            for (int i = 0; i < this.symbolList.Count; ++i)
             {
                 try
                 {
-                    symbol.Initialize(this.log);
+                    symbolList[i].Initialize(this.log);
                 }
                 catch (MibException e)
                 {
                     this.log.AddError(e.Location, e.Message);
                 }
 
-                MibValueSymbol value = symbol as MibValueSymbol;
+                MibValueSymbol value = symbolList[i] as MibValueSymbol;
                 if (value != null && (value.Value is NumberValue || value.Value is ObjectIdentifierValue))
                 {
                     this.symbolValueMap.Add(value.Value.ToString(), value);
@@ -467,7 +467,7 @@ namespace MibbleSharp
         /// <returns>The Mib symbol, or null if none is found</returns>
         public MibSymbol GetSymbol(string name)
         {
-            MibSymbol ms;
+            MibSymbol ms = null;
             this.symbolNameMap.TryGetValue(name, out ms);
             return ms;
         }
@@ -479,7 +479,9 @@ namespace MibbleSharp
         /// <returns>The Mib Value Symbol, or null if not found</returns>
         public MibValueSymbol GetSymbolByValue(string value)
         {
-            return this.symbolValueMap[value];
+            MibValueSymbol ms = null;
+            this.symbolValueMap.TryGetValue(value, out ms);
+            return ms;
         }
 
         /// <summary>Returns a value symbol from this MIB.</summary>
@@ -487,7 +489,9 @@ namespace MibbleSharp
         /// <returns> the MIB value symbol, or null if not found</returns>
         public MibValueSymbol GetSymbolByValue(MibValue value)
         {
-            return this.symbolValueMap[value.ToString()];
+            MibValueSymbol ms = null;
+            this.symbolValueMap.TryGetValue(value.ToString(), out ms);
+            return ms;
         }
 
         /// <summary>
