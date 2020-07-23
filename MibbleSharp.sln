@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30320.27
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MibbleSharp", "MibbleSharp\MibbleSharp.csproj", "{0BA94C64-91DA-4501-A795-2E57DCF58B15}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grammatica", "Grammatica\Grammatica.csproj", "{BB0D2058-F6E1-486B-A02D-4A52667121EE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MibbleValidator", "MibbleValidator\MibbleValidator.csproj", "{92BBDED0-17E2-4DC6-8382-68387CAD4327}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MibbleBrowser", "MibbleBrowser\MibbleBrowser.csproj", "{4364D765-1B10-409D-82C7-51C32201D238}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grammatica", "Grammatica\Grammatica.csproj", "{9873B0C3-A3D1-4165-A379-5ABB7287F114}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MibbleSharp", "MibbleSharp\MibbleSharp.csproj", "{1FF2043F-A7D5-45E7-B938-4C72318DA30B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MibbleValidator", "MibbleValidator\MibbleValidator.csproj", "{8690D022-E6D2-4B55-8311-C65F4C2E91F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,24 +17,27 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0BA94C64-91DA-4501-A795-2E57DCF58B15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0BA94C64-91DA-4501-A795-2E57DCF58B15}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0BA94C64-91DA-4501-A795-2E57DCF58B15}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0BA94C64-91DA-4501-A795-2E57DCF58B15}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BB0D2058-F6E1-486B-A02D-4A52667121EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BB0D2058-F6E1-486B-A02D-4A52667121EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BB0D2058-F6E1-486B-A02D-4A52667121EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BB0D2058-F6E1-486B-A02D-4A52667121EE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{92BBDED0-17E2-4DC6-8382-68387CAD4327}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{92BBDED0-17E2-4DC6-8382-68387CAD4327}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{92BBDED0-17E2-4DC6-8382-68387CAD4327}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{92BBDED0-17E2-4DC6-8382-68387CAD4327}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4364D765-1B10-409D-82C7-51C32201D238}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4364D765-1B10-409D-82C7-51C32201D238}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4364D765-1B10-409D-82C7-51C32201D238}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4364D765-1B10-409D-82C7-51C32201D238}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9873B0C3-A3D1-4165-A379-5ABB7287F114}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9873B0C3-A3D1-4165-A379-5ABB7287F114}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9873B0C3-A3D1-4165-A379-5ABB7287F114}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9873B0C3-A3D1-4165-A379-5ABB7287F114}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FF2043F-A7D5-45E7-B938-4C72318DA30B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FF2043F-A7D5-45E7-B938-4C72318DA30B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FF2043F-A7D5-45E7-B938-4C72318DA30B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FF2043F-A7D5-45E7-B938-4C72318DA30B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8690D022-E6D2-4B55-8311-C65F4C2E91F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8690D022-E6D2-4B55-8311-C65F4C2E91F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8690D022-E6D2-4B55-8311-C65F4C2E91F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8690D022-E6D2-4B55-8311-C65F4C2E91F9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {15563320-CB83-4ADA-BAA5-69ABCF339A3B}
 	EndGlobalSection
 EndGlobal

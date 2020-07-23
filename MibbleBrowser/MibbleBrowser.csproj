@@ -95,7 +95,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MibbleSharp\MibbleSharp.csproj">
-      <Project>{0ba94c64-91da-4501-a795-2e57dcf58b15}</Project>
+      <Project>{1ff2043f-a7d5-45e7-b938-4c72318da30b}</Project>
       <Name>MibbleSharp</Name>
     </ProjectReference>
   </ItemGroup>
