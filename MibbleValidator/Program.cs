@@ -121,10 +121,8 @@ namespace MibbleValidator
                             loader.AddDir(Directory.GetParent(file).FullName);
                         }
 
-                        using (StreamReader sr = new StreamReader(file))
-                        {
-                            mib = loader.Load(sr);
-                        }
+                        using StreamReader sr = new StreamReader(file);
+                        mib = loader.Load(sr);
                     }
 
                     Console.Out.WriteLine("[OK]");
@@ -248,10 +246,8 @@ namespace MibbleValidator
 
             try
             {
-                using (TextReader reader = File.OpenText(file))
-                {
-                    buffer.Append(reader.ReadToEnd());
-                }
+                using TextReader reader = File.OpenText(file);
+                buffer.Append(reader.ReadToEnd());
             }
             catch (FileNotFoundException)
             {
