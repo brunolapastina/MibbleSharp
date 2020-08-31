@@ -82,22 +82,22 @@ namespace PerCederberg.Grammatica.Runtime.RE
         /// <summary>
         /// The inverted character set flag.
         /// </summary>
-        private bool inverted;
+        private readonly bool inverted;
 
         /// <summary>
         /// The character set content, for individual characters.
         /// </summary>
-        private List<char> charContents = new List<char>();
+        private readonly List<char> charContents = new List<char>();
 
         /// <summary>
         /// The character set content, for character ranges.
         /// </summary>
-        private List<Range> rangeContents = new List<Range>();
+        private readonly List<Range> rangeContents = new List<Range>();
 
         /// <summary>
         /// The character set content, for special character sets
         /// </summary>
-        private List<CharacterSetElement> charSetContents = new List<CharacterSetElement>();
+        private readonly List<CharacterSetElement> charSetContents = new List<CharacterSetElement>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CharacterSetElement"/> class.
@@ -427,12 +427,12 @@ namespace PerCederberg.Grammatica.Runtime.RE
             /// <summary>
             /// The minimum character value.
             /// </summary>
-            private char min;
+            private readonly char min;
 
             /// <summary>
             /// The maximum character value.
             /// </summary>
-            private char max;
+            private readonly char max;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="Range"/> class.

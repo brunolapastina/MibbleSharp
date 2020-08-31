@@ -40,7 +40,7 @@ namespace MibbleSharp.Type
         /// <summary>
         /// The constrained size values.
         /// </summary>
-        private IConstraint values;
+        private readonly IConstraint values;
 
          /// <summary>
          /// Initializes a new instance of the <see cref="SizeConstraint"/> class.

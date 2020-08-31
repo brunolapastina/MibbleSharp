@@ -31,13 +31,13 @@ namespace PerCederberg.Grammatica.Runtime.RE
     public class RegExp
     {
         /// <summary>The base regular expression element.</summary>
-        private Element element;
+        private readonly Element element;
 
         /// <summary>The regular expression pattern.</summary>
-        private string pattern;
+        private readonly string pattern;
 
         /// <summary>The character case ignore flag.</summary>
-        private bool ignoreCase;
+        private readonly bool ignoreCase;
 
         /// <summary>
         /// The current position in the pattern. This variable is used by
@@ -162,9 +162,11 @@ namespace PerCederberg.Grammatica.Runtime.RE
         /// </exception>
         private Element ParseTerm()
         {
-            ArrayList list = new ArrayList();
+            ArrayList list = new ArrayList()
+            {
+               this.ParseFact()
+            };
 
-            list.Add(this.ParseFact());
             while (true)
             {
                 switch (this.PeekChar(0))
@@ -269,8 +271,8 @@ namespace PerCederberg.Grammatica.Runtime.RE
         /// </exception>
         private Element ParseAtomModifier(Element elem)
         {
-            int min = 0;
-            int max = -1;
+            int min;
+            int max;
             RepeatElement.RepeatType type;
             int firstPos;
 

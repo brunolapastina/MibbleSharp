@@ -23,7 +23,7 @@ namespace PerCederberg.Grammatica.Runtime.NFA
         /// <summary>
         /// The character to match.
         /// </summary>
-        private char match;
+        private readonly char match;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NFACharTransition"/> class.

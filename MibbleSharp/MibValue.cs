@@ -32,7 +32,7 @@ namespace MibbleSharp
         /// <summary>
         /// The value name
         /// </summary>
-        private string name;
+        private readonly string name;
 
         /// <summary>
         /// The value reference symbol. This is set to the referenced

@@ -45,19 +45,19 @@ namespace PerCederberg.Grammatica.Runtime
         /// <summary>
         /// The list of production patterns.
         /// </summary> 
-        private List<ProductionPattern> patterns = new List<ProductionPattern>();
+        private readonly List<ProductionPattern> patterns = new List<ProductionPattern>();
 
         /// <summary>
         /// The map with production patterns and their id:s. This map
         /// contains the production patterns indexed by their id:s.
         /// </summary> 
-        private Dictionary<int, ProductionPattern> patternIds = new Dictionary<int, ProductionPattern>();
+        private readonly Dictionary<int, ProductionPattern> patternIds = new Dictionary<int, ProductionPattern>();
 
         /// <summary>
         /// The list of buffered tokens. This list will contain tokens that
         /// have been read from the tokenizer, but not yet consumed.
         /// </summary> 
-        private List<Token> tokens = new List<Token>();
+        private readonly List<Token> tokens = new List<Token>();
 
         /// <summary>
         /// The error log. All parse errors will be added to this log as

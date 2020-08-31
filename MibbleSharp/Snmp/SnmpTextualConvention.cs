@@ -35,17 +35,17 @@ namespace MibbleSharp.Snmp
         /// <summary>
         /// The display hint.
         /// </summary>
-        private string displayHint;
+        private readonly string displayHint;
 
         /// <summary>
         /// The type status.
         /// </summary>
-        private SnmpStatus status;
+        private readonly SnmpStatus status;
 
         /// <summary>
         /// The type reference.
         /// </summary>
-        private string reference;
+        private readonly string reference;
 
         /// <summary>
         /// The type syntax.

@@ -37,7 +37,7 @@ namespace MibbleSharp
         /// the corresponding tokens will be added to this hash map and
         /// not returned on subsequent calls.
         /// </summary>
-        private static HashSet<Token> commentTokens = new HashSet<Token>();
+        private static readonly HashSet<Token> commentTokens = new HashSet<Token>();
 
         /// <summary>
         /// Checks if a node corresponds to a bit value. This method is

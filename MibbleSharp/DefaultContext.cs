@@ -38,7 +38,7 @@ namespace MibbleSharp
         public const string JOINTISOCCITT = "joint-iso-ccitt";
 
         /// <summary>The map of default symbols.</summary>
-        private Dictionary<string, MibSymbol> symbols = new Dictionary<string, MibSymbol>();
+        private readonly Dictionary<string, MibSymbol> symbols = new Dictionary<string, MibSymbol>();
 
         /// <summary>Initializes a new instance of the <see cref="DefaultContext"/> class.</summary>
         public DefaultContext()

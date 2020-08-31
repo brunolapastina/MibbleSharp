@@ -33,7 +33,7 @@ namespace MibbleSharp.Snmp
         /// <summary>
         /// The type description.
         /// </summary>
-        private string description;
+        private readonly string description;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SnmpType">SNMP macro type</see> class. This constructor can

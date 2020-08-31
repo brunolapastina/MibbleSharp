@@ -30,17 +30,17 @@ namespace PerCederberg.Grammatica.Runtime.RE
         /// <summary>
         /// The error type
         /// </summary>
-        private ErrorType type;
+        private readonly ErrorType type;
 
         /// <summary>
         /// The error position
         /// </summary>
-        private int position;
+        private readonly int position;
 
         /// <summary>
         /// The regexp pattern
         /// </summary>
-        private string pattern;
+        private readonly string pattern;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RegExpException"/> class.

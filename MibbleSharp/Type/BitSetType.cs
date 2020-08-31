@@ -41,7 +41,7 @@ namespace MibbleSharp.Type
         /// <summary>
         /// The additional defined symbols.
         /// </summary>
-        private Dictionary<string, MibValueSymbol> symbols = new Dictionary<string, MibValueSymbol>();
+        private readonly Dictionary<string, MibValueSymbol> symbols = new Dictionary<string, MibValueSymbol>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BitSetType"/> class

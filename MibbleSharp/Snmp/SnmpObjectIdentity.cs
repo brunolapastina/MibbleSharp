@@ -34,12 +34,12 @@ namespace MibbleSharp.Snmp
         /// <summary>
         /// The object identity status.
         /// </summary>
-        private SnmpStatus status;
+        private readonly SnmpStatus status;
 
         /// <summary>
         /// The object identity reference.
         /// </summary>
-        private string reference;
+        private readonly string reference;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SnmpObjectIdentity"/> class.

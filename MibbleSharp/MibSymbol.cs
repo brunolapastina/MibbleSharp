@@ -29,15 +29,15 @@ namespace MibbleSharp
     public abstract class MibSymbol
     {
         /// <summary>The symbol location.</summary>
-        private FileLocation location;
+        private readonly FileLocation location;
 
         /// <summary>
         /// The MIB containing this symbol.
         /// </summary>
-        private Mib mib;
+        private readonly Mib mib;
 
         /// <summary>The symbol name.</summary>
-        private string name;
+        private readonly string name;
 
         /// <summary>The symbol comment.</summary>
         private string comment;

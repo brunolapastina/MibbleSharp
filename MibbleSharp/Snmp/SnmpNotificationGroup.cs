@@ -41,12 +41,12 @@ namespace MibbleSharp.Snmp
         /// <summary>
         /// The type status.
         /// </summary>
-        private SnmpStatus status;
+        private readonly SnmpStatus status;
 
         /// <summary>
         /// The type reference.
         /// </summary>
-        private string reference;
+        private readonly string reference;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SnmpNotificationGroup"/> class.

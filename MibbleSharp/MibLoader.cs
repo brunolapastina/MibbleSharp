@@ -65,7 +65,7 @@ namespace MibbleSharp
         /// cache. If a MIB isn't found among these directories, the
         /// resource directories will be attempted.
         /// </summary>
-        private IList<MibDirectoryCache> dirCaches = new List<MibDirectoryCache>();
+        private readonly IList<MibDirectoryCache> dirCaches = new List<MibDirectoryCache>();
 
         /// <summary>
         /// The MIB files that have been loaded. This list contains all MIB file loaded
@@ -78,13 +78,13 @@ namespace MibbleSharp
         /// The queue of MIB files to load. This queue contains
         /// MibSource objects.
         /// </summary>
-        private IList<MibSource> sourceQueue = new List<MibSource>();
+        private readonly IList<MibSource> sourceQueue = new List<MibSource>();
         
         /// <summary>
         /// The queue of MIB files to load. This queue contains
         /// MIB module names.
         /// </summary>
-        private IList<string> nameQueue = new List<string>();
+        private readonly IList<string> nameQueue = new List<string>();
 
         /// <summary>
         /// The default MIB context.
@@ -643,13 +643,13 @@ namespace MibbleSharp
             /// The MIB file. This variable is only set if the MIB is read
             /// from file, or if the MIB name is known.
             /// </summary>
-            private string file = null;
+            private readonly string file = null;
 
             /// <summary>
             /// The MIB URL location. This variable is only set if the MIB
             /// is read from a URL.
             /// </summary>
-            private Uri url = null;
+            private readonly Uri url = null;
 
             /// <summary>
             /// The MIB reader. This variable is only set if the MIB

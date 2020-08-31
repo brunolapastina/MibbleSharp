@@ -35,12 +35,12 @@ namespace MibbleSharp.Type
         /// <summary>
         /// The first constraint.
         /// </summary>
-        private IConstraint first;
+        private readonly IConstraint first;
 
         /// <summary>
         /// The second constraint.
         /// </summary>
-        private IConstraint second;
+        private readonly IConstraint second;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompoundConstraint"/> class.

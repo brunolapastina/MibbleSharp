@@ -46,7 +46,7 @@ namespace MibbleSharp
         /// <summary>
         /// The directory to search in
         /// </summary>
-        private string dir;
+        private readonly string dir;
 
         /// <summary>
         /// The file name cache. This cache is indexed by upper-case MIB

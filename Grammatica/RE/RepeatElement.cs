@@ -29,22 +29,22 @@ namespace PerCederberg.Grammatica.Runtime.RE
         /// <summary>
         /// The element to repeat.
         /// </summary>
-        private Element elem;
+        private readonly Element elem;
 
         /// <summary>
         /// The minimum number of repetitions.
         /// </summary>
-        private int min;
+        private readonly int min;
 
         /// <summary>
         /// The maximum number of repetitions.
         /// </summary>
-        private int max;
+        private readonly int max;
 
         /// <summary>
         /// The repeat type.
         /// </summary>
-        private RepeatType type;
+        private readonly RepeatType type;
 
         /// <summary>
         /// The start position of the last set of matches.

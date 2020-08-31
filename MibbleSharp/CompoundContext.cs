@@ -31,12 +31,12 @@ namespace MibbleSharp
         /// <summary>
         /// The primary MIB context
         /// </summary>
-        private IMibContext first;
+        private readonly IMibContext first;
 
         /// <summary>
         /// The secondary MIB context
         /// </summary>
-        private IMibContext second;
+        private readonly IMibContext second;
 
         /// <summary>Initializes a new instance of the <see cref="CompoundContext"/> class.</summary>
         /// <param name="first">The primary MIB context</param>

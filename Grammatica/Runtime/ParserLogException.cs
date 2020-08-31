@@ -30,7 +30,7 @@ namespace PerCederberg.Grammatica.Runtime
         /// <summary>
         /// The list of parse errors
         /// </summary>
-        private List<ParseException> errors = new List<ParseException>();
+        private readonly List<ParseException> errors = new List<ParseException>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ParserLogException"/> class.

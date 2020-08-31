@@ -16,22 +16,22 @@ namespace MibbleBrowser
         /// <summary>
         /// The treeview nodes will be added to
         /// </summary>
-        private TreeView treeView;
+        private readonly TreeView treeView;
 
         /// <summary>
         /// 
         /// </summary>
-        private MibNode rootNode = new MibNode("Mibs", null);
+        private readonly MibNode rootNode = new MibNode("Mibs", null);
 
         /// <summary>
         /// 
         /// </summary>
-        private Dictionary<MibValueSymbol, MibNode> nodes = new Dictionary<MibValueSymbol, MibNode>();
+        private readonly Dictionary<MibValueSymbol, MibNode> nodes = new Dictionary<MibValueSymbol, MibNode>();
 
         /// <summary>
         /// The MibLoader to be used for this tree
         /// </summary>
-        private MibLoader loader = new MibLoader();
+        private readonly MibLoader loader = new MibLoader();
 
         protected internal MibTreeBuilder(TreeView treeView)
         {

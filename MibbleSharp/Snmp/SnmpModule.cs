@@ -34,13 +34,13 @@ namespace MibbleSharp.Snmp
     public class SnmpModule
     {
         /// <summary>The module name</summary>
-        private string module;
+        private readonly string module;
 
         /// <summary>The list of mandatory group values.</summary>
         private IList<MibValue> groups;
 
         /// <summary>The list of compliances.</summary>
-        private IList<SnmpCompliance> compliances;
+        private readonly IList<SnmpCompliance> compliances;
 
         /// <summary>The module comment.</summary>
         private string comment = null;

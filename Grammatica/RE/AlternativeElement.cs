@@ -26,12 +26,12 @@ namespace PerCederberg.Grammatica.Runtime.RE
         /// <summary>
         /// The first alternative element
         /// </summary>
-        private Element elem1;
+        private readonly Element elem1;
 
         /// <summary>
         /// The second alternative element.
         /// </summary>
-        private Element elem2;
+        private readonly Element elem2;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AlternativeElement"/> class.
@@ -80,15 +80,13 @@ namespace PerCederberg.Grammatica.Runtime.RE
             int skip)
         {
             int length = 0;
-            int length1 = -1;
-            int length2 = -1;
             int skip1 = 0;
             int skip2 = 0;
 
             while (length >= 0 && skip1 + skip2 <= skip)
             {
-                length1 = this.elem1.Match(m, buffer, start, skip1);
-                length2 = this.elem2.Match(m, buffer, start, skip2);
+                int length1 = this.elem1.Match(m, buffer, start, skip1);
+                int length2 = this.elem2.Match(m, buffer, start, skip2);
                 if (length1 >= length2)
                 {
                     length = length1;

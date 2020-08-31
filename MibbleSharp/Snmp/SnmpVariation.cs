@@ -51,7 +51,7 @@ namespace MibbleSharp.Snmp
         /// <summary>
         /// The access mode.
         /// </summary>
-        private SnmpAccess access;
+        private readonly SnmpAccess access;
 
         /// <summary>
         /// The cell values required for creation.
@@ -66,7 +66,7 @@ namespace MibbleSharp.Snmp
         /// <summary>
         /// The variation description.
         /// </summary>
-        private string description;
+        private readonly string description;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SnmpVariation"/> class.

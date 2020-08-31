@@ -35,7 +35,7 @@ namespace MibbleSharp
         /// <summary>
         /// The FileLocation where the exception was raised
         /// </summary>
-        private FileLocation location;
+        private readonly FileLocation location;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MibException"/> class.

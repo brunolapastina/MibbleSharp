@@ -30,27 +30,27 @@ namespace PerCederberg.Grammatica.Runtime
         /// <summary>
         /// The error type
         /// </summary>
-        private ErrorType type;
+        private readonly ErrorType type;
 
         /// <summary>
         /// The error information
         /// </summary>
-        private string info;
+        private readonly string info;
 
         /// <summary>
         /// The list of detailed error information
         /// </summary>
-        private IList<string> details;
+        private readonly IList<string> details;
 
         /// <summary>
         /// The line number
         /// </summary>
-        private int line;
+        private readonly int line;
 
         /// <summary>
         /// The column number
         /// </summary>
-        private int column;
+        private readonly int column;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ParseException"/> class.

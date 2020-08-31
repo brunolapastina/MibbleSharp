@@ -48,7 +48,7 @@ namespace MibbleSharp.Snmp
         /// <summary>
         /// The type reference.
         /// </summary>
-        private string reference;
+        private readonly string reference;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SnmpTrapType"/> class.

@@ -38,7 +38,7 @@ namespace PerCederberg.Grammatica.Runtime
         /// <summary>
         /// The element list.
         /// </summary>
-        private List<ProductionPatternElement> elements = new List<ProductionPatternElement>();
+        private readonly List<ProductionPatternElement> elements = new List<ProductionPatternElement>();
 
         /// <summary>
         /// The look-ahead set associated with this alternative.

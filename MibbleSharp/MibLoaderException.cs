@@ -36,7 +36,7 @@ namespace MibbleSharp
         /// <summary>
         /// The Mib Loader log
         /// </summary>
-        private MibLoaderLog log;
+        private readonly MibLoaderLog log;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MibLoaderException"/> class.

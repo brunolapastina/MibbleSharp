@@ -28,12 +28,12 @@ namespace PerCederberg.Grammatica.Runtime
         /// <summary>
         /// The production pattern used for this production.
         /// </summary> 
-        private ProductionPattern pattern;
+        private readonly ProductionPattern pattern;
 
         /// <summary>
         /// The child nodes.
         /// </summary> 
-        private IList<Node> children;
+        private readonly IList<Node> children;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Production"/> class.

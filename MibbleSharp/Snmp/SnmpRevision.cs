@@ -36,7 +36,7 @@ namespace MibbleSharp.Snmp
         /// <summary>
         /// The revision description.
         /// </summary>
-        private string description;
+        private readonly string description;
 
         /// <summary>
         /// The revision comment.

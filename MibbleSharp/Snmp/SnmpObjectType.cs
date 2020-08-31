@@ -43,27 +43,27 @@ namespace MibbleSharp.Snmp
         /// <summary>
         /// The units description.
         /// </summary>
-        private string units;
+        private readonly string units;
 
         /// <summary>
         /// The access mode.
         /// </summary>
-        private SnmpAccess access;
+        private readonly SnmpAccess access;
 
         /// <summary>
         /// The type status.
         /// </summary>
-        private SnmpStatus status;
+        private readonly SnmpStatus status;
 
         /// <summary>
         /// The type reference.
         /// </summary>
-        private string reference;
+        private readonly string reference;
 
         /// <summary>
         /// The list of index values or types.
         /// </summary>
-        private IList<SnmpIndex> index;
+        private readonly IList<SnmpIndex> index;
 
         /// <summary>
         /// The index augments value.

@@ -33,16 +33,16 @@ namespace MibbleSharp.Snmp
     public class SnmpAgentCapabilities : SnmpType
     {
         /// <summary>The product release.</summary>
-        private string productRelease;
+        private readonly string productRelease;
 
         /// <summary>The type status.</summary>
-        private SnmpStatus status;
+        private readonly SnmpStatus status;
 
         /// <summary>The type reference.</summary>
-        private string reference;
+        private readonly string reference;
 
         /// <summary>The list of supported modules.</summary> 
-        private IList<SnmpModuleSupport> modules;
+        private readonly IList<SnmpModuleSupport> modules;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SnmpAgentCapabilities"/> class.

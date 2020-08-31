@@ -35,7 +35,7 @@ namespace MibbleSharp.Snmp
         /// <summary>
         /// The module name.
         /// </summary>
-        private string module;
+        private readonly string module;
 
         /// <summary>
         /// The list of included group values.
@@ -45,7 +45,7 @@ namespace MibbleSharp.Snmp
         /// <summary>
         /// The list of variations.
         /// </summary>
-        private IList<SnmpVariation> variations;
+        private readonly IList<SnmpVariation> variations;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SnmpModuleSupport"/> class.

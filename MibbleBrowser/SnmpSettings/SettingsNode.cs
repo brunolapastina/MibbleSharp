@@ -26,9 +26,9 @@ namespace MibbleBrowser.SnmpSettings
     [Serializable()]
     class SettingsNode : ISerializable
     {
-        private SettingsNode parent;
+        private readonly SettingsNode parent;
 
-        private List<SettingsNode> children = new List<SettingsNode>();
+        private readonly List<SettingsNode> children = new List<SettingsNode>();
 
         public SettingsNode()
         {

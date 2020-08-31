@@ -33,12 +33,12 @@ namespace PerCederberg.Grammatica.Runtime
         /// <summary>
         /// The production pattern identity.
         /// </summary> 
-        private int id;
+        private readonly int id;
 
         /// <summary>
         /// The production pattern name.
         /// </summary> 
-        private string name;
+        private readonly string name;
 
         /// <summary>
         /// The synthetic production flag. If this flag is set, the
@@ -50,7 +50,7 @@ namespace PerCederberg.Grammatica.Runtime
         /// <summary>
         /// The list of production pattern alternatives.
         /// </summary>
-        private List<ProductionPatternAlternative> alternatives;
+        private readonly List<ProductionPatternAlternative> alternatives;
 
         /// <summary>
         /// The default production pattern alternative. This alternative

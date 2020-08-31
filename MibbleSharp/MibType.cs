@@ -77,7 +77,7 @@ namespace MibbleSharp
         /// <summary>
         /// The primitive type flag.
         /// </summary>
-        private bool primitive;
+        private readonly bool primitive;
 
         /// <summary>
         /// The type tag.

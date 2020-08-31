@@ -66,7 +66,7 @@ namespace MibbleSharp.Snmp
         /// <summary>
         /// The status description.
         /// </summary>
-        private string description;
+        private readonly string description;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SnmpStatus"/> class.

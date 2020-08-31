@@ -81,7 +81,7 @@ namespace MibbleSharp.Snmp
         /// <summary>
         /// The access mode description.
         /// </summary>
-        private string description;
+        private readonly string description;
         
         /// <summary>
         /// Initializes a new instance of the <see cref="SnmpAccess"/> class.

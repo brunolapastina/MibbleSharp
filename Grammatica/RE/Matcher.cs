@@ -29,7 +29,7 @@ namespace PerCederberg.Grammatica.Runtime.RE
         /// <summary>
         /// The base regular expression element.
         /// </summary>
-        private Element element;
+        private readonly Element element;
 
         /// <summary>
         /// The input character buffer to work with.
@@ -39,7 +39,7 @@ namespace PerCederberg.Grammatica.Runtime.RE
         /// <summary>
         /// The character case ignore flag.
         /// </summary>
-        private bool ignoreCase;
+        private readonly bool ignoreCase;
 
         /// <summary>
         /// The start of the latest match found.

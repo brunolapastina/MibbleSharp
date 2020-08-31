@@ -51,17 +51,17 @@ namespace MibbleSharp
         /// <summary>
         /// The MIB file being analyzed.
         /// </summary>
-        private string file;
+        private readonly string file;
 
         /// <summary>
         /// The MIB loader using this analyzer.
         /// </summary>
-        private MibLoader loader;
+        private readonly MibLoader loader;
 
         /// <summary>
         /// The MIB loader log.
         /// </summary>
-        private MibLoaderLog log;
+        private readonly MibLoaderLog log;
 
         /// <summary>
         /// The current MIB module being analyzed.
@@ -80,7 +80,7 @@ namespace MibbleSharp
         /// context on the stack is returned by the getContext() method.
         /// </summary>
         /// <see cref="getContext"/>
-        private IList<IMibContext> contextStack = new List<IMibContext>();
+        private readonly IList<IMibContext> contextStack = new List<IMibContext>();
 
         /// <summary>
         /// The implicit tags flag.

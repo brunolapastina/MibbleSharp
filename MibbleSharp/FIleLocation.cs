@@ -33,17 +33,17 @@ namespace MibbleSharp
         /// <summary>
         /// The file to which the location refers.
         /// </summary>
-        private string file;
+        private readonly string file;
 
         /// <summary>
         /// The line number within the file (optional)
         /// </summary>
-        private int line;
+        private readonly int line;
 
         /// <summary>
         /// The column number within the file (optional)
         /// </summary>
-        private int column;
+        private readonly int column;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileLocation"/> class

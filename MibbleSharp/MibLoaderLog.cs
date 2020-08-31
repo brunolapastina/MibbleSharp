@@ -36,7 +36,7 @@ namespace MibbleSharp
         /// <summary>
         /// The log entries.
         /// </summary>
-        private IList<LogEntry> entries = new List<LogEntry>();
+        private readonly IList<LogEntry> entries = new List<LogEntry>();
 
         /// <summary>
         /// The log error count.
@@ -381,17 +381,17 @@ namespace MibbleSharp
             /// <summary>
             /// The log entry type.
             /// </summary>
-            private int type;
+            private readonly int type;
 
             /// <summary>
             /// The log entry file reference.
             /// </summary>
-            private FileLocation location;
+            private readonly FileLocation location;
 
             /// <summary>
             /// The log entry message.
             /// </summary>
-            private string message;
+            private readonly string message;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="LogEntry"/> class.

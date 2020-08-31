@@ -30,19 +30,19 @@ namespace MibbleSharp
     public class MibImport : IMibContext
     {
         /// <summary>The MIB loader being used.</summary>
-        private MibLoader loader;
+        private readonly MibLoader loader;
 
         /// <summary>The referenced MIB.</summary>
         private Mib mib = null;
 
         /// <summary>The import location.</summary>
-        private FileLocation location;
+        private readonly FileLocation location;
 
         /// <summary>The imported MIB name.</summary>
-        private string name;
+        private readonly string name;
 
         /// <summary>The imported MIB symbol names.</summary>
-        private IList<MibSymbol> symbols;
+        private readonly IList<MibSymbol> symbols;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MibImport"/> class.

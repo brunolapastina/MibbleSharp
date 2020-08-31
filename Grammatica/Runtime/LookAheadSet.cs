@@ -37,12 +37,12 @@ namespace PerCederberg.Grammatica.Runtime
         /// turn is represented by an ArrayList with Integers for the
         /// token id:s.
         /// </summary>    
-        private IList<Sequence> elements = new List<Sequence>();
+        private readonly IList<Sequence> elements = new List<Sequence>();
 
         /// <summary>
         /// The maximum length of any look-ahead sequence.
          /// </summary>
-        private int maxLength;
+        private readonly int maxLength;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LookAheadSet"/> class, 
@@ -614,7 +614,7 @@ namespace PerCederberg.Grammatica.Runtime
             /// <summary>
             /// The list of token ids in this sequence.
             /// </summary> 
-            private List<int> tokens = null;
+            private readonly List<int> tokens = null;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="Sequence"/> class, 

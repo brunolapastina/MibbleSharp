@@ -35,22 +35,22 @@ namespace MibbleSharp.Snmp
         /// <summary>
         /// The last updated date.
         /// </summary>
-        private string lastUpdated;
+        private readonly string lastUpdated;
 
         /// <summary>
         /// The organization name.
         /// </summary>
-        private string organization;
+        private readonly string organization;
 
         /// <summary>
         /// The organization contact information.
         /// </summary>
-        private string contactInfo;
+        private readonly string contactInfo;
 
         /// <summary>
         /// The list of SNMP revision objects.
         /// </summary>
-        private IList<SnmpRevision> revisions;
+        private readonly IList<SnmpRevision> revisions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SnmpModuleIdentity"/> class.

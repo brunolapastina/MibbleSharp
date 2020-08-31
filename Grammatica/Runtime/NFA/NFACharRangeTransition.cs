@@ -27,12 +27,12 @@ namespace PerCederberg.Grammatica.Runtime.NFA
         /// <summary>
         /// The inverse match flag.
         /// </summary>
-        private bool inverse;
+        private readonly bool inverse;
 
         /// <summary>
         /// The case-insensitive match flag.
         /// </summary>
-        private bool ignoreCase;
+        private readonly bool ignoreCase;
 
         /// <summary>
         /// The character set content.
@@ -168,12 +168,12 @@ namespace PerCederberg.Grammatica.Runtime.NFA
             /// <summary>
             /// The minimum character value.
             /// </summary>
-            private char min;
+            private readonly char min;
 
             /// <summary>
             /// The maximum character value.
             /// </summary>
-            private char max;
+            private readonly char max;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="Range"/> class.

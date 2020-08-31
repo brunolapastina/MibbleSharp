@@ -31,7 +31,7 @@ namespace MibbleSharp.Snmp
     public class SnmpCompliance
     {
         /// <summary>The compliance group flag. </summary>
-        private bool group;
+        private readonly bool group;
 
         /// <summary>The compliance value.</summary>
         private MibValue value;
@@ -43,10 +43,10 @@ namespace MibbleSharp.Snmp
         private MibType writeSyntax;
 
         /// <summary>The access mode.</summary>
-        private SnmpAccess access;
+        private readonly SnmpAccess access;
 
         /// <summary>The compliance description.</summary>
-        private string description;
+        private readonly string description;
 
         /// <summary>The compliance comment.</summary>
         private string comment = null;

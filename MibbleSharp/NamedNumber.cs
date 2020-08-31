@@ -33,7 +33,7 @@ namespace MibbleSharp
         /// <summary>
         /// The value name
         /// </summary>
-        private string name = null;
+        private readonly string name = null;
 
         /// <summary>
         /// The numeric value
@@ -43,7 +43,7 @@ namespace MibbleSharp
         /// <summary>
         /// The value reference
         /// </summary>
-        private ValueReference reference = null;
+        private readonly ValueReference reference = null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NamedNumber"/> class.

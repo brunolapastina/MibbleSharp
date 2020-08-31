@@ -27,7 +27,7 @@ namespace PerCederberg.Grammatica.Runtime.RE
         /// <summary>
         /// The string to match with.
         /// </summary>
-        private string value;
+        private readonly string value;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StringElement"/> class.

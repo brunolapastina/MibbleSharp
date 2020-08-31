@@ -31,22 +31,22 @@ namespace PerCederberg.Grammatica.Runtime
         /// The token flag. This flag is true for token elements, and
         /// false for production elements.
         /// </summary> 
-        private bool token;
+        private readonly bool token;
 
         /// <summary>
         /// The node identity.
         /// </summary> 
-        private int id;
+        private readonly int id;
 
         /// <summary>
         /// The minimum occurrence count.
         /// </summary> 
-        private int min;
+        private readonly int min;
 
         /// <summary>
         /// The maximum occurrence count.
         /// </summary> 
-        private int max;
+        private readonly int max;
 
         /// <summary>
         /// The look-ahead set associated with this element.

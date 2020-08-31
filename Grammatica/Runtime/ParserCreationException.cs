@@ -32,25 +32,25 @@ namespace PerCederberg.Grammatica.Runtime
         /// <summary>
         /// The error type
         /// </summary>
-        private ErrorType type;
+        private readonly ErrorType type;
 
         /// <summary>
         /// The token or production pattern name. This variable is only
         /// set for some error types.
         /// </summary>
-        private string name;
+        private readonly string name;
 
         /// <summary>
         /// The additional error information string. This variable is only
         /// set for some error types.
         /// </summary>
-        private string info;
+        private readonly string info;
 
         /// <summary>
         /// The error details list. This variable is only set for some
         /// error types.
         /// </summary>
-        private IList<string> details;
+        private readonly IList<string> details;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ParserCreationException"/> class.

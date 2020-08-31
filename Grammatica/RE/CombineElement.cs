@@ -26,12 +26,12 @@ namespace PerCederberg.Grammatica.Runtime.RE
         /// <summary>
         /// The first element.
         /// </summary>
-        private Element elem1;
+        private readonly Element elem1;
 
         /// <summary>
         /// The second element.
         /// </summary>
-        private Element elem2;
+        private readonly Element elem2;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CombineElement"/> class.

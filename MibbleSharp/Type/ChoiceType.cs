@@ -32,7 +32,7 @@ namespace MibbleSharp.Type
         /// <summary>
         /// The choice elements.
         /// </summary>
-        private IList<ElementType> elements;
+        private readonly IList<ElementType> elements;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChoiceType"/> class.

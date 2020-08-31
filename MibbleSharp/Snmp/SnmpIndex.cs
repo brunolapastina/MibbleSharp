@@ -33,7 +33,7 @@ namespace MibbleSharp.Snmp
     public class SnmpIndex
     {
         /// <summary>The implied flag</summary>
-        private bool implied;
+        private readonly bool implied;
 
         /// <summary>
         /// The index value, or null.

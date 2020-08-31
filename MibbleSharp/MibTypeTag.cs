@@ -111,12 +111,12 @@ namespace MibbleSharp
         /// <summary>
         /// The tag category
         /// </summary>
-        private int category;
+        private readonly int category;
 
         /// <summary>
         /// The tag value
         /// </summary>
-        private int value;
+        private readonly int value;
 
         /// <summary>
         /// The next tag in the tag chain
