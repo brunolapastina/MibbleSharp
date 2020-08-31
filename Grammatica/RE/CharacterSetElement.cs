@@ -207,7 +207,7 @@ namespace PerCederberg.Grammatica.Runtime.RE
 
          if (m.IsCaseInsensitive)
          {
-            c = (int)char.ToLower((char)c);
+            c = char.ToLower((char)c);
          }
 
          return this.InSet((char)c) ? 1 : -1;

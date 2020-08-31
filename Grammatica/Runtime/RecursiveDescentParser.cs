@@ -533,7 +533,7 @@ namespace PerCederberg.Grammatica.Runtime
             throw new ParserCreationException(
                 ParserCreationException.ErrorType.InfiniteLoop,
                 pattern.Name,
-                (string)null);
+                null);
          }
 
          // Find pattern look-ahead

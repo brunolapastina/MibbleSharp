@@ -130,7 +130,7 @@ namespace MibbleSharp.Type
          if (value is StringValue)
          {
             size = value.ToString().Length;
-            return this.values.IsCompatible(new NumberValue((BigInteger)size));
+            return this.values.IsCompatible(new NumberValue(size));
          }
 
          return false;
@@ -166,7 +166,7 @@ namespace MibbleSharp.Type
             {
                if (c is ValueRangeConstraint vrc)
                {
-                  if (vrc.IsCompatible((BigInteger)start))
+                  if (vrc.IsCompatible(start))
                   {
                      return start;
                   }

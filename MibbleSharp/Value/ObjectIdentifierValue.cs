@@ -310,7 +310,7 @@ namespace MibbleSharp.Value
       public override MibValue Initialize(MibLoaderLog log, MibType type)
       {
          ValueReference vref = null;
-         
+
          if (this.parent == null)
          {
             return this;
@@ -475,18 +475,18 @@ namespace MibbleSharp.Value
 
          while (low < high)
          {
-            child = this.children[(int)pos];
+            child = this.children[pos];
             if (child.Value == value)
             {
                return child;
             }
             else if (child.Value < value)
             {
-               low = (int)pos + 1;
+               low = pos + 1;
             }
             else
             {
-               high = (int)pos;
+               high = pos;
             }
 
             pos = (low + high) / 2;

@@ -159,7 +159,7 @@ namespace MibbleSharp
       /// import this one.
       /// </summary>
       /// <see cref="MibLoader"/>
-      public IList<Mib> ImportingMibs => 
+      public IList<Mib> ImportingMibs =>
          this.Loader.AllMibs
          .Where(m => m != this && m.GetImport(this.name) != null)
          .ToList();
@@ -247,7 +247,7 @@ namespace MibbleSharp
       public void Clear()
       {
          this.Imports.Clear();
-         
+
          foreach (MibSymbol symbol in this.Symbols)
          {
             symbol.Clear();

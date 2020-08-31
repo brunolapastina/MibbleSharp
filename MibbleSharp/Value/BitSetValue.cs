@@ -24,7 +24,6 @@ namespace MibbleSharp.Value
    using System;
    using System.Collections;
    using System.Collections.Generic;
-   using System.Numerics;
    using System.Text;
 
    /// <summary>
@@ -73,7 +72,7 @@ namespace MibbleSharp.Value
 
             foreach (bool b in this.value)
             {
-               components.Add(new NumberValue((BigInteger)(b ? 1 : 0)));
+               components.Add(new NumberValue(b ? 1 : 0));
             }
 
             return components;

@@ -44,7 +44,7 @@ namespace MibbleSharp
       /// <param name="name">The symbol name</param>
       /// <param name="type">The symbol type</param>
       /// <param name="value">The symbol value</param>
-      public MibValueSymbol(FileLocation location, Mib mib, string name, MibType type, MibValue value) : 
+      public MibValueSymbol(FileLocation location, Mib mib, string name, MibType type, MibValue value) :
          base(location, mib, name)
       {
          this.Type = type;

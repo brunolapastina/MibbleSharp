@@ -37,7 +37,7 @@ namespace MibbleBrowser.SnmpSettings
 
       //public SettingsNode(SettingsNode parent)
       //{
-         //this.parent = parent;
+      //this.parent = parent;
       //}
 
       public SettingsNode(SerializationInfo info, StreamingContext ctxt)

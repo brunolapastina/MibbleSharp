@@ -108,10 +108,10 @@ namespace PerCederberg.Grammatica.Runtime.RE
 
             if (m.IsCaseInsensitive)
             {
-               c = (int)char.ToLower((char)c);
+               c = char.ToLower((char)c);
             }
 
-            if (c != (int)this.value[i])
+            if (c != this.value[i])
             {
                return -1;
             }
