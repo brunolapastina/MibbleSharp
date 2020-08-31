@@ -5,11 +5,11 @@ VisualStudioVersion = 16.0.30320.27
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MibbleBrowser", "MibbleBrowser\MibbleBrowser.csproj", "{4364D765-1B10-409D-82C7-51C32201D238}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grammatica", "Grammatica\Grammatica.csproj", "{9873B0C3-A3D1-4165-A379-5ABB7287F114}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grammatica", "Grammatica\Grammatica.csproj", "{9873B0C3-A3D1-4165-A379-5ABB7287F114}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MibbleSharp", "MibbleSharp\MibbleSharp.csproj", "{1FF2043F-A7D5-45E7-B938-4C72318DA30B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MibbleSharp", "MibbleSharp\MibbleSharp.csproj", "{1FF2043F-A7D5-45E7-B938-4C72318DA30B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MibbleValidator", "MibbleValidator\MibbleValidator.csproj", "{8690D022-E6D2-4B55-8311-C65F4C2E91F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MibbleValidator", "MibbleValidator\MibbleValidator.csproj", "{8690D022-E6D2-4B55-8311-C65F4C2E91F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +33,10 @@ Global
 		{8690D022-E6D2-4B55-8311-C65F4C2E91F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8690D022-E6D2-4B55-8311-C65F4C2E91F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8690D022-E6D2-4B55-8311-C65F4C2E91F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE99660B-1659-4972-B937-327E7950F112}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE99660B-1659-4972-B937-327E7950F112}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE99660B-1659-4972-B937-327E7950F112}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE99660B-1659-4972-B937-327E7950F112}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
