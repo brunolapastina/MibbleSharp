@@ -15,57 +15,57 @@
 
 namespace PerCederberg.Grammatica.Runtime.NFA
 {
-    /// <summary>
-    /// A single character match transition.
-    /// </summary>
-    internal class NFACharTransition : NFATransition
-    {
-        /// <summary>
-        /// The character to match.
-        /// </summary>
-        private readonly char match;
+   /// <summary>
+   /// A single character match transition.
+   /// </summary>
+   internal class NFACharTransition : NFATransition
+   {
+      /// <summary>
+      /// The character to match.
+      /// </summary>
+      private readonly char match;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NFACharTransition"/> class.
-        /// </summary>
-        /// <param name="match">The character to match</param>
-        /// <param name="state">The target state</param>
-        public NFACharTransition(char match, NFAState state) : base(state)
-        {
-            this.match = match;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="NFACharTransition"/> class.
+      /// </summary>
+      /// <param name="match">The character to match</param>
+      /// <param name="state">The target state</param>
+      public NFACharTransition(char match, NFAState state) : base(state)
+      {
+         this.match = match;
+      }
 
-        /// <summary>
-        /// Gets a value indicating whether this transition only matches ASCII characters.
-        /// I.e. characters with numeric values between 0 and 127.
-        /// </summary>
-        public override bool IsAscii
-        {
-            get
-            {
-                return this.match >= 0 && this.match < 128;
-            }
-        }
+      /// <summary>
+      /// Gets a value indicating whether this transition only matches ASCII characters.
+      /// I.e. characters with numeric values between 0 and 127.
+      /// </summary>
+      public override bool IsAscii
+      {
+         get
+         {
+            return this.match >= 0 && this.match < 128;
+         }
+      }
 
-        /// <summary>
-        /// Checks if the specified character matches the transition.
-        /// </summary>
-        /// <param name="ch">The character to check</param>
-        /// <returns>True if the character matches, false if not</returns>
-        public override bool Match(char ch)
-        {
-            return this.match == ch;
-        }
+      /// <summary>
+      /// Checks if the specified character matches the transition.
+      /// </summary>
+      /// <param name="ch">The character to check</param>
+      /// <returns>True if the character matches, false if not</returns>
+      public override bool Match(char ch)
+      {
+         return this.match == ch;
+      }
 
-        /// <summary>
-        /// Creates a copy of this transition but with another target
-        /// state.
-        /// </summary>
-        /// <param name="state">The new target state</param>
-        /// <returns>An identical copy of this transition</returns>
-        public override NFATransition Copy(NFAState state)
-        {
-            return new NFACharTransition(this.match, state);
-        }
-    }
+      /// <summary>
+      /// Creates a copy of this transition but with another target
+      /// state.
+      /// </summary>
+      /// <param name="state">The new target state</param>
+      /// <returns>An identical copy of this transition</returns>
+      public override NFATransition Copy(NFAState state)
+      {
+         return new NFACharTransition(this.match, state);
+      }
+   }
 }

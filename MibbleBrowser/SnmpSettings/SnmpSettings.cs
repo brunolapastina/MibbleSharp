@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MibbleBrowser.SnmpSettings
+﻿namespace MibbleBrowser.SnmpSettings
 {
-    class SnmpSettings
-    {
-    }
+   class SnmpSettings
+   {
+   }
 }

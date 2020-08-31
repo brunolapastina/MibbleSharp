@@ -21,25 +21,25 @@
 
 namespace MibbleSharp
 {
-    /// <summary>
-    /// A MIB symbol context. This interface is implemented by all objects
-    /// that contains multiple named references to MIB symbols.
-    /// Note: This interface is internal to Mibble and
-    /// only exposed to make it available in different packages.
-    /// </summary>
-    public interface IMibContext
-    {
-        /// <summary>
-        /// Searches for a named MIB symbol. This method may search outside
-        /// the normal (or strict) scope, thereby allowing a form of
-        /// relaxed search. Note that the results from the normal and
-        /// expanded search may not be identical, due to the context
-        /// chaining and the same symbol name appearing in various
-        /// contexts.
-        /// </summary>
-        /// <param name="name">The symbol name</param>
-        /// <param name="expanded">The expanded scope flag</param>
-        /// <returns>The MIB symbol, or null if not found</returns>
-        MibSymbol FindSymbol(string name, bool expanded);
-    }
+   /// <summary>
+   /// A MIB symbol context. This interface is implemented by all objects
+   /// that contains multiple named references to MIB symbols.
+   /// Note: This interface is internal to Mibble and
+   /// only exposed to make it available in different packages.
+   /// </summary>
+   public interface IMibContext
+   {
+      /// <summary>
+      /// Searches for a named MIB symbol. This method may search outside
+      /// the normal (or strict) scope, thereby allowing a form of
+      /// relaxed search. Note that the results from the normal and
+      /// expanded search may not be identical, due to the context
+      /// chaining and the same symbol name appearing in various
+      /// contexts.
+      /// </summary>
+      /// <param name="name">The symbol name</param>
+      /// <param name="expanded">The expanded scope flag</param>
+      /// <returns>The MIB symbol, or null if not found</returns>
+      MibSymbol FindSymbol(string name, bool expanded);
+   }
 }

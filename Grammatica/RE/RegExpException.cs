@@ -15,173 +15,173 @@
 
 namespace PerCederberg.Grammatica.Runtime.RE
 {
-    using System;
-    using System.Runtime.Serialization;
-    using System.Security.Permissions;
-    using System.Text;
+   using System;
+   using System.Runtime.Serialization;
+   using System.Security.Permissions;
+   using System.Text;
 
-    /// <summary>
-    /// A regular expression exception. This exception is thrown if a 
-    /// regular expression couldn't be processed (or "compiled") properly.
-    /// </summary>
-    [Serializable]
-    public class RegExpException : Exception
-    {
-        /// <summary>
-        /// The error type
-        /// </summary>
-        private readonly ErrorType type;
+   /// <summary>
+   /// A regular expression exception. This exception is thrown if a 
+   /// regular expression couldn't be processed (or "compiled") properly.
+   /// </summary>
+   [Serializable]
+   public class RegExpException : Exception
+   {
+      /// <summary>
+      /// The error type
+      /// </summary>
+      private readonly ErrorType type;
 
-        /// <summary>
-        /// The error position
-        /// </summary>
-        private readonly int position;
+      /// <summary>
+      /// The error position
+      /// </summary>
+      private readonly int position;
 
-        /// <summary>
-        /// The regexp pattern
-        /// </summary>
-        private readonly string pattern;
+      /// <summary>
+      /// The regexp pattern
+      /// </summary>
+      private readonly string pattern;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RegExpException"/> class.
-        /// </summary>
-        /// <param name="type">The error type</param>
-        /// <param name="pos">The error position</param>
-        /// <param name="pattern">The regexp pattern</param>
-        public RegExpException(ErrorType type, int pos, string pattern)
-        {
-            this.type = type;
-            this.position = pos;
-            this.pattern = pattern;
-        }
- 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RegExpException"/> class,
-        /// in the context of a de-serialization
-        /// </summary>
-        /// <param name="info">The SerializationInfo object</param>
-        /// <param name="context">The StreamingContext object</param>
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
-        protected RegExpException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-            this.position = info.GetInt32("Position");
-            this.pattern = info.GetString("Pattern");
-            this.type = (RegExpException.ErrorType)info.GetInt32("Type");
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="RegExpException"/> class.
+      /// </summary>
+      /// <param name="type">The error type</param>
+      /// <param name="pos">The error position</param>
+      /// <param name="pattern">The regexp pattern</param>
+      public RegExpException(ErrorType type, int pos, string pattern)
+      {
+         this.type = type;
+         this.position = pos;
+         this.pattern = pattern;
+      }
 
-        /// <summary>
-        /// ErrorType enumeration
-        /// </summary>
-        public enum ErrorType
-        {
-            /// <summary>
-            /// The unexpected character error constant. This error is
-            /// used when a character was read that didn't match the
-            /// allowed set of characters at the given position.
-            /// </summary>
-            UnexpectedCharacter,
+      /// <summary>
+      /// Initializes a new instance of the <see cref="RegExpException"/> class,
+      /// in the context of a de-serialization
+      /// </summary>
+      /// <param name="info">The SerializationInfo object</param>
+      /// <param name="context">The StreamingContext object</param>
+      [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+      protected RegExpException(SerializationInfo info, StreamingContext context)
+          : base(info, context)
+      {
+         this.position = info.GetInt32("Position");
+         this.pattern = info.GetString("Pattern");
+         this.type = (RegExpException.ErrorType)info.GetInt32("Type");
+      }
 
-            /// <summary>
-            /// The un-terminated pattern error constant. This error is
-            /// used when more characters were expected in the pattern.
-            /// </summary>
-            UnterminatedPattern,
+      /// <summary>
+      /// ErrorType enumeration
+      /// </summary>
+      public enum ErrorType
+      {
+         /// <summary>
+         /// The unexpected character error constant. This error is
+         /// used when a character was read that didn't match the
+         /// allowed set of characters at the given position.
+         /// </summary>
+         UnexpectedCharacter,
 
-            /// <summary>
-            /// The unsupported special character error constant. This
-            /// error is used when special regular expression
-            /// characters are used in the pattern, but not supported
-            /// in this implementation.
-            /// </summary>
-            UnsupportedSpecialCharacter,
+         /// <summary>
+         /// The un-terminated pattern error constant. This error is
+         /// used when more characters were expected in the pattern.
+         /// </summary>
+         UnterminatedPattern,
 
-            /// <summary>
-            /// The unsupported escape character error constant. This
-            /// error is used when an escape character construct is
-            /// used in the pattern, but not supported in this
-            /// implementation.
-            /// </summary>
-            UnsupportedEscapeCharacter,
+         /// <summary>
+         /// The unsupported special character error constant. This
+         /// error is used when special regular expression
+         /// characters are used in the pattern, but not supported
+         /// in this implementation.
+         /// </summary>
+         UnsupportedSpecialCharacter,
 
-            /// <summary>
-            /// The invalid repeat count error constant. This error is
-            /// used when a repetition count of zero is specified, or
-            /// when the minimum exceeds the maximum.
-            /// </summary>
-            InvalidRepeatCount
-        }
+         /// <summary>
+         /// The unsupported escape character error constant. This
+         /// error is used when an escape character construct is
+         /// used in the pattern, but not supported in this
+         /// implementation.
+         /// </summary>
+         UnsupportedEscapeCharacter,
 
-        /// <summary>
-        /// Gets the detailed exception error message.
-        /// </summary>
-        public override string Message
-        {
-            get
+         /// <summary>
+         /// The invalid repeat count error constant. This error is
+         /// used when a repetition count of zero is specified, or
+         /// when the minimum exceeds the maximum.
+         /// </summary>
+         InvalidRepeatCount
+      }
+
+      /// <summary>
+      /// Gets the detailed exception error message.
+      /// </summary>
+      public override string Message
+      {
+         get
+         {
+            StringBuilder buffer = new StringBuilder();
+
+            // Append error type name
+            switch (this.type)
             {
-                StringBuilder buffer = new StringBuilder();
-
-                // Append error type name
-                switch (this.type)
-                {
-                    case ErrorType.UnexpectedCharacter:
-                        buffer.Append("unexpected character");
-                        break;
-                    case ErrorType.UnterminatedPattern:
-                        buffer.Append("unterminated pattern");
-                        break;
-                    case ErrorType.UnsupportedSpecialCharacter:
-                        buffer.Append("unsupported character");
-                        break;
-                    case ErrorType.UnsupportedEscapeCharacter:
-                        buffer.Append("unsupported escape character");
-                        break;
-                    case ErrorType.InvalidRepeatCount:
-                        buffer.Append("invalid repeat count");
-                        break;
-                    default:
-                        buffer.Append("internal error");
-                        break;
-                }
-
-                // Append erroneous character
-                buffer.Append(": ");
-                if (this.position < this.pattern.Length)
-                {
-                    buffer.Append('\'');
-                    buffer.Append(this.pattern.Substring(this.position));
-                    buffer.Append('\'');
-                }
-                else
-                {
-                    buffer.Append("<end of pattern>");
-                }
-
-                // Append position
-                buffer.Append(" at position ");
-                buffer.Append(this.position);
-
-                return buffer.ToString();
-            }            
-        }
-
-        /// <summary>
-        /// Serialize a <see cref="RegExpException"/> object
-        /// </summary>
-        /// <param name="info">The SerializationInfo object</param>
-        /// <param name="context">The StreamingContext object</param>
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            if (info == null)
-            {
-                throw new ArgumentNullException("info");
+               case ErrorType.UnexpectedCharacter:
+                  buffer.Append("unexpected character");
+                  break;
+               case ErrorType.UnterminatedPattern:
+                  buffer.Append("unterminated pattern");
+                  break;
+               case ErrorType.UnsupportedSpecialCharacter:
+                  buffer.Append("unsupported character");
+                  break;
+               case ErrorType.UnsupportedEscapeCharacter:
+                  buffer.Append("unsupported escape character");
+                  break;
+               case ErrorType.InvalidRepeatCount:
+                  buffer.Append("invalid repeat count");
+                  break;
+               default:
+                  buffer.Append("internal error");
+                  break;
             }
 
-            info.AddValue("Type", this.type);
-            info.AddValue("Position", this.position);
-            info.AddValue("Pattern", this.pattern);
-            base.GetObjectData(info, context);
-        }
-    }
+            // Append erroneous character
+            buffer.Append(": ");
+            if (this.position < this.pattern.Length)
+            {
+               buffer.Append('\'');
+               buffer.Append(this.pattern.Substring(this.position));
+               buffer.Append('\'');
+            }
+            else
+            {
+               buffer.Append("<end of pattern>");
+            }
+
+            // Append position
+            buffer.Append(" at position ");
+            buffer.Append(this.position);
+
+            return buffer.ToString();
+         }
+      }
+
+      /// <summary>
+      /// Serialize a <see cref="RegExpException"/> object
+      /// </summary>
+      /// <param name="info">The SerializationInfo object</param>
+      /// <param name="context">The StreamingContext object</param>
+      [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+      public override void GetObjectData(SerializationInfo info, StreamingContext context)
+      {
+         if (info == null)
+         {
+            throw new ArgumentNullException("info");
+         }
+
+         info.AddValue("Type", this.type);
+         info.AddValue("Position", this.position);
+         info.AddValue("Pattern", this.pattern);
+         base.GetObjectData(info, context);
+      }
+   }
 }

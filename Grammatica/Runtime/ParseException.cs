@@ -15,342 +15,342 @@
 
 namespace PerCederberg.Grammatica.Runtime
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Runtime.Serialization;
-    using System.Security.Permissions;
-    using System.Text;
+   using System;
+   using System.Collections.Generic;
+   using System.Runtime.Serialization;
+   using System.Security.Permissions;
+   using System.Text;
 
-    /// <summary>
-    /// A parse exception
-    /// </summary>
-    [Serializable]
-    public class ParseException : Exception
-    {
-        /// <summary>
-        /// The error type
-        /// </summary>
-        private readonly ErrorType type;
+   /// <summary>
+   /// A parse exception
+   /// </summary>
+   [Serializable]
+   public class ParseException : Exception
+   {
+      /// <summary>
+      /// The error type
+      /// </summary>
+      private readonly ErrorType type;
 
-        /// <summary>
-        /// The error information
-        /// </summary>
-        private readonly string info;
+      /// <summary>
+      /// The error information
+      /// </summary>
+      private readonly string info;
 
-        /// <summary>
-        /// The list of detailed error information
-        /// </summary>
-        private readonly IList<string> details;
+      /// <summary>
+      /// The list of detailed error information
+      /// </summary>
+      private readonly IList<string> details;
 
-        /// <summary>
-        /// The line number
-        /// </summary>
-        private readonly int line;
+      /// <summary>
+      /// The line number
+      /// </summary>
+      private readonly int line;
 
-        /// <summary>
-        /// The column number
-        /// </summary>
-        private readonly int column;
+      /// <summary>
+      /// The column number
+      /// </summary>
+      private readonly int column;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ParseException"/> class.
-        /// </summary>
-        /// <param name="type">The parse error type</param>
-        /// <param name="info">The additional error information</param>
-        /// <param name="line">The line number, or -1 if unknown</param>
-        /// <param name="column">The column number, or -1 if unknown</param>
-        public ParseException(
-            ErrorType type,
-            string info,
-            int line,
-            int column)
-            : this(type, info, null, line, column)
-        {
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="ParseException"/> class.
+      /// </summary>
+      /// <param name="type">The parse error type</param>
+      /// <param name="info">The additional error information</param>
+      /// <param name="line">The line number, or -1 if unknown</param>
+      /// <param name="column">The column number, or -1 if unknown</param>
+      public ParseException(
+          ErrorType type,
+          string info,
+          int line,
+          int column)
+          : this(type, info, null, line, column)
+      {
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ParseException"/> class.
-        /// This constructor is only used to supply the detailed 
-        /// information array, which is only used for expected 
-        /// token errors. The list then contains
-        /// descriptions of the expected tokens.
-        /// </summary>
-        /// <param name="type">The parse error type</param>
-        /// <param name="info">The additional error information</param>
-        /// <param name="details">The detailed error information</param>
-        /// <param name="line">The line number, or -1 if unknown</param>
-        /// <param name="column">The column number, or -1 if unknown</param>
-        public ParseException(
-            ErrorType type,
-            string info,
-            IList<string> details,
-            int line,
-            int column)
-        {
-            this.type = type;
-            this.info = info;
-            this.details = details;
-            this.line = line;
-            this.column = column;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="ParseException"/> class.
+      /// This constructor is only used to supply the detailed 
+      /// information array, which is only used for expected 
+      /// token errors. The list then contains
+      /// descriptions of the expected tokens.
+      /// </summary>
+      /// <param name="type">The parse error type</param>
+      /// <param name="info">The additional error information</param>
+      /// <param name="details">The detailed error information</param>
+      /// <param name="line">The line number, or -1 if unknown</param>
+      /// <param name="column">The column number, or -1 if unknown</param>
+      public ParseException(
+          ErrorType type,
+          string info,
+          IList<string> details,
+          int line,
+          int column)
+      {
+         this.type = type;
+         this.info = info;
+         this.details = details;
+         this.line = line;
+         this.column = column;
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ParseException"/> class,
-        /// as part of a de-serialization
-        /// </summary>
-        /// <param name="info">The SerializationInfo object</param>
-        /// <param name="context">The StreamingContext object</param>
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
-        protected ParseException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-            this.line = info.GetInt32("Line");
-            this.column = info.GetInt32("Column");
-            this.details = (IList<string>)info.GetValue("Details", typeof(IList<string>));
-            this.info = info.GetString("Info");
-            this.type = (ErrorType)info.GetInt32("Type");
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="ParseException"/> class,
+      /// as part of a de-serialization
+      /// </summary>
+      /// <param name="info">The SerializationInfo object</param>
+      /// <param name="context">The StreamingContext object</param>
+      [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+      protected ParseException(SerializationInfo info, StreamingContext context)
+          : base(info, context)
+      {
+         this.line = info.GetInt32("Line");
+         this.column = info.GetInt32("Column");
+         this.details = (IList<string>)info.GetValue("Details", typeof(IList<string>));
+         this.info = info.GetString("Info");
+         this.type = (ErrorType)info.GetInt32("Type");
+      }
 
-        /// <summary>
-        /// The ErrorType enumeration
-        /// </summary>
-        public enum ErrorType
-        {
-            /// <summary>
-            /// The internal error type is only used to signal an error
-            /// that is a result of a bug in the parser or tokenizer
-            /// code.
-            /// </summary>
-            Internal,
+      /// <summary>
+      /// The ErrorType enumeration
+      /// </summary>
+      public enum ErrorType
+      {
+         /// <summary>
+         /// The internal error type is only used to signal an error
+         /// that is a result of a bug in the parser or tokenizer
+         /// code.
+         /// </summary>
+         Internal,
 
-            /// <summary>
-            /// The I/O error type is used for stream I/O errors.
-            /// </summary>
-            IO,
+         /// <summary>
+         /// The I/O error type is used for stream I/O errors.
+         /// </summary>
+         IO,
 
-            /// <summary>
-            /// The unexpected end of file error type is used when end
-            /// of file is encountered instead of a valid token.
-            /// </summary>
-            UnexpectedEOF,
+         /// <summary>
+         /// The unexpected end of file error type is used when end
+         /// of file is encountered instead of a valid token.
+         /// </summary>
+         UnexpectedEOF,
 
-            /// <summary>
-            /// The unexpected character error type is used when a
-            /// character is read that isn't handled by one of the
-            /// token patterns.
-            /// </summary>
-            UnexpectedChar,
+         /// <summary>
+         /// The unexpected character error type is used when a
+         /// character is read that isn't handled by one of the
+         /// token patterns.
+         /// </summary>
+         UnexpectedChar,
 
-            /// <summary>
-            /// The unexpected token error type is used when another
-            /// token than the expected one is encountered.
-            /// </summary>
-            UnexpectedToken,
+         /// <summary>
+         /// The unexpected token error type is used when another
+         /// token than the expected one is encountered.
+         /// </summary>
+         UnexpectedToken,
 
-            /// <summary>
-            /// The invalid token error type is used when a token
-            /// pattern with an error message is matched. The
-            /// additional information provided should contain the
-            /// error message.
-            /// </summary>
-            InvalidToken,
+         /// <summary>
+         /// The invalid token error type is used when a token
+         /// pattern with an error message is matched. The
+         /// additional information provided should contain the
+         /// error message.
+         /// </summary>
+         InvalidToken,
 
-            /// <summary>
-            /// The analysis error type is used when an error is
-            /// encountered in the analysis. The additional information
-            /// provided should contain the error message.
-            /// </summary>
-            Analysis
-        }
+         /// <summary>
+         /// The analysis error type is used when an error is
+         /// encountered in the analysis. The additional information
+         /// provided should contain the error message.
+         /// </summary>
+         Analysis
+      }
 
-        /// <summary>
-        /// Gets the error type
-        /// </summary>
-        public ErrorType Type
-        {
-            get
+      /// <summary>
+      /// Gets the error type
+      /// </summary>
+      public ErrorType Type
+      {
+         get
+         {
+            return this.type;
+         }
+      }
+
+      /// <summary>
+      /// Gets additional error information
+      /// </summary>
+      public string Info
+      {
+         get
+         {
+            return this.info;
+         }
+      }
+
+      /// <summary>
+      /// Gets detailed error information
+      /// </summary>
+      public IEnumerable<string> Details
+      {
+         get
+         {
+            return this.details;
+         }
+      }
+
+      /// <summary>
+      /// Gets the line number where the error occurred. Returns -1 if unknown
+      /// </summary>
+      public int Line
+      {
+         get
+         {
+            return this.line;
+         }
+      }
+
+      /// <summary>
+      /// Gets the column number where the error occurred. Returns -1 if unknown
+      /// </summary>
+      public int Column
+      {
+         get
+         {
+            return this.column;
+         }
+      }
+
+      /// <summary>
+      /// The message property (read-only). This property contains
+      /// the detailed exception error message, including line and
+      /// column numbers when available.
+      /// </summary>
+      /// <see cref="ErrorMessage"/>
+      public override string Message
+      {
+         get
+         {
+            StringBuilder buffer = new StringBuilder();
+
+            // Add error description
+            buffer.Append(this.ErrorMessage);
+
+            // Add line and column
+            if (this.line > 0 && this.column > 0)
             {
-                return this.type;
+               buffer.Append(", on line: ");
+               buffer.Append(this.line);
+               buffer.Append(" column: ");
+               buffer.Append(this.column);
             }
-        }
 
-        /// <summary>
-        /// Gets additional error information
-        /// </summary>
-        public string Info
-        {
-            get
+            return buffer.ToString();
+         }
+      }
+
+      /// <summary>
+      /// Gets the error message, containing all available error info
+      /// except the line and column
+      /// </summary>
+      public string ErrorMessage
+      {
+         get
+         {
+            StringBuilder buffer = new StringBuilder();
+
+            // Add type and info
+            switch (this.type)
             {
-                return this.info;
-            }
-        }
+               case ErrorType.IO:
+                  buffer.Append("I/O error: ");
+                  buffer.Append(this.info);
+                  break;
+               case ErrorType.UnexpectedEOF:
+                  buffer.Append("unexpected end of file");
+                  break;
+               case ErrorType.UnexpectedChar:
+                  buffer.Append("unexpected character '");
+                  buffer.Append(this.info);
+                  buffer.Append("'");
+                  break;
+               case ErrorType.UnexpectedToken:
+                  buffer.Append("unexpected token ");
+                  buffer.Append(this.info);
+                  if (this.details != null)
+                  {
+                     buffer.Append(", expected ");
+                     if (this.details.Count > 1)
+                     {
+                        buffer.Append("one of ");
+                     }
 
-        /// <summary>
-        /// Gets detailed error information
-        /// </summary>
-        public IEnumerable<string> Details
-        {
-            get
+                     buffer.Append(this.MessageDetails);
+                  }
+
+                  break;
+               case ErrorType.InvalidToken:
+                  buffer.Append(this.info);
+                  break;
+               case ErrorType.Analysis:
+                  buffer.Append(this.info);
+                  break;
+               default:
+                  buffer.Append("internal error");
+                  if (this.info != null)
+                  {
+                     buffer.Append(": ");
+                     buffer.Append(this.info);
+                  }
+
+                  break;
+            }
+
+            return buffer.ToString();
+         }
+      }
+
+      /// <summary>
+      /// Gets a string containing all the detailed information in
+      /// a list. The elements are separated with the CurrentCulture's
+      /// ListSeparator string
+      /// </summary>
+      private string MessageDetails
+      {
+         get
+         {
+            StringBuilder buffer = new StringBuilder();
+
+            for (int i = 0; i < this.details.Count; i++)
             {
-                return this.details;
+               if (i > 0)
+               {
+                  buffer.Append(System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ");
+                  if (i + 1 == this.details.Count)
+                  {
+                     buffer.Append("or ");
+                  }
+               }
+
+               buffer.Append(this.details[i]);
             }
-        }
 
-        /// <summary>
-        /// Gets the line number where the error occurred. Returns -1 if unknown
-        /// </summary>
-        public int Line
-        {
-            get
-            {
-                return this.line;
-            }
-        }
+            return buffer.ToString();
+         }
+      }
 
-        /// <summary>
-        /// Gets the column number where the error occurred. Returns -1 if unknown
-        /// </summary>
-        public int Column
-        {
-            get
-            {
-                return this.column;
-            }
-        }
+      /// <summary>
+      /// Serialize a ParseException object
+      /// </summary>
+      /// <param name="info">The SerializationInfo object</param>
+      /// <param name="context">The StreamingContext object</param>
+      [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+      public override void GetObjectData(SerializationInfo info, StreamingContext context)
+      {
+         info.AddValue("Line", this.line);
+         info.AddValue("Column", this.column);
+         info.AddValue("Details", this.details);
+         info.AddValue("Info", this.info);
+         info.AddValue("Type", this.type);
 
-        /// <summary>
-        /// The message property (read-only). This property contains
-        /// the detailed exception error message, including line and
-        /// column numbers when available.
-        /// </summary>
-        /// <see cref="ErrorMessage"/>
-        public override string Message
-        {
-            get
-            {
-                StringBuilder buffer = new StringBuilder();
-
-                // Add error description
-                buffer.Append(this.ErrorMessage);
-
-                // Add line and column
-                if (this.line > 0 && this.column > 0)
-                {
-                    buffer.Append(", on line: ");
-                    buffer.Append(this.line);
-                    buffer.Append(" column: ");
-                    buffer.Append(this.column);
-                }
-
-                return buffer.ToString();
-            }
-        }
-
-        /// <summary>
-        /// Gets the error message, containing all available error info
-        /// except the line and column
-        /// </summary>
-        public string ErrorMessage
-        {
-            get
-            {
-                StringBuilder buffer = new StringBuilder();
-
-                // Add type and info
-                switch (this.type)
-                {
-                    case ErrorType.IO:
-                        buffer.Append("I/O error: ");
-                        buffer.Append(this.info);
-                        break;
-                    case ErrorType.UnexpectedEOF:
-                        buffer.Append("unexpected end of file");
-                        break;
-                    case ErrorType.UnexpectedChar:
-                        buffer.Append("unexpected character '");
-                        buffer.Append(this.info);
-                        buffer.Append("'");
-                        break;
-                    case ErrorType.UnexpectedToken:
-                        buffer.Append("unexpected token ");
-                        buffer.Append(this.info);
-                        if (this.details != null)
-                        {
-                            buffer.Append(", expected ");
-                            if (this.details.Count > 1)
-                            {
-                                buffer.Append("one of ");
-                            }
-
-                            buffer.Append(this.MessageDetails);
-                        }
-
-                        break;
-                    case ErrorType.InvalidToken:
-                        buffer.Append(this.info);
-                        break;
-                    case ErrorType.Analysis:
-                        buffer.Append(this.info);
-                        break;
-                    default:
-                        buffer.Append("internal error");
-                        if (this.info != null)
-                        {
-                            buffer.Append(": ");
-                            buffer.Append(this.info);
-                        }
-
-                        break;
-                }
-
-                return buffer.ToString();
-            }
-        }
-
-        /// <summary>
-        /// Gets a string containing all the detailed information in
-        /// a list. The elements are separated with the CurrentCulture's
-        /// ListSeparator string
-        /// </summary>
-        private string MessageDetails
-        {
-            get
-            {
-                StringBuilder buffer = new StringBuilder();
-
-                for (int i = 0; i < this.details.Count; i++)
-                {
-                    if (i > 0)
-                    {
-                        buffer.Append(System.Globalization.CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ");
-                        if (i + 1 == this.details.Count)
-                        {
-                            buffer.Append("or ");
-                        }
-                    }
-
-                    buffer.Append(this.details[i]);
-                }
-
-                return buffer.ToString();
-            }
-        }
-
-        /// <summary>
-        /// Serialize a ParseException object
-        /// </summary>
-        /// <param name="info">The SerializationInfo object</param>
-        /// <param name="context">The StreamingContext object</param>
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("Line", this.line);
-            info.AddValue("Column", this.column);
-            info.AddValue("Details", this.details);
-            info.AddValue("Info", this.info);
-            info.AddValue("Type", this.type);
-
-            base.GetObjectData(info, context);
-        }
-    }
+         base.GetObjectData(info, context);
+      }
+   }
 }

@@ -15,785 +15,785 @@
 
 namespace PerCederberg.Grammatica.Runtime
 {
-    using System;
-    using System.Collections;
-    using System.Globalization;
-    using System.Text;
-    using PerCederberg.Grammatica.Runtime.NFA;
-    using PerCederberg.Grammatica.Runtime.RE;
+   using PerCederberg.Grammatica.Runtime.NFA;
+   using PerCederberg.Grammatica.Runtime.RE;
+   using System;
+   using System.Collections;
+   using System.Globalization;
+   using System.Text;
 
-    /// <summary>
-    /// A regular expression parser. The parser creates an NFA for the
-    /// regular expression having a single start and acceptance states.
-    /// </summary>
-    internal class TokenRegExpParser
-    {
-        /// <summary>
-        /// The regular expression pattern.
-        /// </summary>
-        private string pattern;
+   /// <summary>
+   /// A regular expression parser. The parser creates an NFA for the
+   /// regular expression having a single start and acceptance states.
+   /// </summary>
+   internal class TokenRegExpParser
+   {
+      /// <summary>
+      /// The regular expression pattern.
+      /// </summary>
+      private readonly string pattern;
 
-        /// <summary>
-       /// The character case ignore flag.
-        /// </summary>
-        private bool ignoreCase;
+      /// <summary>
+      /// The character case ignore flag.
+      /// </summary>
+      private readonly bool ignoreCase;
 
-        /// <summary>
-       /// The current position in the pattern. This variable is used by
-       /// the parsing methods.
-        /// </summary>
-        private int pos;
+      /// <summary>
+      /// The current position in the pattern. This variable is used by
+      /// the parsing methods.
+      /// </summary>
+      private int pos;
 
-        /// <summary>
-       /// The start NFA state for this regular expression.
-        /// </summary>
-        private NFAState start = new NFAState();
+      /// <summary>
+      /// The start NFA state for this regular expression.
+      /// </summary>
+      private readonly NFAState start = new NFAState();
 
-        /// <summary>
-       /// The end NFA state for this regular expression.
-        /// </summary>
-        private NFAState end = null;
+      /// <summary>
+      /// The end NFA state for this regular expression.
+      /// </summary>
+      private readonly NFAState end = null;
 
-        /// <summary>
-       /// The number of states found.
-        /// </summary>
-        private int stateCount = 0;
+      /// <summary>
+      /// The number of states found.
+      /// </summary>
+      private int stateCount = 0;
 
-        /// <summary>
-       /// The number of transitions found.
-        /// </summary>
-        private int transitionCount = 0;
+      /// <summary>
+      /// The number of transitions found.
+      /// </summary>
+      private int transitionCount = 0;
 
-        /// <summary>
-       /// The number of epsilon transitions found.
-        /// </summary>
-        private int epsilonCount = 0;
+      /// <summary>
+      /// The number of epsilon transitions found.
+      /// </summary>
+      private int epsilonCount = 0;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TokenRegExpParser"/> class, in 
-        /// case-insensitive mode.
-        /// Note that this will trigger the parsing of the regular expression.
-        /// </summary>
-        /// <param name="pattern">The regular expression pattern</param>
-        /// <exception cref="RegExpException">
-        /// If the regular expression could not be correctly parsed
-        /// </exception>
-        public TokenRegExpParser(string pattern) : this(pattern, false)
-        {
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="TokenRegExpParser"/> class, in 
+      /// case-insensitive mode.
+      /// Note that this will trigger the parsing of the regular expression.
+      /// </summary>
+      /// <param name="pattern">The regular expression pattern</param>
+      /// <exception cref="RegExpException">
+      /// If the regular expression could not be correctly parsed
+      /// </exception>
+      public TokenRegExpParser(string pattern) : this(pattern, false)
+      {
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TokenRegExpParser"/> class.
-        /// The regular expression can be either case-sensitive or case-insensitive.
-        /// Note that this will trigger the parsing of the regular
-        /// expression.
-        /// </summary>
-        /// <param name="pattern">The regular expression pattern</param>
-        /// <param name="ignoreCase">The character case ignore flag</param>
-        /// <exception cref="RegExpException">
-        /// if the regular expression couldn't be parsed correctly
-        /// </exception>
-        public TokenRegExpParser(string pattern, bool ignoreCase)
-        {
-            this.pattern = pattern;
-            this.ignoreCase = ignoreCase;
-            this.pos = 0;
-            this.end = this.ParseExpr(this.start);
-            if (this.pos < pattern.Length)
+      /// <summary>
+      /// Initializes a new instance of the <see cref="TokenRegExpParser"/> class.
+      /// The regular expression can be either case-sensitive or case-insensitive.
+      /// Note that this will trigger the parsing of the regular
+      /// expression.
+      /// </summary>
+      /// <param name="pattern">The regular expression pattern</param>
+      /// <param name="ignoreCase">The character case ignore flag</param>
+      /// <exception cref="RegExpException">
+      /// if the regular expression couldn't be parsed correctly
+      /// </exception>
+      public TokenRegExpParser(string pattern, bool ignoreCase)
+      {
+         this.pattern = pattern;
+         this.ignoreCase = ignoreCase;
+         this.pos = 0;
+         this.end = this.ParseExpr(this.start);
+         if (this.pos < pattern.Length)
+         {
+            throw new RegExpException(
+                RegExpException.ErrorType.UnexpectedCharacter,
+                this.pos,
+                this.pattern);
+         }
+      }
+
+      /// <summary>
+      /// Gets the debug information for the generated NFA.
+      /// </summary>
+      public string DebugInfo
+      {
+         get
+         {
+            if (this.stateCount == 0)
             {
-                throw new RegExpException(
-                    RegExpException.ErrorType.UnexpectedCharacter,
-                    this.pos,
-                    this.pattern);
+               this.UpdateStats(this.start, new Hashtable());
             }
-        }
 
-        /// <summary>
-        /// Gets the debug information for the generated NFA.
-        /// </summary>
-        public string DebugInfo
-        {
-            get
+            return this.stateCount + " states, " +
+                   this.transitionCount + " transitions, " +
+                   this.epsilonCount + " epsilons";
+         }
+      }
+
+      /// <summary>
+      /// Gets the start NFA state for this regular expression.
+      /// </summary>
+      internal NFAState Start
+      {
+         get
+         {
+            return this.start;
+         }
+      }
+
+      /// <summary>
+      /// Gets the end NFA state for this regular expression.
+      /// </summary>
+      internal NFAState End
+      {
+         get
+         {
+            return this.end;
+         }
+      }
+
+      /// <summary>
+      /// Updates the statistical counters for the NFA generated.
+      /// </summary>
+      /// <param name="state">The current state to visit</param>
+      /// <param name="visited">THe lookup map of visited states</param>
+      private void UpdateStats(NFAState state, Hashtable visited)
+      {
+         if (!visited.ContainsKey(state))
+         {
+            visited.Add(state, state);
+            this.stateCount++;
+            foreach (var trans in state.Outgoing)
             {
-                if (this.stateCount == 0)
-                {
-                    this.UpdateStats(this.start, new Hashtable());
-                }
+               this.transitionCount++;
+               if (trans is NFAEpsilonTransition)
+               {
+                  this.epsilonCount++;
+               }
 
-                return this.stateCount + " states, " +
-                       this.transitionCount + " transitions, " +
-                       this.epsilonCount + " epsilons";
+               this.UpdateStats(trans.State, visited);
             }
-        }
+         }
+      }
 
-        /// <summary>
-        /// Gets the start NFA state for this regular expression.
-        /// </summary>
-        internal NFAState Start
-        {
-            get
+      /// <summary>
+      /// Parses a regular expression. This method handles the <c>Expr</c>
+      /// production in the grammar (see regexp.grammar).
+      /// </summary>
+      /// <param name="start">The initial NFA state</param>
+      /// <returns>The terminating NFA state</returns>
+      /// <exception cref="RegExpException">
+      /// If an error was encountered in the pattern string
+      /// </exception>
+      private NFAState ParseExpr(NFAState start)
+      {
+         NFAState end = new NFAState();
+         NFAState subStart;
+         NFAState subEnd;
+
+         do
+         {
+            if (this.PeekChar(0) == '|')
             {
-                return this.start;
+               this.ReadChar('|');
             }
-        }
 
-        /// <summary>
-        /// Gets the end NFA state for this regular expression.
-        /// </summary>
-        internal NFAState End
-        {
-            get
+            subStart = new NFAState();
+            subEnd = this.ParseTerm(subStart);
+
+            if (subStart.Incoming.Count == 0)
             {
-                return this.end;
+               subStart.MergeInto(start);
             }
-        }
-
-        /// <summary>
-        /// Updates the statistical counters for the NFA generated.
-        /// </summary>
-        /// <param name="state">The current state to visit</param>
-        /// <param name="visited">THe lookup map of visited states</param>
-        private void UpdateStats(NFAState state, Hashtable visited)
-        {
-            if (!visited.ContainsKey(state))
+            else
             {
-                visited.Add(state, state);
-                this.stateCount++;
-                foreach (var trans in state.Outgoing)
-                {
-                    this.transitionCount++;
-                    if (trans is NFAEpsilonTransition)
-                    {
-                        this.epsilonCount++;
-                    }
-
-                    this.UpdateStats(trans.State, visited);
-                }
+               start.AddOut(new NFAEpsilonTransition(subStart));
             }
-        }
 
-        /// <summary>
-        /// Parses a regular expression. This method handles the <c>Expr</c>
-        /// production in the grammar (see regexp.grammar).
-        /// </summary>
-        /// <param name="start">The initial NFA state</param>
-        /// <returns>The terminating NFA state</returns>
-        /// <exception cref="RegExpException">
-        /// If an error was encountered in the pattern string
-        /// </exception>
-        private NFAState ParseExpr(NFAState start)
-        {
-            NFAState end = new NFAState();
-            NFAState subStart;
-            NFAState subEnd;
-
-            do
+            if (subEnd.Outgoing.Count == 0 ||
+                (!end.HasTransitions && this.PeekChar(0) != '|'))
             {
-                if (this.PeekChar(0) == '|')
-                {
-                    this.ReadChar('|');
-                }
-
-                subStart = new NFAState();
-                subEnd = this.ParseTerm(subStart);
-
-                if (subStart.Incoming.Count == 0)
-                {
-                    subStart.MergeInto(start);
-                }
-                else
-                {
-                    start.AddOut(new NFAEpsilonTransition(subStart));
-                }
-
-                if (subEnd.Outgoing.Count == 0 ||
-                    (!end.HasTransitions && this.PeekChar(0) != '|'))
-                {
-                    subEnd.MergeInto(end);
-                }
-                else
-                {
-                    subEnd.AddOut(new NFAEpsilonTransition(end));
-                }
+               subEnd.MergeInto(end);
             }
-            while (this.PeekChar(0) == '|');
+            else
+            {
+               subEnd.AddOut(new NFAEpsilonTransition(end));
+            }
+         }
+         while (this.PeekChar(0) == '|');
 
+         return end;
+      }
+
+      /// <summary>
+      /// Parses a regular expression term. This method handles the
+      /// Term production in the grammar (see regexp.grammar).
+      /// </summary>
+      /// <param name="start">The initial NFA state</param>
+      /// <returns>The terminating NFA state</returns>
+      /// <exception cref="RegExpException">
+      /// If an error was encountered in the pattern string
+      /// </exception>
+      private NFAState ParseTerm(NFAState start)
+      {
+         NFAState end;
+
+         end = this.ParseFact(start);
+         while (true)
+         {
+            switch (this.PeekChar(0))
+            {
+               case -1:
+               case ')':
+               case ']':
+               case '{':
+               case '}':
+               case '?':
+               case '+':
+               case '|':
+                  return end;
+               default:
+                  end = this.ParseFact(end);
+                  break;
+            }
+         }
+      }
+
+      /// <summary>
+      /// Parses a regular expression factor. This method handles the
+      /// Fact production in the grammar (see regexp.grammar).
+      /// </summary>
+      /// <param name="start">The initial NFA state</param>
+      /// <returns>The terminating NFA state</returns>
+      /// <exception cref="RegExpException">
+      /// If an error was encountered in the pattern string
+      /// </exception>
+      private NFAState ParseFact(NFAState start)
+      {
+         NFAState placeholder = new NFAState();
+         NFAState end;
+
+         end = this.ParseAtom(placeholder);
+         switch (this.PeekChar(0))
+         {
+            case '?':
+            case '*':
+            case '+':
+            case '{':
+               end = this.ParseAtomModifier(placeholder, end);
+               break;
+         }
+
+         if (placeholder.Incoming.Count > 0 && start.Outgoing.Count > 0)
+         {
+            start.AddOut(new NFAEpsilonTransition(placeholder));
             return end;
-        }
+         }
+         else
+         {
+            placeholder.MergeInto(start);
+            return (end == placeholder) ? start : end;
+         }
+      }
 
-        /// <summary>
-        /// Parses a regular expression term. This method handles the
-        /// Term production in the grammar (see regexp.grammar).
-        /// </summary>
-        /// <param name="start">The initial NFA state</param>
-        /// <returns>The terminating NFA state</returns>
-        /// <exception cref="RegExpException">
-        /// If an error was encountered in the pattern string
-        /// </exception>
-        private NFAState ParseTerm(NFAState start)
-        {
-            NFAState end;
+      /// <summary>
+      /// Parses a regular expression atom. This method handles the
+      /// Atom production in the grammar (see regexp.grammar).
+      /// </summary>
+      /// <param name="start">The initial NFA state</param>
+      /// <returns>The terminating NFA state</returns>
+      /// <exception cref="RegExpException">
+      /// If an error was encountered in the pattern string
+      /// </exception>
+      private NFAState ParseAtom(NFAState start)
+      {
+         NFAState end;
 
-            end = this.ParseFact(start);
-            while (true)
+         switch (this.PeekChar(0))
+         {
+            case '.':
+               this.ReadChar('.');
+               return start.AddOut(new NFADotTransition(new NFAState()));
+            case '(':
+               this.ReadChar('(');
+               end = this.ParseExpr(start);
+               this.ReadChar(')');
+               return end;
+            case '[':
+               this.ReadChar('[');
+               end = this.ParseCharSet(start);
+               this.ReadChar(']');
+               return end;
+            case -1:
+            case ')':
+            case ']':
+            case '{':
+            case '}':
+            case '?':
+            case '*':
+            case '+':
+            case '|':
+               throw new RegExpException(
+                   RegExpException.ErrorType.UnexpectedCharacter,
+                   this.pos,
+                   this.pattern);
+            default:
+               return this.ParseChar(start);
+         }
+      }
+
+      /// <summary>
+      /// Parses a regular expression atom modifier. This method handles
+      /// the AtomModifier production in the grammar (see regexp.grammar).
+      /// </summary>
+      /// <param name="start">The initial NFA state</param>
+      /// <param name="end">The terminal NFA state</param>
+      /// <returns>The terminating NFA state</returns>
+      /// <exception cref="RegExpException">
+      /// If an error was encountered in the pattern string
+      /// </exception>
+      private NFAState ParseAtomModifier(
+          NFAState start,
+          NFAState end)
+      {
+         int min;
+         int max;
+         int firstPos = this.pos;
+
+         // Read min and max
+         switch (this.ReadChar())
+         {
+            case '?':
+               min = 0;
+               max = 1;
+               break;
+            case '*':
+               min = 0;
+               max = -1;
+               break;
+            case '+':
+               min = 1;
+               max = -1;
+               break;
+            case '{':
+               min = this.ReadNumber();
+               max = min;
+               if (this.PeekChar(0) == ',')
+               {
+                  this.ReadChar(',');
+                  max = -1;
+                  if (this.PeekChar(0) != '}')
+                  {
+                     max = this.ReadNumber();
+                  }
+               }
+
+               this.ReadChar('}');
+
+               if (max == 0 || (max > 0 && min > max))
+               {
+                  throw new RegExpException(
+                      RegExpException.ErrorType.InvalidRepeatCount,
+                      firstPos,
+                      this.pattern);
+               }
+
+               break;
+            default:
+               throw new RegExpException(
+                   RegExpException.ErrorType.UnexpectedCharacter,
+                   this.pos - 1,
+                   this.pattern);
+         }
+
+         // Read possessive or reluctant modifiers
+         if (this.PeekChar(0) == '?')
+         {
+            throw new RegExpException(
+                RegExpException.ErrorType.UnsupportedSpecialCharacter,
+                this.pos,
+                this.pattern);
+         }
+         else if (this.PeekChar(0) == '+')
+         {
+            throw new RegExpException(
+                RegExpException.ErrorType.UnsupportedSpecialCharacter,
+                this.pos,
+                this.pattern);
+         }
+
+         // Handle supported repeaters
+         if (min == 0 && max == 1)
+         {
+            return start.AddOut(new NFAEpsilonTransition(end));
+         }
+         else if (min == 0 && max == -1)
+         {
+            if (end.Outgoing.Count == 0)
             {
-                switch (this.PeekChar(0))
-                {
-                    case -1:
-                    case ')':
-                    case ']':
-                    case '{':
-                    case '}':
-                    case '?':
-                    case '+':
-                    case '|':
-                        return end;
-                    default:
-                        end = this.ParseFact(end);
-                        break;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Parses a regular expression factor. This method handles the
-        /// Fact production in the grammar (see regexp.grammar).
-        /// </summary>
-        /// <param name="start">The initial NFA state</param>
-        /// <returns>The terminating NFA state</returns>
-        /// <exception cref="RegExpException">
-        /// If an error was encountered in the pattern string
-        /// </exception>
-        private NFAState ParseFact(NFAState start)
-        {
-            NFAState placeholder = new NFAState();
-            NFAState end;
-
-            end = this.ParseAtom(placeholder);
-            switch (this.PeekChar(0))
-            {
-                case '?':
-                case '*':
-                case '+':
-                case '{':
-                    end = this.ParseAtomModifier(placeholder, end);
-                    break;
-            }
-
-            if (placeholder.Incoming.Count > 0 && start.Outgoing.Count > 0)
-            {
-                start.AddOut(new NFAEpsilonTransition(placeholder));
-                return end;
-            }
-            else
-            {
-                placeholder.MergeInto(start);
-                return (end == placeholder) ? start : end;
-            }
-        }
-
-        /// <summary>
-        /// Parses a regular expression atom. This method handles the
-        /// Atom production in the grammar (see regexp.grammar).
-        /// </summary>
-        /// <param name="start">The initial NFA state</param>
-        /// <returns>The terminating NFA state</returns>
-        /// <exception cref="RegExpException">
-        /// If an error was encountered in the pattern string
-        /// </exception>
-        private NFAState ParseAtom(NFAState start)
-        {
-            NFAState end;
-
-            switch (this.PeekChar(0))
-            {
-                case '.':
-                    this.ReadChar('.');
-                    return start.AddOut(new NFADotTransition(new NFAState()));
-                case '(':
-                    this.ReadChar('(');
-                    end = this.ParseExpr(start);
-                    this.ReadChar(')');
-                    return end;
-                case '[':
-                    this.ReadChar('[');
-                    end = this.ParseCharSet(start);
-                    this.ReadChar(']');
-                    return end;
-                case -1:
-                case ')':
-                case ']':
-                case '{':
-                case '}':
-                case '?':
-                case '*':
-                case '+':
-                case '|':
-                    throw new RegExpException(
-                        RegExpException.ErrorType.UnexpectedCharacter,
-                        this.pos,
-                        this.pattern);
-                default:
-                    return this.ParseChar(start);
-            }
-        }
-
-        /// <summary>
-        /// Parses a regular expression atom modifier. This method handles
-        /// the AtomModifier production in the grammar (see regexp.grammar).
-        /// </summary>
-        /// <param name="start">The initial NFA state</param>
-        /// <param name="end">The terminal NFA state</param>
-        /// <returns>The terminating NFA state</returns>
-        /// <exception cref="RegExpException">
-        /// If an error was encountered in the pattern string
-        /// </exception>
-        private NFAState ParseAtomModifier(
-            NFAState start,
-            NFAState end)
-        {
-            int min = 0;
-            int max = -1;
-            int firstPos = this.pos;
-
-            // Read min and max
-            switch (this.ReadChar())
-            {
-                case '?':
-                    min = 0;
-                    max = 1;
-                    break;
-                case '*':
-                    min = 0;
-                    max = -1;
-                    break;
-                case '+':
-                    min = 1;
-                    max = -1;
-                    break;
-                case '{':
-                    min = this.ReadNumber();
-                    max = min;
-                    if (this.PeekChar(0) == ',')
-                    {
-                        this.ReadChar(',');
-                        max = -1;
-                        if (this.PeekChar(0) != '}')
-                        {
-                            max = this.ReadNumber();
-                        }
-                    }
-
-                    this.ReadChar('}');
-
-                    if (max == 0 || (max > 0 && min > max))
-                    {
-                        throw new RegExpException(
-                            RegExpException.ErrorType.InvalidRepeatCount,
-                            firstPos,
-                            this.pattern);
-                    }
-
-                    break;
-                default:
-                    throw new RegExpException(
-                        RegExpException.ErrorType.UnexpectedCharacter,
-                        this.pos - 1,
-                        this.pattern);
-            }
-
-            // Read possessive or reluctant modifiers
-            if (this.PeekChar(0) == '?')
-            {
-                throw new RegExpException(
-                    RegExpException.ErrorType.UnsupportedSpecialCharacter,
-                    this.pos,
-                    this.pattern);
-            }
-            else if (this.PeekChar(0) == '+')
-            {
-                throw new RegExpException(
-                    RegExpException.ErrorType.UnsupportedSpecialCharacter,
-                    this.pos,
-                    this.pattern);
-            }
-
-            // Handle supported repeaters
-            if (min == 0 && max == 1)
-            {
-                return start.AddOut(new NFAEpsilonTransition(end));
-            }
-            else if (min == 0 && max == -1)
-            {
-                if (end.Outgoing.Count == 0)
-                {
-                    end.MergeInto(start);
-                }
-                else
-                {
-                    end.AddOut(new NFAEpsilonTransition(start));
-                }
-
-                return start;
-            }
-            else if (min == 1 && max == -1)
-            {
-                if (start.Outgoing.Count == 1 &&
-                    end.Outgoing.Count == 0 &&
-                    end.Incoming.Count == 1 &&
-                    start.Outgoing[0] == end.Incoming[0])
-                {
-                    end.AddOut(start.Outgoing[0].Copy(end));
-                }
-                else
-                {
-                    end.AddOut(new NFAEpsilonTransition(start));
-                }
-
-                return end;
+               end.MergeInto(start);
             }
             else
             {
-                throw new RegExpException(
-                    RegExpException.ErrorType.InvalidRepeatCount,
-                    firstPos,
-                    this.pattern);
+               end.AddOut(new NFAEpsilonTransition(start));
             }
-        }
 
-        /// <summary>
-        /// Parses a regular expression character set. This method handles
-        /// the contents of the '[...]' construct in a regular expression.
-        /// </summary>
-        /// <param name="start">The initial NFA state</param>
-        /// <returns>The terminating NFA state</returns>
-        /// <exception cref="RegExpException">
-        /// If an error was encountered in the pattern string
-        /// </exception>
-        private NFAState ParseCharSet(NFAState start)
-        {
-            NFAState end = new NFAState();
-            NFACharRangeTransition range;
-            char min;
-            char max;
-
-            if (this.PeekChar(0) == '^')
+            return start;
+         }
+         else if (min == 1 && max == -1)
+         {
+            if (start.Outgoing.Count == 1 &&
+                end.Outgoing.Count == 0 &&
+                end.Incoming.Count == 1 &&
+                start.Outgoing[0] == end.Incoming[0])
             {
-                this.ReadChar('^');
-                range = new NFACharRangeTransition(true, this.ignoreCase, end);
+               end.AddOut(start.Outgoing[0].Copy(end));
             }
             else
             {
-                range = new NFACharRangeTransition(false, this.ignoreCase, end);
-            }
-
-            start.AddOut(range);
-
-            while (this.PeekChar(0) > 0)
-            {
-                min = (char)this.PeekChar(0);
-                switch (min)
-                {
-                    case ']':
-                        return end;
-                    case '\\':
-                        range.AddCharacter(this.ReadEscapeChar());
-                        break;
-                    default:
-                        this.ReadChar(min);
-                        if (this.PeekChar(0) == '-' &&
-                            this.PeekChar(1) > 0 &&
-                            this.PeekChar(1) != ']')
-                        {
-                            this.ReadChar('-');
-                            max = this.ReadChar();
-                            range.AddRange(min, max);
-                        }
-                        else
-                        {
-                            range.AddCharacter(min);
-                        }
-
-                        break;
-                }
+               end.AddOut(new NFAEpsilonTransition(start));
             }
 
             return end;
-        }
+         }
+         else
+         {
+            throw new RegExpException(
+                RegExpException.ErrorType.InvalidRepeatCount,
+                firstPos,
+                this.pattern);
+         }
+      }
 
-        /// <summary>
-        /// Parses a regular expression character. This method handles
-        /// a single normal character in a regular expression.
-        /// </summary>
-        /// <param name="start">The initial NFA state</param>
-        /// <returns>The terminating NFA state</returns>
-        /// <exception cref="RegExpException">
-        /// If an error was encountered in the pattern string
-        /// </exception>
-        private NFAState ParseChar(NFAState start)
-        {
-            switch (this.PeekChar(0))
+      /// <summary>
+      /// Parses a regular expression character set. This method handles
+      /// the contents of the '[...]' construct in a regular expression.
+      /// </summary>
+      /// <param name="start">The initial NFA state</param>
+      /// <returns>The terminating NFA state</returns>
+      /// <exception cref="RegExpException">
+      /// If an error was encountered in the pattern string
+      /// </exception>
+      private NFAState ParseCharSet(NFAState start)
+      {
+         NFAState end = new NFAState();
+         NFACharRangeTransition range;
+         char min;
+         char max;
+
+         if (this.PeekChar(0) == '^')
+         {
+            this.ReadChar('^');
+            range = new NFACharRangeTransition(true, this.ignoreCase, end);
+         }
+         else
+         {
+            range = new NFACharRangeTransition(false, this.ignoreCase, end);
+         }
+
+         start.AddOut(range);
+
+         while (this.PeekChar(0) > 0)
+         {
+            min = (char)this.PeekChar(0);
+            switch (min)
             {
-                case '\\':
-                    return this.ParseEscapeChar(start);
-                case '^':
-                case '$':
-                    throw new RegExpException(
-                        RegExpException.ErrorType.UnsupportedSpecialCharacter,
-                        this.pos,
-                        this.pattern);
-                default:
-                    return start.AddOut(this.ReadChar(), this.ignoreCase, new NFAState());
+               case ']':
+                  return end;
+               case '\\':
+                  range.AddCharacter(this.ReadEscapeChar());
+                  break;
+               default:
+                  this.ReadChar(min);
+                  if (this.PeekChar(0) == '-' &&
+                      this.PeekChar(1) > 0 &&
+                      this.PeekChar(1) != ']')
+                  {
+                     this.ReadChar('-');
+                     max = this.ReadChar();
+                     range.AddRange(min, max);
+                  }
+                  else
+                  {
+                     range.AddCharacter(min);
+                  }
+
+                  break;
             }
-        }
+         }
 
-        /// <summary>
-        /// Parses a regular expression character escape. This method
-        /// handles a single character escape in a regular expression.
-        /// </summary>
-        /// <param name="start">The initial NFA state</param>
-        /// <returns>The terminating NFA state</returns>
-        /// <exception cref="RegExpException">
-        /// If an error was encountered in the pattern string
-        /// </exception>
-        private NFAState ParseEscapeChar(NFAState start)
-        {
-            NFAState end = new NFAState();
+         return end;
+      }
 
-            if (this.PeekChar(0) == '\\' && this.PeekChar(1) > 0)
+      /// <summary>
+      /// Parses a regular expression character. This method handles
+      /// a single normal character in a regular expression.
+      /// </summary>
+      /// <param name="start">The initial NFA state</param>
+      /// <returns>The terminating NFA state</returns>
+      /// <exception cref="RegExpException">
+      /// If an error was encountered in the pattern string
+      /// </exception>
+      private NFAState ParseChar(NFAState start)
+      {
+         switch (this.PeekChar(0))
+         {
+            case '\\':
+               return this.ParseEscapeChar(start);
+            case '^':
+            case '$':
+               throw new RegExpException(
+                   RegExpException.ErrorType.UnsupportedSpecialCharacter,
+                   this.pos,
+                   this.pattern);
+            default:
+               return start.AddOut(this.ReadChar(), this.ignoreCase, new NFAState());
+         }
+      }
+
+      /// <summary>
+      /// Parses a regular expression character escape. This method
+      /// handles a single character escape in a regular expression.
+      /// </summary>
+      /// <param name="start">The initial NFA state</param>
+      /// <returns>The terminating NFA state</returns>
+      /// <exception cref="RegExpException">
+      /// If an error was encountered in the pattern string
+      /// </exception>
+      private NFAState ParseEscapeChar(NFAState start)
+      {
+         NFAState end = new NFAState();
+
+         if (this.PeekChar(0) == '\\' && this.PeekChar(1) > 0)
+         {
+            switch ((char)this.PeekChar(1))
             {
-                switch ((char)this.PeekChar(1))
-                {
-                    case 'd':
-                        this.ReadChar();
-                        this.ReadChar();
-                        return start.AddOut(new NFADigitTransition(end));
-                    case 'D':
-                        this.ReadChar();
-                        this.ReadChar();
-                        return start.AddOut(new NFANonDigitTransition(end));
-                    case 's':
-                        this.ReadChar();
-                        this.ReadChar();
-                        return start.AddOut(new NFAWhitespaceTransition(end));
-                    case 'S':
-                        this.ReadChar();
-                        this.ReadChar();
-                        return start.AddOut(new NFANonWhitespaceTransition(end));
-                    case 'w':
-                        this.ReadChar();
-                        this.ReadChar();
-                        return start.AddOut(new NFAWordTransition(end));
-                    case 'W':
-                        this.ReadChar();
-                        this.ReadChar();
-                        return start.AddOut(new NFANonWordTransition(end));
-                }
+               case 'd':
+                  this.ReadChar();
+                  this.ReadChar();
+                  return start.AddOut(new NFADigitTransition(end));
+               case 'D':
+                  this.ReadChar();
+                  this.ReadChar();
+                  return start.AddOut(new NFANonDigitTransition(end));
+               case 's':
+                  this.ReadChar();
+                  this.ReadChar();
+                  return start.AddOut(new NFAWhitespaceTransition(end));
+               case 'S':
+                  this.ReadChar();
+                  this.ReadChar();
+                  return start.AddOut(new NFANonWhitespaceTransition(end));
+               case 'w':
+                  this.ReadChar();
+                  this.ReadChar();
+                  return start.AddOut(new NFAWordTransition(end));
+               case 'W':
+                  this.ReadChar();
+                  this.ReadChar();
+                  return start.AddOut(new NFANonWordTransition(end));
             }
+         }
 
-            return start.AddOut(this.ReadEscapeChar(), this.ignoreCase, end);
-        }
+         return start.AddOut(this.ReadEscapeChar(), this.ignoreCase, end);
+      }
 
-        /// <summary>
-        /// Reads a regular expression character escape. This method
-        /// handles a single character escape in a regular expression.
-        /// </summary>
-        /// <returns>The character read</returns>
-        /// <exception cref="RegExpException">
-        /// If an error was encountered in the pattern string
-        /// </exception>
-        private char ReadEscapeChar()
-        {
-            char c;
-            string str;
-            int value;
+      /// <summary>
+      /// Reads a regular expression character escape. This method
+      /// handles a single character escape in a regular expression.
+      /// </summary>
+      /// <returns>The character read</returns>
+      /// <exception cref="RegExpException">
+      /// If an error was encountered in the pattern string
+      /// </exception>
+      private char ReadEscapeChar()
+      {
+         char c;
+         string str;
+         int value;
 
-            this.ReadChar('\\');
-            c = this.ReadChar();
-            switch (c)
-            {
-                case '0':
-                    c = this.ReadChar();
-                    if (c < '0' || c > '3')
-                    {
-                        throw new RegExpException(
-                            RegExpException.ErrorType.UnsupportedEscapeCharacter,
-                            this.pos - 3,
-                            this.pattern);
-                    }
+         this.ReadChar('\\');
+         c = this.ReadChar();
+         switch (c)
+         {
+            case '0':
+               c = this.ReadChar();
+               if (c < '0' || c > '3')
+               {
+                  throw new RegExpException(
+                      RegExpException.ErrorType.UnsupportedEscapeCharacter,
+                      this.pos - 3,
+                      this.pattern);
+               }
 
-                    value = c - '0';
-                    c = (char)this.PeekChar(0);
+               value = c - '0';
+               c = (char)this.PeekChar(0);
 
-                    if (c >= '0' && c <= '7')
-                    {
-                        value *= 8;
-                        value += this.ReadChar() - '0';
-                        c = (char)this.PeekChar(0);
-                        if (c >= '0' && c <= '7')
-                        {
-                            value *= 8;
-                            value += this.ReadChar() - '0';
-                        }
-                    }
+               if (c >= '0' && c <= '7')
+               {
+                  value *= 8;
+                  value += this.ReadChar() - '0';
+                  c = (char)this.PeekChar(0);
+                  if (c >= '0' && c <= '7')
+                  {
+                     value *= 8;
+                     value += this.ReadChar() - '0';
+                  }
+               }
 
-                    return (char)value;
-                case 'x':
-                    str = this.ReadChar().ToString() + this.ReadChar().ToString();
-                    try
-                    {
-                        value = int.Parse(str, NumberStyles.AllowHexSpecifier);
-                        return (char)value;
-                    }
-                    catch (FormatException)
-                    {
-                        throw new RegExpException(
-                            RegExpException.ErrorType.UnsupportedEscapeCharacter,
-                            pos - str.Length - 2,
-                            pattern);
-                    }
+               return (char)value;
+            case 'x':
+               str = this.ReadChar().ToString() + this.ReadChar().ToString();
+               try
+               {
+                  value = int.Parse(str, NumberStyles.AllowHexSpecifier);
+                  return (char)value;
+               }
+               catch (FormatException)
+               {
+                  throw new RegExpException(
+                      RegExpException.ErrorType.UnsupportedEscapeCharacter,
+                      pos - str.Length - 2,
+                      pattern);
+               }
 
-                case 'u':
-                    str = this.ReadChar().ToString() +
-                          this.ReadChar().ToString() +
-                          this.ReadChar().ToString() +
-                          this.ReadChar().ToString();
-                    try
-                    {
-                        value = int.Parse(str, NumberStyles.AllowHexSpecifier);
-                        return (char)value;
-                    }
-                    catch (FormatException)
-                    {
-                        throw new RegExpException(
-                            RegExpException.ErrorType.UnsupportedEscapeCharacter,
-                            this.pos - str.Length - 2,
-                           this.pattern);
-                    }
+            case 'u':
+               str = this.ReadChar().ToString() +
+                     this.ReadChar().ToString() +
+                     this.ReadChar().ToString() +
+                     this.ReadChar().ToString();
+               try
+               {
+                  value = int.Parse(str, NumberStyles.AllowHexSpecifier);
+                  return (char)value;
+               }
+               catch (FormatException)
+               {
+                  throw new RegExpException(
+                      RegExpException.ErrorType.UnsupportedEscapeCharacter,
+                      this.pos - str.Length - 2,
+                     this.pattern);
+               }
 
-                case 't':
-                    return '\t';
-                case 'n':
-                    return '\n';
-                case 'r':
-                    return '\r';
-                case 'f':
-                    return '\f';
-                case 'a':
-                    return '\u0007';
-                case 'e':
-                    return '\u001B';
-                default:
-                    if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
-                    {
-                        throw new RegExpException(
-                            RegExpException.ErrorType.UnsupportedEscapeCharacter,
-                            this.pos - 2,
-                            this.pattern);
-                    }
+            case 't':
+               return '\t';
+            case 'n':
+               return '\n';
+            case 'r':
+               return '\r';
+            case 'f':
+               return '\f';
+            case 'a':
+               return '\u0007';
+            case 'e':
+               return '\u001B';
+            default:
+               if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+               {
+                  throw new RegExpException(
+                      RegExpException.ErrorType.UnsupportedEscapeCharacter,
+                      this.pos - 2,
+                      this.pattern);
+               }
 
-                    return c;
-            }
-        }
+               return c;
+         }
+      }
 
-        /// <summary>
-        /// Reads a number from the pattern. If the next character isn't a
-        /// numeric character, an exception is thrown. This method reads
-        /// several consecutive numeric characters.
-        /// </summary>
-        /// <returns>The numeric value read</returns>
-        /// <exception cref="RegExpException">
-        /// If an error was encountered in the pattern string
-        /// </exception>
-        private int ReadNumber()
-        {
-            StringBuilder buf = new StringBuilder();
-            int c;
+      /// <summary>
+      /// Reads a number from the pattern. If the next character isn't a
+      /// numeric character, an exception is thrown. This method reads
+      /// several consecutive numeric characters.
+      /// </summary>
+      /// <returns>The numeric value read</returns>
+      /// <exception cref="RegExpException">
+      /// If an error was encountered in the pattern string
+      /// </exception>
+      private int ReadNumber()
+      {
+         StringBuilder buf = new StringBuilder();
+         int c;
 
+         c = this.PeekChar(0);
+         while (c >= '0' && c <= '9')
+         {
+            buf.Append(this.ReadChar());
             c = this.PeekChar(0);
-            while (c >= '0' && c <= '9')
-            {
-                buf.Append(this.ReadChar());
-                c = this.PeekChar(0);
-            }
+         }
 
-            if (buf.Length <= 0)
-            {
-                throw new RegExpException(
-                    RegExpException.ErrorType.UnexpectedCharacter,
-                    this.pos,
-                    this.pattern);
-            }
+         if (buf.Length <= 0)
+         {
+            throw new RegExpException(
+                RegExpException.ErrorType.UnexpectedCharacter,
+                this.pos,
+                this.pattern);
+         }
 
-            return int.Parse(buf.ToString());
-        }
+         return int.Parse(buf.ToString());
+      }
 
-        /// <summary>
-        /// Reads the next character in the pattern. If no next character
-        /// exists, an exception is thrown.
-        /// </summary>
-        /// <returns>The character read</returns>
-        /// <exception cref="RegExpException">
-        /// If an error was encountered in the pattern string
-        /// </exception>
-        private char ReadChar()
-        {
-            int c = this.PeekChar(0);
+      /// <summary>
+      /// Reads the next character in the pattern. If no next character
+      /// exists, an exception is thrown.
+      /// </summary>
+      /// <returns>The character read</returns>
+      /// <exception cref="RegExpException">
+      /// If an error was encountered in the pattern string
+      /// </exception>
+      private char ReadChar()
+      {
+         int c = this.PeekChar(0);
 
-            if (c < 0)
-            {
-                throw new RegExpException(
-                    RegExpException.ErrorType.UnterminatedPattern,
-                    this.pos,
-                    this.pattern);
-            }
-            else
-            {
-                this.pos++;
-                return (char)c;
-            }
-        }
+         if (c < 0)
+         {
+            throw new RegExpException(
+                RegExpException.ErrorType.UnterminatedPattern,
+                this.pos,
+                this.pattern);
+         }
+         else
+         {
+            this.pos++;
+            return (char)c;
+         }
+      }
 
-        /// <summary>
-        /// Reads the next character in the pattern. If the character
-        /// wasn't the specified one, an exception is thrown.
-        /// </summary>
-        /// <param name="c">The character to read</param>
-        /// <returns>The character read</returns>
-        /// <exception cref="RegExpException">
-        /// If the character read didn't match the specified one, or if 
-        /// no next character was available in the pattern string
-        /// </exception>
-        private char ReadChar(char c)
-        {
-            if (c != this.ReadChar())
-            {
-                throw new RegExpException(
-                    RegExpException.ErrorType.UnexpectedCharacter,
-                    this.pos - 1,
-                    this.pattern);
-            }
+      /// <summary>
+      /// Reads the next character in the pattern. If the character
+      /// wasn't the specified one, an exception is thrown.
+      /// </summary>
+      /// <param name="c">The character to read</param>
+      /// <returns>The character read</returns>
+      /// <exception cref="RegExpException">
+      /// If the character read didn't match the specified one, or if 
+      /// no next character was available in the pattern string
+      /// </exception>
+      private char ReadChar(char c)
+      {
+         if (c != this.ReadChar())
+         {
+            throw new RegExpException(
+                RegExpException.ErrorType.UnexpectedCharacter,
+                this.pos - 1,
+                this.pattern);
+         }
 
-            return c;
-        }
+         return c;
+      }
 
-        /// <summary>
-        /// Returns a character that has not yet been read from the
-        /// pattern. If the requested position is beyond the end of the
-        /// pattern string, -1 is returned.
-        /// </summary>
-        /// <param name="count">The preview position, from zero (0)</param>
-        /// <returns>The character found, or -1 if beyond the end of the pattern string</returns>
-        private int PeekChar(int count)
-        {
-            if (this.pos + count < this.pattern.Length)
-            {
-                return this.pattern[this.pos + count];
-            }
-            else
-            {
-                return -1;
-            }
-        }
-    }
+      /// <summary>
+      /// Returns a character that has not yet been read from the
+      /// pattern. If the requested position is beyond the end of the
+      /// pattern string, -1 is returned.
+      /// </summary>
+      /// <param name="count">The preview position, from zero (0)</param>
+      /// <returns>The character found, or -1 if beyond the end of the pattern string</returns>
+      private int PeekChar(int count)
+      {
+         if (this.pos + count < this.pattern.Length)
+         {
+            return this.pattern[this.pos + count];
+         }
+         else
+         {
+            return -1;
+         }
+      }
+   }
 }

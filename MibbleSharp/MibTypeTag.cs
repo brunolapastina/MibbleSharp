@@ -21,251 +21,250 @@
 
 namespace MibbleSharp
 {
-    using System.Text;
+   using System.Text;
 
-    /// <summary>
-    /// A MIB type tag. The type tag consists of a category and value.
-    /// Together these two numbers normally identifies a type uniquely, as
-    /// all primitive and most (if not all) SNMP types (such as <c>IpAddress</c>
-    /// and similar) have type tags assigned to them. Type tags may also
-    /// be chained together in a list, in order to not loose information.
-    /// Whether to replace or to chain a type tag is determined by the
-    /// EXPLICIT or IMPLICIT keywords in the MIB file.
-    /// </summary>
-    public class MibTypeTag
-    {
-        /// <summary>
-        /// The universal type tag category. This is the type tag category
-        /// used for the ASN.1 primitive types.
-        /// </summary>
-        public static readonly int UniversalCategory = 0;
+   /// <summary>
+   /// A MIB type tag. The type tag consists of a category and value.
+   /// Together these two numbers normally identifies a type uniquely, as
+   /// all primitive and most (if not all) SNMP types (such as <c>IpAddress</c>
+   /// and similar) have type tags assigned to them. Type tags may also
+   /// be chained together in a list, in order to not loose information.
+   /// Whether to replace or to chain a type tag is determined by the
+   /// EXPLICIT or IMPLICIT keywords in the MIB file.
+   /// </summary>
+   public class MibTypeTag
+   {
+      /// <summary>
+      /// The universal type tag category. This is the type tag category
+      /// used for the ASN.1 primitive types.
+      /// </summary>
+      public static readonly int UniversalCategory = 0;
 
-        /// <summary>The application type tag category.</summary>
-        public static readonly int ApplicationCategory = 1;
+      /// <summary>The application type tag category.</summary>
+      public static readonly int ApplicationCategory = 1;
 
-        /// <summary>
-        /// The context specific type tag category. This is the default
-        /// type tag category if no other category was specified.
-        /// </summary>
-        public static readonly int ContextSpecificCategory = 2;
+      /// <summary>
+      /// The context specific type tag category. This is the default
+      /// type tag category if no other category was specified.
+      /// </summary>
+      public static readonly int ContextSpecificCategory = 2;
 
-        /// <summary>
-        /// The private type tag category.
-        /// </summary>
-        public static readonly int PrivateCategory = 3;
+      /// <summary>
+      /// The private type tag category.
+      /// </summary>
+      public static readonly int PrivateCategory = 3;
 
-        /// <summary>
-        /// The universal boolean type tag.
-        /// </summary>
-        public static readonly MibTypeTag Boolean = 
-            new MibTypeTag(UniversalCategory, 1);
+      /// <summary>
+      /// The universal boolean type tag.
+      /// </summary>
+      public static readonly MibTypeTag Boolean =
+          new MibTypeTag(UniversalCategory, 1);
 
-        /// <summary>
-        /// The universal integer type tag.
-        /// </summary>
-        public static readonly MibTypeTag Integer =
-            new MibTypeTag(UniversalCategory, 2);
+      /// <summary>
+      /// The universal integer type tag.
+      /// </summary>
+      public static readonly MibTypeTag Integer =
+          new MibTypeTag(UniversalCategory, 2);
 
-        /// <summary>
-        /// The universal bit string type tag.
-        /// </summary>
-        public static readonly MibTypeTag BitString =
-            new MibTypeTag(UniversalCategory, 3);
+      /// <summary>
+      /// The universal bit string type tag.
+      /// </summary>
+      public static readonly MibTypeTag BitString =
+          new MibTypeTag(UniversalCategory, 3);
 
-        /// <summary>
-        /// The universal octet string type tag.
-        /// </summary>
-        public static readonly MibTypeTag OctetString =
-            new MibTypeTag(UniversalCategory, 4);
+      /// <summary>
+      /// The universal octet string type tag.
+      /// </summary>
+      public static readonly MibTypeTag OctetString =
+          new MibTypeTag(UniversalCategory, 4);
 
-        /// <summary>
-        /// The universal null type tag.
-        /// </summary>
-        public static readonly MibTypeTag Null =
-            new MibTypeTag(UniversalCategory, 5);
+      /// <summary>
+      /// The universal null type tag.
+      /// </summary>
+      public static readonly MibTypeTag Null =
+          new MibTypeTag(UniversalCategory, 5);
 
-        /// <summary>
-        /// The universal object identifier type tag.
-        /// </summary>
-        public static readonly MibTypeTag ObjectIdentifier =
-            new MibTypeTag(UniversalCategory, 6);
+      /// <summary>
+      /// The universal object identifier type tag.
+      /// </summary>
+      public static readonly MibTypeTag ObjectIdentifier =
+          new MibTypeTag(UniversalCategory, 6);
 
-        /// <summary>
-        /// The universal real type tag.
-        /// </summary>
-        public static readonly MibTypeTag Real =
-            new MibTypeTag(UniversalCategory, 9);
+      /// <summary>
+      /// The universal real type tag.
+      /// </summary>
+      public static readonly MibTypeTag Real =
+          new MibTypeTag(UniversalCategory, 9);
 
-        /// <summary>
-        /// The universal sequence and sequence of type tag.
-        /// </summary>
-        public static readonly MibTypeTag Sequence =
-            new MibTypeTag(UniversalCategory, 16);
+      /// <summary>
+      /// The universal sequence and sequence of type tag.
+      /// </summary>
+      public static readonly MibTypeTag Sequence =
+          new MibTypeTag(UniversalCategory, 16);
 
-        /// <summary>
-        /// The universal set type tag.
-        /// </summary>
-        public static readonly MibTypeTag Set =
-            new MibTypeTag(UniversalCategory, 17);
+      /// <summary>
+      /// The universal set type tag.
+      /// </summary>
+      public static readonly MibTypeTag Set =
+          new MibTypeTag(UniversalCategory, 17);
 
-        /// <summary>
-        /// The tag category
-        /// </summary>
-        private readonly int category;
+      /// <summary>
+      /// The tag category
+      /// </summary>
+      private readonly int category;
 
-        /// <summary>
-        /// The tag value
-        /// </summary>
-        private readonly int value;
+      /// <summary>
+      /// The tag value
+      /// </summary>
+      private readonly int value;
 
-        /// <summary>
-        /// The next tag in the tag chain
-        /// </summary>
-        private MibTypeTag next = null;
+      /// <summary>
+      /// The next tag in the tag chain
+      /// </summary>
+      private MibTypeTag next = null;
 
-        /// <summary>Initializes a new instance of the <see cref="MibTypeTag"/> class.</summary>
-        /// <param name="category">The type tag category</param>
-        /// <param name="value">The type tag value</param>
-        public MibTypeTag(int category, int value)
-        {
-            this.category = category;
-            this.value = value;
-        }
+      /// <summary>Initializes a new instance of the <see cref="MibTypeTag"/> class.</summary>
+      /// <param name="category">The type tag category</param>
+      /// <param name="value">The type tag value</param>
+      public MibTypeTag(int category, int value)
+      {
+         this.category = category;
+         this.value = value;
+      }
 
-        /// <summary>
-        /// Gets the type tag category. The category value corresponds
-        /// to one of the defined category constants.
-        /// </summary>
-        /// <see cref="UniversalCategory"/>
-        /// <see cref="ApplicationCategory"/>
-        /// <see cref="ContextSpecificCategory"/>
-        /// <see cref="PrivateCategory"/>
-        public int Category
-        {
-            get
-            {
-                return this.category;
-            }
-        }
+      /// <summary>
+      /// Gets the type tag category. The category value corresponds
+      /// to one of the defined category constants.
+      /// </summary>
+      /// <see cref="UniversalCategory"/>
+      /// <see cref="ApplicationCategory"/>
+      /// <see cref="ContextSpecificCategory"/>
+      /// <see cref="PrivateCategory"/>
+      public int Category
+      {
+         get
+         {
+            return this.category;
+         }
+      }
 
-        /// <summary>Gets the type tag value. The tag category and value
-        /// normally identifies a type uniquely.
-        /// </summary>
-        public int Value
-        {
-            get
-            {
-                return this.value;
-            }
-        }
+      /// <summary>Gets the type tag value. The tag category and value
+      /// normally identifies a type uniquely.
+      /// </summary>
+      public int Value
+      {
+         get
+         {
+            return this.value;
+         }
+      }
 
-        /// <summary>
-        /// Gets or sets the next tag in the tag chain
-        /// </summary>
-        public MibTypeTag Next
-        {
-            get
-            {
-                return this.next;
-            }
+      /// <summary>
+      /// Gets or sets the next tag in the tag chain
+      /// </summary>
+      public MibTypeTag Next
+      {
+         get
+         {
+            return this.next;
+         }
 
-            set
-            {
-                this.next = value;
-            }
-        }
+         set
+         {
+            this.next = value;
+         }
+      }
 
-        /// <summary>
-        /// Checks if this type tag equals another object. This method
-        /// will only return true if the other object is a type tag with
-        /// the same category and value numbers.
-        /// </summary>
-        /// <param name="obj">The object to compare to</param>
-        /// <returns>True if the objects are equal, false if not</returns>
-        public override bool Equals(object obj)
-        {
-            // If parameter is null return false.
-            if (obj == null)
-            {
-                return false;
-            }
+      /// <summary>
+      /// Checks if this type tag equals another object. This method
+      /// will only return true if the other object is a type tag with
+      /// the same category and value numbers.
+      /// </summary>
+      /// <param name="obj">The object to compare to</param>
+      /// <returns>True if the objects are equal, false if not</returns>
+      public override bool Equals(object obj)
+      {
+         // If parameter is null return false.
+         if (obj == null)
+         {
+            return false;
+         }
 
-            MibTypeTag tag = obj as MibTypeTag;
-            if (tag == null)
-            {
-                return false;
-            }
-
+         if (obj is MibTypeTag tag)
+         {
             return this.Equals(tag);
-        }
+         }
 
-        /// <summary>
-        /// Checks if this type tag equals another object. This method
-        /// will only return true if the other object is a type tag with
-        /// the same category and value numbers.
-        /// </summary>
-        /// <param name="m">The MibTypeTag to compare to</param>
-        /// <returns>True if the tags are equal, false if not</returns>
-        public bool Equals(MibTypeTag m)
-        {
-            return this.category == m.category && this.value == m.value;
-        }
+         return false;
+      }
 
-        /// <summary>
-        /// Checks if this type tag has the specified category and
-        /// value numbers.
-        /// </summary>
-        /// <param name="category">The category to compare to</param>
-        /// <param name="value">The value number to compare to</param>
-        /// <returns>True if the category and value match with those of the object, false if not</returns>
-        public bool Equals(int category, int value)
-        {
-            return this.category == category && this.value == value;
-        }
+      /// <summary>
+      /// Checks if this type tag equals another object. This method
+      /// will only return true if the other object is a type tag with
+      /// the same category and value numbers.
+      /// </summary>
+      /// <param name="m">The MibTypeTag to compare to</param>
+      /// <returns>True if the tags are equal, false if not</returns>
+      public bool Equals(MibTypeTag m)
+      {
+         return this.category == m.category && this.value == m.value;
+      }
 
-        /// <summary>
-        /// Returns the hash code value for the object. This method is
-        /// re-implemented to fulfill the contract of returning the same
-        /// hash code for objects that are considered equal.
-        /// </summary>
-        /// <returns>The hash code value for the object</returns>
-        public override int GetHashCode()
-        {
-            return (this.category << 8) + this.value;
-        }
+      /// <summary>
+      /// Checks if this type tag has the specified category and
+      /// value numbers.
+      /// </summary>
+      /// <param name="category">The category to compare to</param>
+      /// <param name="value">The value number to compare to</param>
+      /// <returns>True if the category and value match with those of the object, false if not</returns>
+      public bool Equals(int category, int value)
+      {
+         return this.category == category && this.value == value;
+      }
 
-        /// <summary>
-        /// Returns a string representation of this object
-        /// </summary>
-        /// <returns>A string representation of this object</returns>
-        public override string ToString()
-        {
-            StringBuilder buffer = new StringBuilder();
+      /// <summary>
+      /// Returns the hash code value for the object. This method is
+      /// re-implemented to fulfill the contract of returning the same
+      /// hash code for objects that are considered equal.
+      /// </summary>
+      /// <returns>The hash code value for the object</returns>
+      public override int GetHashCode()
+      {
+         return (this.category << 8) + this.value;
+      }
 
-            buffer.Append("[");
-            if (this.category == UniversalCategory)
-            {
-                buffer.Append("UNIVERSAL ");
-            }
-            else if (this.category == ApplicationCategory)
-            {
-                buffer.Append("APPLICATION ");
-            }
-            else if (this.category == PrivateCategory)
-            {
-                buffer.Append("PRIVATE ");
-            }
+      /// <summary>
+      /// Returns a string representation of this object
+      /// </summary>
+      /// <returns>A string representation of this object</returns>
+      public override string ToString()
+      {
+         StringBuilder buffer = new StringBuilder();
 
-            buffer.Append(this.value);
-            buffer.Append("]");
+         buffer.Append("[");
+         if (this.category == UniversalCategory)
+         {
+            buffer.Append("UNIVERSAL ");
+         }
+         else if (this.category == ApplicationCategory)
+         {
+            buffer.Append("APPLICATION ");
+         }
+         else if (this.category == PrivateCategory)
+         {
+            buffer.Append("PRIVATE ");
+         }
 
-            if (this.next != null)
-            {
-                buffer.Append(" ");
-                buffer.Append(this.next.ToString());
-            }
+         buffer.Append(this.value);
+         buffer.Append("]");
 
-            return buffer.ToString();
-        }
-    }
+         if (this.next != null)
+         {
+            buffer.Append(" ");
+            buffer.Append(this.next.ToString());
+         }
+
+         return buffer.ToString();
+      }
+   }
 }

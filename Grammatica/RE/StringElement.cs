@@ -15,120 +15,119 @@
 
 namespace PerCederberg.Grammatica.Runtime.RE
 {
-    using System;
-    using System.IO;
+   using System.IO;
 
-    /// <summary>
-    /// A regular expression string element. This element only matches
-    /// an exact string. Once created, the string element is immutable.
-    /// </summary>
-    internal class StringElement : Element
-    {
-        /// <summary>
-        /// The string to match with.
-        /// </summary>
-        private readonly string value;
+   /// <summary>
+   /// A regular expression string element. This element only matches
+   /// an exact string. Once created, the string element is immutable.
+   /// </summary>
+   internal class StringElement : Element
+   {
+      /// <summary>
+      /// The string to match with.
+      /// </summary>
+      private readonly string value;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StringElement"/> class.
-        /// </summary>
-        /// <param name="c">The character to match against</param>
-        public StringElement(char c)
-            : this(c.ToString())
-        {
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="StringElement"/> class.
+      /// </summary>
+      /// <param name="c">The character to match against</param>
+      public StringElement(char c)
+          : this(c.ToString())
+      {
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StringElement"/> class.
-        /// </summary>
-        /// <param name="str">The string to match against</param>
-        public StringElement(string str)
-        {
-            this.value = str;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="StringElement"/> class.
+      /// </summary>
+      /// <param name="str">The string to match against</param>
+      public StringElement(string str)
+      {
+         this.value = str;
+      }
 
-        /// <summary>
-        /// Gets the string to be matched.
-        /// </summary>
-        public string String
-        {
-            get
+      /// <summary>
+      /// Gets the string to be matched.
+      /// </summary>
+      public string String
+      {
+         get
+         {
+            return this.value;
+         }
+      }
+
+      /// <summary>
+      /// Gets a clone of the object. Returns this element as it is immutable.
+      /// </summary>
+      /// <returns>
+      /// A clone of the object. In this case the current object itself is returned
+      /// as it is immutable
+      /// </returns>
+      public override object Clone()
+      {
+         return this;
+      }
+
+      /// <summary>
+      /// Returns the length of a matching string starting at the
+      /// specified position. The number of matches to skip can also
+      /// be specified, but numbers higher than zero (0) cause a
+      /// failed match for any element that doesn't attempt to
+      /// combine other elements.
+      /// </summary>
+      /// <param name="m">The matcher being used</param>
+      /// <param name="buffer">The input character buffer to match</param>
+      /// <param name="start">The starting position</param>
+      /// <param name="skip">The number of matches to skip</param>
+      /// <returns>
+      /// The length of the longest matching string, or -1 if no match is found
+      /// </returns>
+      /// <exception cref="IOException">If an I/O error occurred</exception>
+      public override int Match(
+          Matcher m,
+          ReaderBuffer buffer,
+          int start,
+          int skip)
+      {
+         int c;
+
+         if (skip != 0)
+         {
+            return -1;
+         }
+
+         for (int i = 0; i < this.value.Length; i++)
+         {
+            c = buffer.Peek(start + i);
+            if (c < 0)
             {
-                return this.value;
-            }
-        }
-
-        /// <summary>
-        /// Gets a clone of the object. Returns this element as it is immutable.
-        /// </summary>
-        /// <returns>
-        /// A clone of the object. In this case the current object itself is returned
-        /// as it is immutable
-        /// </returns>
-        public override object Clone()
-        {
-            return this;
-        }
-
-        /// <summary>
-        /// Returns the length of a matching string starting at the
-        /// specified position. The number of matches to skip can also
-        /// be specified, but numbers higher than zero (0) cause a
-        /// failed match for any element that doesn't attempt to
-        /// combine other elements.
-        /// </summary>
-        /// <param name="m">The matcher being used</param>
-        /// <param name="buffer">The input character buffer to match</param>
-        /// <param name="start">The starting position</param>
-        /// <param name="skip">The number of matches to skip</param>
-        /// <returns>
-        /// The length of the longest matching string, or -1 if no match is found
-        /// </returns>
-        /// <exception cref="IOException">If an I/O error occurred</exception>
-        public override int Match(
-            Matcher m,
-            ReaderBuffer buffer,
-            int start,
-            int skip)
-        {
-            int c;
-
-            if (skip != 0)
-            {
-                return -1;
-            }
-
-            for (int i = 0; i < this.value.Length; i++)
-            {
-                c = buffer.Peek(start + i);
-                if (c < 0)
-                {
-                    m.SetReadEndOfString();
-                    return -1;
-                }
-
-                if (m.IsCaseInsensitive)
-                {
-                    c = (int)char.ToLower((char)c);
-                }
-
-                if (c != (int)this.value[i])
-                {
-                    return -1;
-                }
+               m.SetReadEndOfString();
+               return -1;
             }
 
-            return this.value.Length;
-        }
+            if (m.IsCaseInsensitive)
+            {
+               c = (int)char.ToLower((char)c);
+            }
 
-        /// <summary>
-        /// Prints this element to the specified output stream.
-        /// </summary>
-        /// <param name="output">The output stream to use</param>
-        /// <param name="indent">The current indentation</param>
-        public override void PrintTo(TextWriter output, string indent)
-        {
-            output.WriteLine(indent + "'" + this.value + "'");
-        }
-    }
+            if (c != (int)this.value[i])
+            {
+               return -1;
+            }
+         }
+
+         return this.value.Length;
+      }
+
+      /// <summary>
+      /// Prints this element to the specified output stream.
+      /// </summary>
+      /// <param name="output">The output stream to use</param>
+      /// <param name="indent">The current indentation</param>
+      public override void PrintTo(TextWriter output, string indent)
+      {
+         output.WriteLine(indent + "'" + this.value + "'");
+      }
+   }
 }

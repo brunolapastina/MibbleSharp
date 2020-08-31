@@ -21,105 +21,105 @@
 
 namespace MibbleSharp
 {
-    using System.Collections.Generic;
-    using MibbleSharp.Type;
-    using MibbleSharp.Value;
-    
-    /// <summary>A default MIB context.</summary>
-    public class DefaultContext : IMibContext
-    {
-        /// <summary>The root "ccitt" symbol name.</summary>
-        public const string CCITT = "ccitt";
+   using MibbleSharp.Type;
+   using MibbleSharp.Value;
+   using System.Collections.Generic;
 
-        /// <summary>The root "iso" symbol name.</summary>
-        public const string ISO = "iso";
+   /// <summary>A default MIB context.</summary>
+   public class DefaultContext : IMibContext
+   {
+      /// <summary>The root "ccitt" symbol name.</summary>
+      public const string CCITT = "ccitt";
 
-        /// <summary>The root "joint-iso-ccitt" symbol name.</summary>
-        public const string JOINTISOCCITT = "joint-iso-ccitt";
+      /// <summary>The root "iso" symbol name.</summary>
+      public const string ISO = "iso";
 
-        /// <summary>The map of default symbols.</summary>
-        private readonly Dictionary<string, MibSymbol> symbols = new Dictionary<string, MibSymbol>();
+      /// <summary>The root "joint-iso-ccitt" symbol name.</summary>
+      public const string JOINTISOCCITT = "joint-iso-ccitt";
 
-        /// <summary>Initializes a new instance of the <see cref="DefaultContext"/> class.</summary>
-        public DefaultContext()
-        {
-            this.Initialize();
-        }
+      /// <summary>The map of default symbols.</summary>
+      private readonly Dictionary<string, MibSymbol> symbols = new Dictionary<string, MibSymbol>();
 
-        /// <summary>
-        /// Searches for a named MIB symbol. This method may search outside
-        /// the normal (or strict) scope, thereby allowing a form of
-        /// relaxed search. Note that the results from the normal and
-        /// expanded search may not be identical, due to the context
-        /// chaining and the same symbol name appearing in various
-        /// contexts. 
-        /// </summary>
-        /// <remark>
-        /// This is an internal method that should
-        /// only be called by the MIB loader.
-        /// </remark>
-        /// <param name="name">the symbol name</param>
-        /// <param name="expanded">the expanded scope flag</param>
-        /// <returns>The symbol if found, null if not</returns>
-        public MibSymbol FindSymbol(string name, bool expanded)
-        {
-            if (this.symbols.ContainsKey(name))
-            {
-                return this.symbols[name];
-            }
+      /// <summary>Initializes a new instance of the <see cref="DefaultContext"/> class.</summary>
+      public DefaultContext()
+      {
+         this.Initialize();
+      }
 
-            return null;
-        }
+      /// <summary>
+      /// Searches for a named MIB symbol. This method may search outside
+      /// the normal (or strict) scope, thereby allowing a form of
+      /// relaxed search. Note that the results from the normal and
+      /// expanded search may not be identical, due to the context
+      /// chaining and the same symbol name appearing in various
+      /// contexts. 
+      /// </summary>
+      /// <remark>
+      /// This is an internal method that should
+      /// only be called by the MIB loader.
+      /// </remark>
+      /// <param name="name">the symbol name</param>
+      /// <param name="expanded">the expanded scope flag</param>
+      /// <returns>The symbol if found, null if not</returns>
+      public MibSymbol FindSymbol(string name, bool expanded)
+      {
+         if (this.symbols.ContainsKey(name))
+         {
+            return this.symbols[name];
+         }
 
-        /// <summary>
-        /// Retrieve a string representation of the object.
-        /// </summary>
-        /// <returns>A string representation of the object</returns>
-        public override string ToString()
-        {
-            return "<defaults>";
-        }
+         return null;
+      }
 
-        /// <summary>
-        /// Initializes this context by creating all default symbols.
-        /// </summary>
-        private void Initialize()
-        {
-            MibSymbol symbol;
-            ObjectIdentifierValue oid;
+      /// <summary>
+      /// Retrieve a string representation of the object.
+      /// </summary>
+      /// <returns>A string representation of the object</returns>
+      public override string ToString()
+      {
+         return "<defaults>";
+      }
 
-            // Add the ccitt symbol
-            oid = new ObjectIdentifierValue(CCITT, 0);
-            symbol = new MibValueSymbol(
-                new FileLocation(null, -1, -1),
-                null,
-                CCITT,
-                new ObjectIdentifierType(),
-                oid);
-            oid.Symbol = (MibValueSymbol)symbol;
-            this.symbols.Add(CCITT, symbol);
+      /// <summary>
+      /// Initializes this context by creating all default symbols.
+      /// </summary>
+      private void Initialize()
+      {
+         MibSymbol symbol;
+         ObjectIdentifierValue oid;
 
-            // Add the iso symbol
-            oid = new ObjectIdentifierValue(ISO, 1);
-            symbol = new MibValueSymbol(
-                new FileLocation(null, -1, -1),
-                null,
-                ISO,
-                new ObjectIdentifierType(),
-                oid);
-            oid.Symbol = (MibValueSymbol)symbol;
-            this.symbols.Add(ISO, symbol);
+         // Add the ccitt symbol
+         oid = new ObjectIdentifierValue(CCITT, 0);
+         symbol = new MibValueSymbol(
+             new FileLocation(null, -1, -1),
+             null,
+             CCITT,
+             new ObjectIdentifierType(),
+             oid);
+         oid.Symbol = (MibValueSymbol)symbol;
+         this.symbols.Add(CCITT, symbol);
 
-            // Add the joint-iso-ccitt symbol
-            oid = new ObjectIdentifierValue(JOINTISOCCITT, 2);
-            symbol = new MibValueSymbol(
-                new FileLocation(null, -1, -1),
-                null,
-                JOINTISOCCITT,
-                new ObjectIdentifierType(),
-                oid);
-            oid.Symbol = (MibValueSymbol)symbol;
-            this.symbols.Add(JOINTISOCCITT, symbol);
-        }
-    }
+         // Add the iso symbol
+         oid = new ObjectIdentifierValue(ISO, 1);
+         symbol = new MibValueSymbol(
+             new FileLocation(null, -1, -1),
+             null,
+             ISO,
+             new ObjectIdentifierType(),
+             oid);
+         oid.Symbol = (MibValueSymbol)symbol;
+         this.symbols.Add(ISO, symbol);
+
+         // Add the joint-iso-ccitt symbol
+         oid = new ObjectIdentifierValue(JOINTISOCCITT, 2);
+         symbol = new MibValueSymbol(
+             new FileLocation(null, -1, -1),
+             null,
+             JOINTISOCCITT,
+             new ObjectIdentifierType(),
+             oid);
+         oid.Symbol = (MibValueSymbol)symbol;
+         this.symbols.Add(JOINTISOCCITT, symbol);
+      }
+   }
 }

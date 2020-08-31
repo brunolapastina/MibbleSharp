@@ -21,272 +21,272 @@
 
 namespace MibbleSharp.Snmp
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using MibbleSharp.Value;
+   using MibbleSharp.Value;
+   using System.Collections.Generic;
+   using System.Linq;
+   using System.Text;
 
-    /// <summary>
-    /// An SNMP module variation value. This declaration is used inside a
-    /// module support declaration.
-    /// </summary>
-    /// <see cref="SnmpModuleSupport"/>
-    public class SnmpVariation
-    {
-        /// <summary>
-        /// The variation value.
-        /// </summary>
-        private MibValue value;
+   /// <summary>
+   /// An SNMP module variation value. This declaration is used inside a
+   /// module support declaration.
+   /// </summary>
+   /// <see cref="SnmpModuleSupport"/>
+   public class SnmpVariation
+   {
+      /// <summary>
+      /// The variation value.
+      /// </summary>
+      private MibValue value;
 
-        /// <summary>
-        /// The value syntax.
-        /// </summary>
-        private MibType syntax;
+      /// <summary>
+      /// The value syntax.
+      /// </summary>
+      private MibType syntax;
 
-        /// <summary>
-        /// The value write syntax.
-        /// </summary>
-        private MibType writeSyntax;
+      /// <summary>
+      /// The value write syntax.
+      /// </summary>
+      private MibType writeSyntax;
 
-        /// <summary>
-        /// The access mode.
-        /// </summary>
-        private readonly SnmpAccess access;
+      /// <summary>
+      /// The access mode.
+      /// </summary>
+      private readonly SnmpAccess access;
 
-        /// <summary>
-        /// The cell values required for creation.
-        /// </summary>
-        private IList<MibValue> requiredCells;
+      /// <summary>
+      /// The cell values required for creation.
+      /// </summary>
+      private IList<MibValue> requiredCells;
 
-        /// <summary>
-        /// The default value.
-        /// </summary>
-        private MibValue defaultValue;
+      /// <summary>
+      /// The default value.
+      /// </summary>
+      private MibValue defaultValue;
 
-        /// <summary>
-        /// The variation description.
-        /// </summary>
-        private readonly string description;
+      /// <summary>
+      /// The variation description.
+      /// </summary>
+      private readonly string description;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SnmpVariation"/> class.
-        /// </summary>
-        /// <param name="value">the variation value</param>
-        /// <param name="syntax">the value syntax, or null</param>
-        /// <param name="writeSyntax">the value write syntax, or null</param>
-        /// <param name="access">the access mode, or null</param>
-        /// <param name="requiredCells">the cell values required for creation</param>
-        /// <param name="defaultValue">the default value, or null</param>
-        /// <param name="description">the variation description</param>
-        public SnmpVariation(
-            MibValue value,
-            MibType syntax,
-            MibType writeSyntax,
-            SnmpAccess access,
-            IList<MibValue> requiredCells,
-            MibValue defaultValue,
-            string description)
-        {
-            this.value = value;
-            this.syntax = syntax;
-            this.writeSyntax = writeSyntax;
-            this.access = access;
-            this.requiredCells = requiredCells;
-            this.defaultValue = defaultValue;
-            this.description = description;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="SnmpVariation"/> class.
+      /// </summary>
+      /// <param name="value">the variation value</param>
+      /// <param name="syntax">the value syntax, or null</param>
+      /// <param name="writeSyntax">the value write syntax, or null</param>
+      /// <param name="access">the access mode, or null</param>
+      /// <param name="requiredCells">the cell values required for creation</param>
+      /// <param name="defaultValue">the default value, or null</param>
+      /// <param name="description">the variation description</param>
+      public SnmpVariation(
+          MibValue value,
+          MibType syntax,
+          MibType writeSyntax,
+          SnmpAccess access,
+          IList<MibValue> requiredCells,
+          MibValue defaultValue,
+          string description)
+      {
+         this.value = value;
+         this.syntax = syntax;
+         this.writeSyntax = writeSyntax;
+         this.access = access;
+         this.requiredCells = requiredCells;
+         this.defaultValue = defaultValue;
+         this.description = description;
+      }
 
-        /// <summary>
-        /// Gets the base symbol that this variation applies to.
-        /// </summary>
-        public MibValueSymbol BaseSymbol
-        {
-            get
+      /// <summary>
+      /// Gets the base symbol that this variation applies to.
+      /// </summary>
+      public MibValueSymbol BaseSymbol
+      {
+         get
+         {
+            if (this.value is ObjectIdentifierValue val)
             {
-                if (this.value is ObjectIdentifierValue)
-                {
-                    return ((ObjectIdentifierValue)this.value).Symbol;
-                }
-
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Gets the value
-        /// </summary>
-        /// <returns></returns>
-        public MibValue Value
-        {
-            get
-            {
-                return this.value;
-            }
-        }
-
-        /// <summary>
-        /// Gets the value syntax
-        /// </summary>
-        public MibType Syntax
-        {
-            get
-            {
-                return this.syntax;
-            }
-        }
-
-        /// <summary>
-        /// Gets the value write syntax
-        /// </summary>
-        public MibType WriteSyntax
-        {
-            get
-            {
-                return this.writeSyntax;
-            }
-        }
-
-        /// <summary>
-        /// Gets the access mode
-        /// </summary>
-        public SnmpAccess Access
-        {
-            get
-            {
-                return this.access;
-            }
-        }
-
-        /// <summary>
-        /// Gets cell values required for creation. The returned list
-        /// will consist of MibValue instances.
-        /// </summary>
-        /// <see cref="MibValue"/>
-        public IList<MibValue> RequiredCells
-        {
-            get
-            {
-                return this.requiredCells;
-            }
-        }
-
-        /// <summary>
-        /// Gets the default value.
-        /// </summary>
-        public MibValue DefaultValue
-        {
-            get
-            {
-                return this.defaultValue;
-            }
-        }
-
-        /// <summary>
-        /// Gets the variation description
-        /// </summary>
-        public string Description
-        {
-            get
-            {
-                return this.description;
-            }
-        }
-        
-        /// <summary>
-        /// Initializes the object. This will remove all levels of
-        /// indirection present, such as references to other types, and
-        /// returns the basic type. No information is lost by this operation. 
-        /// This method may modify this object as a side-effect, and will 
-        /// be called by the MIB loader.
-        /// </summary>
-        /// <param name="log">The MIB loader log</param>
-        /// <exception cref="MibException">
-        /// If an error occurred during initialization
-        /// </exception>
-        public void Initialize(MibLoaderLog log)
-        {
-            MibType type = null;
-
-            this.value = this.value.Initialize(log, null);
-
-            if (this.BaseSymbol != null)
-            {
-                // TODO: use utility function to retrieve correct base type here
-                type = this.BaseSymbol.Type;
-
-                if (type is SnmpTextualConvention)
-                {
-                    type = ((SnmpTextualConvention)type).Syntax;
-                }
-
-                if (type is SnmpObjectType)
-                {
-                    type = ((SnmpObjectType)type).Syntax;
-                }
+               return val.Symbol;
             }
 
-            if (this.syntax != null)
+            return null;
+         }
+      }
+
+      /// <summary>
+      /// Gets the value
+      /// </summary>
+      /// <returns></returns>
+      public MibValue Value
+      {
+         get
+         {
+            return this.value;
+         }
+      }
+
+      /// <summary>
+      /// Gets the value syntax
+      /// </summary>
+      public MibType Syntax
+      {
+         get
+         {
+            return this.syntax;
+         }
+      }
+
+      /// <summary>
+      /// Gets the value write syntax
+      /// </summary>
+      public MibType WriteSyntax
+      {
+         get
+         {
+            return this.writeSyntax;
+         }
+      }
+
+      /// <summary>
+      /// Gets the access mode
+      /// </summary>
+      public SnmpAccess Access
+      {
+         get
+         {
+            return this.access;
+         }
+      }
+
+      /// <summary>
+      /// Gets cell values required for creation. The returned list
+      /// will consist of MibValue instances.
+      /// </summary>
+      /// <see cref="MibValue"/>
+      public IList<MibValue> RequiredCells
+      {
+         get
+         {
+            return this.requiredCells;
+         }
+      }
+
+      /// <summary>
+      /// Gets the default value.
+      /// </summary>
+      public MibValue DefaultValue
+      {
+         get
+         {
+            return this.defaultValue;
+         }
+      }
+
+      /// <summary>
+      /// Gets the variation description
+      /// </summary>
+      public string Description
+      {
+         get
+         {
+            return this.description;
+         }
+      }
+
+      /// <summary>
+      /// Initializes the object. This will remove all levels of
+      /// indirection present, such as references to other types, and
+      /// returns the basic type. No information is lost by this operation. 
+      /// This method may modify this object as a side-effect, and will 
+      /// be called by the MIB loader.
+      /// </summary>
+      /// <param name="log">The MIB loader log</param>
+      /// <exception cref="MibException">
+      /// If an error occurred during initialization
+      /// </exception>
+      public void Initialize(MibLoaderLog log)
+      {
+         MibType type = null;
+
+         this.value = this.value.Initialize(log, null);
+
+         if (this.BaseSymbol != null)
+         {
+            // TODO: use utility function to retrieve correct base type here
+            type = this.BaseSymbol.Type;
+
+            if (type is SnmpTextualConvention convention)
             {
-                this.syntax = this.syntax.Initialize(null, log);
+               type = convention.Syntax;
             }
 
-            if (this.writeSyntax != null)
+            if (type is SnmpObjectType type1)
             {
-                this.writeSyntax = this.writeSyntax.Initialize(null, log);
+               type = type1.Syntax;
             }
+         }
 
-            this.requiredCells = this.requiredCells.Select(rc => rc.Initialize(log, type)).ToList();
+         if (this.syntax != null)
+         {
+            this.syntax = this.syntax.Initialize(null, log);
+         }
 
-            if (this.defaultValue != null)
-            {
-                this.defaultValue = this.defaultValue.Initialize(log, type);
-            }
-        }
+         if (this.writeSyntax != null)
+         {
+            this.writeSyntax = this.writeSyntax.Initialize(null, log);
+         }
 
-        /// <summary>
-        /// Returns a string representation of this object.
-        /// </summary>
-        /// <returns>A string representation of this object.</returns>
-        public override string ToString()
-        {
-            StringBuilder builder = new StringBuilder();
+         this.requiredCells = this.requiredCells.Select(rc => rc.Initialize(log, type)).ToList();
 
-            builder.Append(this.value);
+         if (this.defaultValue != null)
+         {
+            this.defaultValue = this.defaultValue.Initialize(log, type);
+         }
+      }
 
-            if (this.syntax != null)
-            {
-                builder.Append("\n      Syntax: ");
-                builder.Append(this.syntax);
-            }
+      /// <summary>
+      /// Returns a string representation of this object.
+      /// </summary>
+      /// <returns>A string representation of this object.</returns>
+      public override string ToString()
+      {
+         StringBuilder builder = new StringBuilder();
 
-            if (this.writeSyntax != null)
-            {
-                builder.Append("\n      Write-Syntax: ");
-                builder.Append(this.writeSyntax);
-            }
+         builder.Append(this.value);
 
-            if (this.access != null)
-            {
-                builder.Append("\n      Access: ");
-                builder.Append(this.access);
-            }
+         if (this.syntax != null)
+         {
+            builder.Append("\n      Syntax: ");
+            builder.Append(this.syntax);
+         }
 
-            if (this.requiredCells.Count > 0)
-            {
-                builder.Append("\n      Creation-Requires: ");
-                builder.Append(this.requiredCells);
-            }
+         if (this.writeSyntax != null)
+         {
+            builder.Append("\n      Write-Syntax: ");
+            builder.Append(this.writeSyntax);
+         }
 
-            if (this.defaultValue != null)
-            {
-                builder.Append("\n      Default Value: ");
-                builder.Append(this.defaultValue);
-            }
+         if (this.access != null)
+         {
+            builder.Append("\n      Access: ");
+            builder.Append(this.access);
+         }
 
-            builder.Append("\n      Description: ");
-            builder.Append(this.description);
+         if (this.requiredCells.Count > 0)
+         {
+            builder.Append("\n      Creation-Requires: ");
+            builder.Append(this.requiredCells);
+         }
 
-            return builder.ToString();
-        }
-    }
+         if (this.defaultValue != null)
+         {
+            builder.Append("\n      Default Value: ");
+            builder.Append(this.defaultValue);
+         }
+
+         builder.Append("\n      Description: ");
+         builder.Append(this.description);
+
+         return builder.ToString();
+      }
+   }
 }

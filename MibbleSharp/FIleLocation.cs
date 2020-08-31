@@ -21,135 +21,135 @@
 
 namespace MibbleSharp
 {
-    using System;
+   using System;
 
-    /// <summary>
-    /// A file location. This class contains a reference to an exact
-    /// location (line, column) inside a text file.
-    /// </summary>
-    [Serializable]
-    public class FileLocation
-    {
-        /// <summary>
-        /// The file to which the location refers.
-        /// </summary>
-        private readonly string file;
+   /// <summary>
+   /// A file location. This class contains a reference to an exact
+   /// location (line, column) inside a text file.
+   /// </summary>
+   [Serializable]
+   public class FileLocation
+   {
+      /// <summary>
+      /// The file to which the location refers.
+      /// </summary>
+      private readonly string file;
 
-        /// <summary>
-        /// The line number within the file (optional)
-        /// </summary>
-        private readonly int line;
+      /// <summary>
+      /// The line number within the file (optional)
+      /// </summary>
+      private readonly int line;
 
-        /// <summary>
-        /// The column number within the file (optional)
-        /// </summary>
-        private readonly int column;
+      /// <summary>
+      /// The column number within the file (optional)
+      /// </summary>
+      private readonly int column;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FileLocation"/> class
-        /// without specifying any particular position.
-        /// </summary>
-        /// <param name="file">The filename for this File Location</param>
-        public FileLocation(string file) : this(file, -1, -1)
-        {
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="FileLocation"/> class
+      /// without specifying any particular position.
+      /// </summary>
+      /// <param name="file">The filename for this File Location</param>
+      public FileLocation(string file) : this(file, -1, -1)
+      {
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FileLocation"/> class
-        /// with a precise location in the file.
-        /// </summary>
-        /// <remarks>
-        /// Location validity is not checked at this time,
-        /// except for negative line and column values
-        /// </remarks>
-        /// <param name="file">Filename for location. Existence is not checked</param>
-        /// <param name="line">Line number of location. Negative values are reset to -1</param>
-        /// <param name="column">Column number of location. Negative values are reset to -1</param>
-        public FileLocation(string file, int line, int column)
-        {
-            this.file = file;
-            this.line = line < -1 ? -1 : line;
-            this.column = column < -1 ? -1 : column;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="FileLocation"/> class
+      /// with a precise location in the file.
+      /// </summary>
+      /// <remarks>
+      /// Location validity is not checked at this time,
+      /// except for negative line and column values
+      /// </remarks>
+      /// <param name="file">Filename for location. Existence is not checked</param>
+      /// <param name="line">Line number of location. Negative values are reset to -1</param>
+      /// <param name="column">Column number of location. Negative values are reset to -1</param>
+      public FileLocation(string file, int line, int column)
+      {
+         this.file = file;
+         this.line = line < -1 ? -1 : line;
+         this.column = column < -1 ? -1 : column;
+      }
 
-        /// <summary>
-        /// Gets the File Location's filename
-        /// </summary>
-        public string File
-        {
-            get
+      /// <summary>
+      /// Gets the File Location's filename
+      /// </summary>
+      public string File
+      {
+         get
+         {
+            return this.file;
+         }
+      }
+
+      /// <summary>
+      /// Gets the File Location's line number
+      /// </summary>
+      public int LineNumber
+      {
+         get
+         {
+            return this.line;
+         }
+      }
+
+      /// <summary>
+      /// Gets the File Location's column Number
+      /// </summary>
+      public int ColumnNumber
+      {
+         get
+         {
+            return this.column;
+         }
+      }
+
+      /// <summary>
+      /// Reads the specified line from the file. If the file couldn't
+      /// be opened or read correctly, null will be returned. The line
+      /// will NOT contain the terminating '\n' character. This method
+      /// takes special care to only count the linefeed (LF, 0x0A)
+      /// character as a valid newline.
+      /// </summary>
+      /// <returns>the line read, or null if not found</returns>
+      public string ReadLine()
+      {
+         string str = null;
+         int count = 1;
+         int ch;
+
+         if (this.file == null || this.line < 0)
+         {
+            return null;
+         }
+
+         using (System.IO.StreamReader sr = System.IO.File.OpenText(this.file))
+         {
+            // Only count line-feed characters in files with invalid line
+            // termination sequences. The default readLine() method doesn't
+            // quite do the right thing in those cases... (bug #16252)
+            while (count < this.line && (ch = sr.Read()) >= 0)
             {
-                return this.file;
-            }
-        }
-
-        /// <summary>
-        /// Gets the File Location's line number
-        /// </summary>
-        public int LineNumber
-        {
-            get
-            {
-                return this.line;
-            }
-        }
-
-        /// <summary>
-        /// Gets the File Location's column Number
-        /// </summary>
-        public int ColumnNumber
-        {
-            get
-            {
-                return this.column;
-            }
-        }
-
-        /// <summary>
-        /// Reads the specified line from the file. If the file couldn't
-        /// be opened or read correctly, null will be returned. The line
-        /// will NOT contain the terminating '\n' character. This method
-        /// takes special care to only count the linefeed (LF, 0x0A)
-        /// character as a valid newline.
-        /// </summary>
-        /// <returns>the line read, or null if not found</returns>
-        public string ReadLine()
-        {
-            string str = null;
-            int count = 1;
-            int ch;
-
-            if (this.file == null || this.line < 0)
-            {
-                return null;
-            }
-
-            using (System.IO.StreamReader sr = System.IO.File.OpenText(this.file))
-            {
-                // Only count line-feed characters in files with invalid line
-                // termination sequences. The default readLine() method doesn't
-                // quite do the right thing in those cases... (bug #16252)
-                while (count < this.line && (ch = sr.Read()) >= 0)
-                {
-                    if (ch == '\n')
-                    {
-                        count++;
-                    }
-                }
-
-                str = sr.ReadLine();
+               if (ch == '\n')
+               {
+                  count++;
+               }
             }
 
-            return str;
-        }
+            str = sr.ReadLine();
+         }
 
-        /// <summary>
-        /// Get string representation of the FileLocation
-        /// </summary>
-        /// <returns>A string representation of the FileLocation object</returns>
-        public override string ToString()
-        {
-            return "File: " + this.file + ", Line: " + this.line + ", Column: " + this.column;
-        }
-    }
+         return str;
+      }
+
+      /// <summary>
+      /// Get string representation of the FileLocation
+      /// </summary>
+      /// <returns>A string representation of the FileLocation object</returns>
+      public override string ToString()
+      {
+         return "File: " + this.file + ", Line: " + this.line + ", Column: " + this.column;
+      }
+   }
 }

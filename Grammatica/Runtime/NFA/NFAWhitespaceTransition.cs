@@ -15,52 +15,52 @@
 
 namespace PerCederberg.Grammatica.Runtime.NFA
 {
-    /// <summary>
-    /// The whitespace character set transition. This transition
-    /// matches a single whitespace character.
-    /// </summary>
-    internal class NFAWhitespaceTransition : NFATransition
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NFAWhitespaceTransition"/> class
-        /// </summary>
-        /// <param name="state">The target state</param>
-        public NFAWhitespaceTransition(NFAState state) : base(state)
-        {
-        }
+   /// <summary>
+   /// The whitespace character set transition. This transition
+   /// matches a single whitespace character.
+   /// </summary>
+   internal class NFAWhitespaceTransition : NFATransition
+   {
+      /// <summary>
+      /// Initializes a new instance of the <see cref="NFAWhitespaceTransition"/> class
+      /// </summary>
+      /// <param name="state">The target state</param>
+      public NFAWhitespaceTransition(NFAState state) : base(state)
+      {
+      }
 
-        /// <summary>
-        /// Gets a value indicating whether this transition only matches ASCII characters.
-        /// I.e. characters with numeric values between 0 and 127.
-        /// </summary>
-        public override bool IsAscii
-        {
-            get
-            {
-                return true;
-            }
-        }
+      /// <summary>
+      /// Gets a value indicating whether this transition only matches ASCII characters.
+      /// I.e. characters with numeric values between 0 and 127.
+      /// </summary>
+      public override bool IsAscii
+      {
+         get
+         {
+            return true;
+         }
+      }
 
-        /// <summary>
-        /// Checks if the specified character matches the transition.
-        /// </summary>
-        /// <param name="ch">The character to check</param>
-        /// <returns>True if the character matches, false if not</returns>
-        public override bool Match(char ch)
-        {
-            // Initial version matched space, \t, \n, \f, \r and 11
-            return char.IsWhiteSpace(ch);
-        }
+      /// <summary>
+      /// Checks if the specified character matches the transition.
+      /// </summary>
+      /// <param name="ch">The character to check</param>
+      /// <returns>True if the character matches, false if not</returns>
+      public override bool Match(char ch)
+      {
+         // Initial version matched space, \t, \n, \f, \r and 11
+         return char.IsWhiteSpace(ch);
+      }
 
-        /// <summary>
-        /// Creates a copy of this transition but with another target
-        /// state.
-        /// </summary>
-        /// <param name="state">The new target state</param>
-        /// <returns>An identical copy of this transition</returns>
-        public override NFATransition Copy(NFAState state)
-        {
-            return new NFAWhitespaceTransition(state);
-        }
-    }
+      /// <summary>
+      /// Creates a copy of this transition but with another target
+      /// state.
+      /// </summary>
+      /// <param name="state">The new target state</param>
+      /// <returns>An identical copy of this transition</returns>
+      public override NFATransition Copy(NFAState state)
+      {
+         return new NFAWhitespaceTransition(state);
+      }
+   }
 }

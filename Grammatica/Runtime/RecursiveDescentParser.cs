@@ -15,968 +15,971 @@
 
 namespace PerCederberg.Grammatica.Runtime
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
+   using System.Collections;
+   using System.Collections.Generic;
+   using System.IO;
+   using System.Linq;
 
-    /// <summary>
-    /// A recursive descent parser. This parser handles LL(n) grammars,
-    /// selecting the appropriate pattern to parse based on the next few
-    /// tokens. The parser is more efficient the fewer look-ahead tokens
-    /// that is has to consider.
-    /// </summary>
-    public class RecursiveDescentParser : Parser
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RecursiveDescentParser"/> class.
-        /// </summary>
-        /// <param name="input">The input stream to read from</param>
-        /// <param name="analyzer">The analyzer callback to use</param>
-        /// <exception cref="ParserCreationException">
-        /// If the tokenizer couldn't be initialized correctly
-        /// </exception>
-        public RecursiveDescentParser(TextReader input, Analyzer analyzer)
-            : base(input, analyzer)
-        {
-        }
+   /// <summary>
+   /// A recursive descent parser. This parser handles LL(n) grammars,
+   /// selecting the appropriate pattern to parse based on the next few
+   /// tokens. The parser is more efficient the fewer look-ahead tokens
+   /// that is has to consider.
+   /// </summary>
+   public class RecursiveDescentParser : Parser
+   {
+      /// <summary>
+      /// Initializes a new instance of the <see cref="RecursiveDescentParser"/> class.
+      /// </summary>
+      /// <param name="input">The input stream to read from</param>
+      /// <param name="analyzer">The analyzer callback to use</param>
+      /// <exception cref="ParserCreationException">
+      /// If the tokenizer couldn't be initialized correctly
+      /// </exception>
+      public RecursiveDescentParser(TextReader input, Analyzer analyzer)
+          : base(input, analyzer)
+      {
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RecursiveDescentParser"/> class.
-        /// </summary>
-        /// <param name="tokenizer">The tokenizer to use</param>
-        /// <param name="analyzer">The analyzer callback to use</param>
-        public RecursiveDescentParser(
-            Tokenizer tokenizer,
-            Analyzer analyzer)
-            : base(tokenizer, analyzer)
-        {
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="RecursiveDescentParser"/> class.
+      /// </summary>
+      /// <param name="tokenizer">The tokenizer to use</param>
+      /// <param name="analyzer">The analyzer callback to use</param>
+      public RecursiveDescentParser(
+          Tokenizer tokenizer,
+          Analyzer analyzer)
+          : base(tokenizer, analyzer)
+      {
+      }
 
-        /// <summary>
-        /// Adds a new production pattern to the parser. The pattern
-        /// will be added last in the list. The first pattern added is
-        /// assumed to be the starting point in the grammar. The
-        /// pattern will be validated against the grammar type to some
-        /// extent.
-        /// </summary>
-        /// <param name="pattern">The pattern to add</param>
-        /// <exception cref="ParserCreationException">
-        /// If the pattern couldn't be added correctly to the parser
-        /// </exception>
-        public override void AddPattern(ProductionPattern pattern)
-        {
-            // Check for empty matches
-            if (pattern.IsMatchingEmpty)
-            {
-                throw new ParserCreationException(
-                    ParserCreationException.ErrorType.InvalidProduction,
-                    pattern.Name,
-                    "zero elements can be matched (minimum is one)");
-            }
-
-            // Check for left-recusive patterns
-            if (pattern.IsLeftRecursive)
-            {
-                throw new ParserCreationException(
-                    ParserCreationException.ErrorType.InvalidProduction,
-                    pattern.Name,
-                    "left recursive patterns are not allowed");
-            }
-
-            // Add pattern
-            base.AddPattern(pattern);
-        }
-
-        /// <summary>
-        /// Initializes the parser. All the added production patterns
-        /// will be analyzed for ambiguities and errors. This method
-        /// also initializes the internal data structures used during
-        /// the parsing.
-        /// </summary>
-        /// <exception cref="ParserCreationException">
-        /// If the parser couldn't be initialized correctly
-        /// </exception>
-        public override void Prepare()
-        {
-            IEnumerator e;
-
-            // Performs production pattern checks
-            base.Prepare();
-            this.Initialized = false;
-
-            // Calculate production look-ahead sets
-            e = this.GetPatterns().GetEnumerator();
-            while (e.MoveNext())
-            {
-                this.CalculateLookAhead((ProductionPattern)e.Current);
-            }
-
-            // Set initialized flag
-            this.Initialized = true;
-        }
-
-        /// <summary>
-        /// Parses the input stream and creates a parse tree.
-        /// </summary>
-        /// <returns>The parse tree</returns>
-        /// <exception cref="ParseException">
-        /// If the input couldn't be parsed correctly
-        /// </exception>
-        protected override Node ParseStart()
-        {
-            Token token;
-            Node node;
-            IList<string> list;
-
-            node = this.ParsePattern(this.GetStartPattern());
-
-            token = this.PeekToken(0);
-
-            if (token != null)
-            {
-                list = new List<string>(1);
-                list.Add("<EOF>");
-                throw new ParseException(
-                    ParseException.ErrorType.UnexpectedToken,
-                    token.ToShortString(),
-                    list,
-                    token.StartLine,
-                    token.StartColumn);
-            }
-
-            return node;
-        }
-
-        /// <summary>
-        /// Parses a production pattern. A parse tree node may or may
-        /// not be created depending on the analyzer callbacks.
-        /// </summary>
-        /// <param name="pattern">The production pattern to parse</param>
-        /// <returns>The created parse tree node, or null</returns>
-        /// <exception cref="ParseException">
-        /// If the input couldn't be parsed correctly
-        /// </exception>
-        private Node ParsePattern(ProductionPattern pattern)
-        {
-            ProductionPatternAlternative alt;
-            ProductionPatternAlternative defaultAlt;
-
-            defaultAlt = pattern.DefaultAlternative;
-            for (int i = 0; i < pattern.Count; i++)
-            {
-                alt = pattern[i];
-                if (defaultAlt != alt && this.IsNext(alt))
-                {
-                    return this.ParseAlternative(alt);
-                }
-            }
-
-            if (defaultAlt == null || !this.IsNext(defaultAlt))
-            {
-                this.ThrowParseException(this.FindUnion(pattern));
-            }
-
-            return this.ParseAlternative(defaultAlt);
-        }
-
-        /// <summary>
-        /// Parses a production pattern alternative. A parse tree node
-        /// may or may not be created depending on the analyzer
-        /// callbacks.
-        /// </summary>
-        /// <param name="alt">The production pattern alternative</param>
-        /// <returns>The created parse tree node, or null</returns>
-        /// <exception cref="ParseException">
-        /// If the input couldn't be parsed correctly
-        /// </exception>
-        private Node ParseAlternative(ProductionPatternAlternative alt)
-        {
-            Production node;
-
-            node = this.NewProduction(alt.Pattern);
-            this.EnterNode(node);
-            for (int i = 0; i < alt.Count; i++)
-            {
-                try
-                {
-                    this.ParseElement(node, alt[i]);
-                }
-                catch (ParseException e)
-                {
-                    this.AddError(e, true);
-                    this.NextToken();
-                    i--;
-                }
-            }
-
-            return this.ExitNode(node);
-        }
-
-        /// <summary>
-        /// Parses a production pattern element. All nodes parsed may
-        /// or may not be added to the parse tree node specified,
-        /// depending on the analyzer callbacks.
-        /// </summary>
-        /// <param name="node">The production parse tree node</param>
-        /// <param name="elem">The production pattern element to parse</param>
-        /// <exception cref="ParseException">
-        /// If the input couldn't be parsed correctly
-        /// </exception>
-        private void ParseElement(
-            Production node,
-            ProductionPatternElement elem)
-        {
-            Node child;
-
-            for (int i = 0; i < elem.MaxCount; i++)
-            {
-                if (i < elem.MinCount || this.IsNext(elem))
-                {
-                    if (elem.IsToken)
-                    {
-                        child = this.NextToken(elem.Id);
-                        this.EnterNode(child);
-                        this.AddNode(node, this.ExitNode(child));
-                    }
-                    else
-                    {
-                        child = this.ParsePattern(this.GetPattern(elem.Id));
-                        this.AddNode(node, child);
-                    }
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Checks if the next tokens match a production pattern. The
-        /// pattern look-ahead set will be used if existing, otherwise
-        /// this method returns false.
-        /// </summary>
-        /// <param name="pattern">The pattern to check</param>
-        /// <returns>True if the next tokens match, false otherwise</returns>
-        private bool IsNext(ProductionPattern pattern)
-        {
-            LookAheadSet set = pattern.LookAhead;
-
-            if (set == null)
-            {
-                return false;
-            }
-            else
-            {
-                return set.IsNext(this);
-            }
-        }
-
-        /// <summary>
-        /// Checks if the next tokens match a production pattern
-        /// alternative. The pattern alternative look-ahead set will be
-        /// used if existing, otherwise this method returns false.
-        /// </summary>
-        /// <param name="alt">The pattern alternative to check</param>
-        /// <returns>
-        /// True if the next tokens match, or false otherwise
-        /// </returns>
-        private bool IsNext(ProductionPatternAlternative alt)
-        {
-            LookAheadSet set = alt.LookAhead;
-
-            if (set == null)
-            {
-                return false;
-            }
-            else
-            {
-                return set.IsNext(this);
-            }
-        }
-
-        /// <summary>
-        /// Checks if the next tokens match a production pattern
-        /// element. If the element has a look-ahead set it will be
-        /// used, otherwise the look-ahead set of the referenced
-        /// production or token will be used.
-        /// </summary>
-        /// <param name="elem">The pattern element to check</param>
-        /// <returns>
-        /// True if the next tokens match, or false otherwise
-        /// </returns>
-        private bool IsNext(ProductionPatternElement elem)
-        {
-            LookAheadSet set = elem.LookAhead;
-
-            if (set != null)
-            {
-                return set.IsNext(this);
-            }
-            else if (elem.IsToken)
-            {
-                return elem.IsMatch(this.PeekToken(0));
-            }
-            else
-            {
-                return this.IsNext(this.GetPattern(elem.Id));
-            }
-        }
-
-        /// <summary>
-        /// Calculates the look-ahead needed for the specified production
-        /// pattern. This method attempts to resolve any conflicts and
-        /// stores the results in the pattern look-ahead object.
-        /// </summary>
-        /// <param name="pattern">The production pattern</param>
-        /// <exception cref="ParserCreationException">
-        /// If the look-ahead set couldn't be determined due to inherent ambiguities
-        /// </exception>
-        private void CalculateLookAhead(ProductionPattern pattern)
-        {
-            ProductionPatternAlternative alt;
-            LookAheadSet result;
-            LookAheadSet[] alternatives;
-            LookAheadSet conflicts;
-            LookAheadSet previous = new LookAheadSet(0);
-            int length = 1;
-            int i;
-            CallStack stack = new CallStack();
-
-            // Calculate simple look-ahead
-            stack.Push(pattern.Name, 1);
-            result = new LookAheadSet(1);
-            alternatives = new LookAheadSet[pattern.Count];
-
-            for (i = 0; i < pattern.Count; i++)
-            {
-                alt = pattern[i];
-                alternatives[i] = this.FindLookAhead(alt, 1, 0, stack, null);
-                alt.LookAhead = alternatives[i];
-                result.AddAll(alternatives[i]);
-            }
-
-            if (pattern.LookAhead == null)
-            {
-                pattern.LookAhead = result;
-            }
-
-            conflicts = this.FindConflicts(pattern, 1);
-
-            // Resolve conflicts
-            while (conflicts.Size > 0)
-            {
-                length++;
-                stack.Clear();
-                stack.Push(pattern.Name, length);
-                conflicts.AddAll(previous);
-                for (i = 0; i < pattern.Count; i++)
-                {
-                    alt = pattern[i];
-                    if (alternatives[i].Intersects(conflicts))
-                    {
-                        alternatives[i] = 
-                            this.FindLookAhead(
-                                alt,
-                                length,
-                                0,
-                                stack,
-                                conflicts);
-                        alt.LookAhead = alternatives[i];
-                    }
-
-                    if (alternatives[i].Intersects(conflicts))
-                    {
-                        if (pattern.DefaultAlternative == null)
-                        {
-                            pattern.DefaultAlternative = alt;
-                        }
-                        else if (pattern.DefaultAlternative != alt)
-                        {
-                            result = alternatives[i].CreateIntersection(conflicts);
-                            this.ThrowAmbiguityException(
-                                pattern.Name,
-                                null,
-                                result);
-                        }
-                    }
-                }
-
-                previous = conflicts;
-                conflicts = this.FindConflicts(pattern, length);
-            }
-
-            // Resolve conflicts inside rules
-            for (i = 0; i < pattern.Count; i++)
-            {
-                this.CalculateLookAhead(pattern[i], 0);
-            }
-        }
-
-        /// <summary>
-        /// Calculates the look-aheads needed for the specified pattern
-        /// alternative. This method attempts to resolve any conflicts in
-        /// optional elements by recalculating look-aheads for referenced
-        /// productions.
-        /// </summary>
-        /// <param name="alt">The production pattern alternative</param>
-        /// <param name="pos">The pattern element position</param>
-        /// <exception cref="ParserCreationException">
-        /// If the look-ahead set couldn't be determined due to inherent ambiguities
-        /// </exception>
-        private void CalculateLookAhead(
-            ProductionPatternAlternative alt,
-            int pos)
-        {
-            ProductionPattern pattern;
-            ProductionPatternElement elem;
-            LookAheadSet first;
-            LookAheadSet follow;
-            LookAheadSet conflicts;
-            LookAheadSet previous = new LookAheadSet(0);
-            string location;
-            int length = 1;
-
-            // Check trivial cases
-            if (pos >= alt.Count)
-            {
-                return;
-            }
-
-            // Check for non-optional element
-            pattern = alt.Pattern;
-            elem = alt[pos];
-            if (elem.MinCount == elem.MaxCount)
-            {
-                this.CalculateLookAhead(alt, pos + 1);
-                return;
-            }
-
-            // Calculate simple look-aheads
-            first = this.FindLookAhead(elem, 1, new CallStack(), null);
-            follow = this.FindLookAhead(alt, 1, pos + 1, new CallStack(), null);
-
-            // Resolve conflicts
-            location = "at position " + (pos + 1);
-            conflicts = this.FindConflicts(
+      /// <summary>
+      /// Adds a new production pattern to the parser. The pattern
+      /// will be added last in the list. The first pattern added is
+      /// assumed to be the starting point in the grammar. The
+      /// pattern will be validated against the grammar type to some
+      /// extent.
+      /// </summary>
+      /// <param name="pattern">The pattern to add</param>
+      /// <exception cref="ParserCreationException">
+      /// If the pattern couldn't be added correctly to the parser
+      /// </exception>
+      public override void AddPattern(ProductionPattern pattern)
+      {
+         // Check for empty matches
+         if (pattern.IsMatchingEmpty)
+         {
+            throw new ParserCreationException(
+                ParserCreationException.ErrorType.InvalidProduction,
                 pattern.Name,
-                location,
-                first,
-                follow);
-            while (conflicts.Size > 0)
+                "zero elements can be matched (minimum is one)");
+         }
+
+         // Check for left-recusive patterns
+         if (pattern.IsLeftRecursive)
+         {
+            throw new ParserCreationException(
+                ParserCreationException.ErrorType.InvalidProduction,
+                pattern.Name,
+                "left recursive patterns are not allowed");
+         }
+
+         // Add pattern
+         base.AddPattern(pattern);
+      }
+
+      /// <summary>
+      /// Initializes the parser. All the added production patterns
+      /// will be analyzed for ambiguities and errors. This method
+      /// also initializes the internal data structures used during
+      /// the parsing.
+      /// </summary>
+      /// <exception cref="ParserCreationException">
+      /// If the parser couldn't be initialized correctly
+      /// </exception>
+      public override void Prepare()
+      {
+         IEnumerator e;
+
+         // Performs production pattern checks
+         base.Prepare();
+         this.Initialized = false;
+
+         // Calculate production look-ahead sets
+         e = this.GetPatterns().GetEnumerator();
+         while (e.MoveNext())
+         {
+            this.CalculateLookAhead((ProductionPattern)e.Current);
+         }
+
+         // Set initialized flag
+         this.Initialized = true;
+      }
+
+      /// <summary>
+      /// Parses the input stream and creates a parse tree.
+      /// </summary>
+      /// <returns>The parse tree</returns>
+      /// <exception cref="ParseException">
+      /// If the input couldn't be parsed correctly
+      /// </exception>
+      protected override Node ParseStart()
+      {
+         Token token;
+         Node node;
+         IList<string> list;
+
+         node = this.ParsePattern(this.GetStartPattern());
+
+         token = this.PeekToken(0);
+
+         if (token != null)
+         {
+            list = new List<string>(1)
             {
-                length++;
-                conflicts.AddAll(previous);
-                first = this.FindLookAhead(
-                    elem,
-                    length,
-                    new CallStack(),
-                    conflicts);
-                follow = this.FindLookAhead(
-                    alt,
-                    length,
-                    pos + 1,
-                    new CallStack(),
-                    conflicts);
-                first = first.CreateCombination(follow);
-                elem.LookAhead = first;
-                if (first.Intersects(conflicts))
-                {
-                    first = first.CreateIntersection(conflicts);
-                    this.ThrowAmbiguityException(
-                        pattern.Name, 
-                        location, 
-                        first);
-                }
-
-                previous = conflicts;
-                conflicts = this.FindConflicts(
-                    pattern.Name,
-                    location,
-                    first,
-                    follow);
-            }
-
-            // Check remaining elements
-            this.CalculateLookAhead(alt, pos + 1);
-        }
-
-        /// <summary>
-        /// Finds the look-ahead set for a production pattern. The maximum
-        /// look-ahead length must be specified. It is also possible to
-        /// specify a look-ahead set filter, which will make sure that
-        /// unnecessary token sequences will be avoided.
-        /// </summary>
-        /// <param name="pattern">The production pattern</param>
-        /// <param name="length">The maximum look-ahead length</param>
-        /// <param name="stack">The call stack used for loop detection</param>
-        /// <param name="filter">The look-ahead set filter</param>
-        /// <returns>The look-ahead set for the production pattern</returns>
-        /// <exception cref="ParserCreationException">
-        /// If an infinite loop was found in the grammar
-        /// </exception>
-        private LookAheadSet FindLookAhead(
-            ProductionPattern pattern,
-            int length,
-            CallStack stack,
-            LookAheadSet filter)
-        {
-            LookAheadSet result;
-            LookAheadSet temp;
-
-            // Check for infinite loop
-            if (stack.Contains(pattern.Name, length))
-            {
-                throw new ParserCreationException(
-                    ParserCreationException.ErrorType.InfiniteLoop,
-                    pattern.Name,
-                    (string)null);
-            }
-
-            // Find pattern look-ahead
-            stack.Push(pattern.Name, length);
-            result = new LookAheadSet(length);
-            for (int i = 0; i < pattern.Count; i++)
-            {
-                temp = this.FindLookAhead(
-                    pattern[i],
-                    length,
-                    0,
-                    stack,
-                    filter);
-                result.AddAll(temp);
-            }
-
-            stack.Pop();
-
-            return result;
-        }
-
-        /// <summary>
-        /// Finds the look-ahead set for a production pattern alternative.
-        /// The pattern position and maximum look-ahead length must be
-        /// specified. It is also possible to specify a look-ahead set
-        /// filter, which will make sure that unnecessary token sequences
-        /// will be avoided.
-        /// </summary>
-        /// <param name="alt">The production pattern alternative</param>
-        /// <param name="length">The maximum look-ahead length</param>
-        /// <param name="pos">The pattern element position</param>
-        /// <param name="stack">The call stack used for loop detection</param>
-        /// <param name="filter">The look-ahead set filter</param>
-        /// <returns>
-        /// The look-ahead set for the pattern alternative
-        /// </returns>
-        /// <exception cref="ParserCreationException">
-        /// If an infinite loop was found in the grammar
-        /// </exception>
-        private LookAheadSet FindLookAhead(
-            ProductionPatternAlternative alt,
-            int length,
-            int pos,
-            CallStack stack,
-            LookAheadSet filter)
-        {
-            LookAheadSet first;
-            LookAheadSet follow;
-            LookAheadSet overlaps;
-
-            // Check trivial cases
-            if (length <= 0 || pos >= alt.Count)
-            {
-                return new LookAheadSet(0);
-            }
-
-            // Find look-ahead for this element
-            first = this.FindLookAhead(alt[pos], length, stack, filter);
-            if (alt[pos].MinCount == 0)
-            {
-                first.AddEmpty();
-            }
-
-            // Find remaining look-ahead
-            if (filter == null)
-            {
-                length -= first.MinLength;
-                if (length > 0)
-                {
-                    follow = this.FindLookAhead(alt, length, pos + 1, stack, null);
-                    first = first.CreateCombination(follow);
-                }
-            }
-            else if (filter.IsOverlap(first))
-            {
-                overlaps = first.CreateOverlaps(filter);
-                length -= overlaps.MinLength;
-                filter = filter.CreateFilter(overlaps);
-                follow = this.FindLookAhead(alt, length, pos + 1, stack, filter);
-                first.RemoveAll(overlaps);
-                first.AddAll(overlaps.CreateCombination(follow));
-            }
-
-            return first;
-        }
-
-        /// <summary>
-        /// Finds the look-ahead set for a production pattern element. The
-        /// maximum look-ahead length must be specified. This method takes
-        /// the element repeats into consideration when creating the
-        /// look-ahead set, but does NOT include an empty sequence even if
-        /// the minimum count is zero (0). It is also possible to specify a
-        /// look-ahead set filter, which will make sure that unnecessary
-        /// token sequences will be avoided.
-        /// </summary>
-        /// <param name="elem">The production pattern element</param>
-        /// <param name="length">The maximum look-ahead length</param>
-        /// <param name="stack">The call stack used for loop detection</param>
-        /// <param name="filter">The look-ahead set filter</param>
-        /// <returns>The look-ahead set for the pattern element</returns>
-        /// <exception cref="ParserCreationException">
-        /// If an infinite loop was found in the grammar
-        /// </exception>
-        private LookAheadSet FindLookAhead(
-            ProductionPatternElement elem,
-            int length,
-            CallStack stack,
-            LookAheadSet filter)
-        {
-            LookAheadSet result;
-            LookAheadSet first;
-            LookAheadSet follow;
-            int max;
-
-            // Find initial element look-ahead
-            first = this.FindLookAhead(elem, length, 0, stack, filter);
-            result = new LookAheadSet(length);
-            result.AddAll(first);
-            if (filter == null || !filter.IsOverlap(result))
-            {
-                return result;
-            }
-
-            // Handle element repetitions
-            if (elem.MaxCount == int.MaxValue)
-            {
-                first = first.CreateRepetitive();
-            }
-
-            max = elem.MaxCount;
-            if (length < max)
-            {
-                max = length;
-            }
-
-            for (int i = 1; i < max; i++)
-            {
-                first = first.CreateOverlaps(filter);
-                if (first.Size <= 0 || first.MinLength >= length)
-                {
-                    break;
-                }
-
-                follow = this.FindLookAhead(
-                    elem,
-                    length,
-                    0,
-                    stack,
-                    filter.CreateFilter(first));
-                first = first.CreateCombination(follow);
-                result.AddAll(first);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Finds the look-ahead set for a production pattern element. The
-        /// maximum look-ahead length must be specified. This method does
-        /// NOT take the element repeat into consideration when creating
-        /// the look-ahead set. It is also possible to specify a look-ahead
-        /// set filter, which will make sure that unnecessary token
-        /// sequences will be avoided.
-        /// </summary>
-        /// <param name="elem">The production pattern element</param>
-        /// <param name="length">The maximum look ahead length</param>
-        /// <param name="dummy">A parameter to distinguish the method</param>
-        /// <param name="stack">The call stack used for loop detection</param>
-        /// <param name="filter">The look ahead set filter</param>
-        /// <returns>The look-ahead set for the pattern element</returns>
-        /// <exception cref="ParserCreationException">
-        /// If an infinite loop was found in the grammar
-        /// </exception>
-        private LookAheadSet FindLookAhead(
-            ProductionPatternElement elem,
-            int length,
-            int dummy,
-            CallStack stack,
-            LookAheadSet filter)
-        {
-            LookAheadSet result;
-            ProductionPattern pattern;
-
-            if (elem.IsToken)
-            {
-                result = new LookAheadSet(length);
-                result.Add(elem.Id);
-            }
-            else
-            {
-                pattern = this.GetPattern(elem.Id);
-                result = this.FindLookAhead(pattern, length, stack, filter);
-                if (stack.Contains(pattern.Name))
-                {
-                    result = result.CreateRepetitive();
-                }
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Returns a look-ahead set with all conflicts between
-        /// alternatives in a production pattern.
-        /// </summary>
-        /// <param name="pattern">The production pattern</param>
-        /// <param name="maxLength">The maximum token sequence length</param>
-        /// <returns>A look-ahead set with the conflicts found</returns>
-        /// <exception cref="ParserCreationException">
-        /// If an inherent ambiguity was found among the look-ahead sets
-        /// </exception>
-        private LookAheadSet FindConflicts(
-            ProductionPattern pattern,
-            int maxLength)
-        {
-            LookAheadSet result = new LookAheadSet(maxLength);
-            LookAheadSet set1;
-            LookAheadSet set2;
-
-            for (int i = 0; i < pattern.Count; i++)
-            {
-                set1 = pattern[i].LookAhead;
-                for (int j = 0; j < i; j++)
-                {
-                    set2 = pattern[j].LookAhead;
-                    result.AddAll(set1.CreateIntersection(set2));
-                }
-            }
-
-            if (result.IsRepetitive)
-            {
-                this.ThrowAmbiguityException(pattern.Name, null, result);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Returns a look-ahead set with all conflicts between two
-        /// look-ahead sets.
-        /// </summary>
-        /// <param name="pattern">The pattern name being analyzed</param>
-        /// <param name="location">The pattern location</param>
-        /// <param name="set1">The first look-ahead set</param>
-        /// <param name="set2">The second look-ahead set</param>
-        /// <returns>A look-ahead set with the conflicts found</returns>
-        /// <exception cref="ParserCreationException">
-        /// If an inherent ambiguity was found among the look-ahead sets
-        /// </exception>
-        private LookAheadSet FindConflicts(
-            string pattern,
-            string location,
-            LookAheadSet set1,
-            LookAheadSet set2)
-        {
-            LookAheadSet result;
-
-            result = set1.CreateIntersection(set2);
-            if (result.IsRepetitive)
-            {
-                this.ThrowAmbiguityException(pattern, location, result);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Returns the union of all alternative look-ahead sets in a
-        /// production pattern.
-        /// </summary>
-        /// <param name="pattern">The production pattern</param>
-        /// <returns>A unified look-ahead set</returns>
-        private LookAheadSet FindUnion(ProductionPattern pattern)
-        {
-            LookAheadSet result;
-            int length = 0;
-            int i;
-
-            for (i = 0; i < pattern.Count; i++)
-            {
-                result = pattern[i].LookAhead;
-                if (result.MaxLength > length)
-                {
-                    length = result.MaxLength;
-                }
-            }
-
-            result = new LookAheadSet(length);
-
-            for (i = 0; i < pattern.Count; i++)
-            {
-                result.AddAll(pattern[i].LookAhead);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Throws a parse exception that matches the specified look-ahead
-        /// set. This method will take into account any initial matching
-        /// tokens in the look-ahead set.
-        /// </summary>
-        /// <param name="set">The look-ahead set to match</param>
-        /// <exception cref="ParseException">Always thrown by this method</exception>         
-        private void ThrowParseException(LookAheadSet set)
-        {
-            Token token;
-            IList<string> list = new List<string>();
-            int[] initials;
-
-            // Read tokens until mismatch
-            while (set.IsNext(this, 1))
-            {
-                set = set.CreateNextSet(this.NextToken().Id);
-            }
-
-            // Find next token descriptions
-            initials = set.InitialTokens;
-            for (int i = 0; i < initials.Length; i++)
-            {
-                list.Add(this.GetTokenDescription(initials[i]));
-            }
-
-            // Create exception
-            token = this.NextToken();
+               "<EOF>"
+            };
             throw new ParseException(
                 ParseException.ErrorType.UnexpectedToken,
                 token.ToShortString(),
                 list,
                 token.StartLine,
                 token.StartColumn);
-        }
+         }
 
-        /// <summary>
-        /// Throws a parser creation exception for an ambiguity. The
-        /// specified look-ahead set contains the token conflicts to be
-        /// reported.
-        /// </summary>
-        /// <param name="pattern">The production pattern name</param>
-        /// <param name="location">The production pattern location, or null</param>
-        /// <param name="set">The look-ahead set with conflicts</param>
-        /// <exception cref="ParserCreationException">
-        /// Always thrown by this method
-        /// </exception>
-        private void ThrowAmbiguityException(
-            string pattern,
-            string location,
-            LookAheadSet set)
-        {
-            int[] initials;
+         return node;
+      }
 
-            // Find next token descriptions
-            initials = set.InitialTokens;
-            IList<string> list = initials.Select(i => this.GetTokenDescription(i)).ToList();
+      /// <summary>
+      /// Parses a production pattern. A parse tree node may or may
+      /// not be created depending on the analyzer callbacks.
+      /// </summary>
+      /// <param name="pattern">The production pattern to parse</param>
+      /// <returns>The created parse tree node, or null</returns>
+      /// <exception cref="ParseException">
+      /// If the input couldn't be parsed correctly
+      /// </exception>
+      private Node ParsePattern(ProductionPattern pattern)
+      {
+         ProductionPatternAlternative alt;
+         ProductionPatternAlternative defaultAlt;
 
-            // Create exception
-            throw new ParserCreationException(
-                ParserCreationException.ErrorType.InherentAmbiguity,
-                pattern,
+         defaultAlt = pattern.DefaultAlternative;
+         for (int i = 0; i < pattern.Count; i++)
+         {
+            alt = pattern[i];
+            if (defaultAlt != alt && this.IsNext(alt))
+            {
+               return this.ParseAlternative(alt);
+            }
+         }
+
+         if (defaultAlt == null || !this.IsNext(defaultAlt))
+         {
+            this.ThrowParseException(this.FindUnion(pattern));
+         }
+
+         return this.ParseAlternative(defaultAlt);
+      }
+
+      /// <summary>
+      /// Parses a production pattern alternative. A parse tree node
+      /// may or may not be created depending on the analyzer
+      /// callbacks.
+      /// </summary>
+      /// <param name="alt">The production pattern alternative</param>
+      /// <returns>The created parse tree node, or null</returns>
+      /// <exception cref="ParseException">
+      /// If the input couldn't be parsed correctly
+      /// </exception>
+      private Node ParseAlternative(ProductionPatternAlternative alt)
+      {
+         Production node;
+
+         node = this.NewProduction(alt.Pattern);
+         this.EnterNode(node);
+         for (int i = 0; i < alt.Count; i++)
+         {
+            try
+            {
+               this.ParseElement(node, alt[i]);
+            }
+            catch (ParseException e)
+            {
+               this.AddError(e, true);
+               this.NextToken();
+               i--;
+            }
+         }
+
+         return this.ExitNode(node);
+      }
+
+      /// <summary>
+      /// Parses a production pattern element. All nodes parsed may
+      /// or may not be added to the parse tree node specified,
+      /// depending on the analyzer callbacks.
+      /// </summary>
+      /// <param name="node">The production parse tree node</param>
+      /// <param name="elem">The production pattern element to parse</param>
+      /// <exception cref="ParseException">
+      /// If the input couldn't be parsed correctly
+      /// </exception>
+      private void ParseElement(
+          Production node,
+          ProductionPatternElement elem)
+      {
+         Node child;
+
+         for (int i = 0; i < elem.MaxCount; i++)
+         {
+            if (i < elem.MinCount || this.IsNext(elem))
+            {
+               if (elem.IsToken)
+               {
+                  child = this.NextToken(elem.Id);
+                  this.EnterNode(child);
+                  this.AddNode(node, this.ExitNode(child));
+               }
+               else
+               {
+                  child = this.ParsePattern(this.GetPattern(elem.Id));
+                  this.AddNode(node, child);
+               }
+            }
+            else
+            {
+               break;
+            }
+         }
+      }
+
+      /// <summary>
+      /// Checks if the next tokens match a production pattern. The
+      /// pattern look-ahead set will be used if existing, otherwise
+      /// this method returns false.
+      /// </summary>
+      /// <param name="pattern">The pattern to check</param>
+      /// <returns>True if the next tokens match, false otherwise</returns>
+      private bool IsNext(ProductionPattern pattern)
+      {
+         LookAheadSet set = pattern.LookAhead;
+
+         if (set == null)
+         {
+            return false;
+         }
+         else
+         {
+            return set.IsNext(this);
+         }
+      }
+
+      /// <summary>
+      /// Checks if the next tokens match a production pattern
+      /// alternative. The pattern alternative look-ahead set will be
+      /// used if existing, otherwise this method returns false.
+      /// </summary>
+      /// <param name="alt">The pattern alternative to check</param>
+      /// <returns>
+      /// True if the next tokens match, or false otherwise
+      /// </returns>
+      private bool IsNext(ProductionPatternAlternative alt)
+      {
+         LookAheadSet set = alt.LookAhead;
+
+         if (set == null)
+         {
+            return false;
+         }
+         else
+         {
+            return set.IsNext(this);
+         }
+      }
+
+      /// <summary>
+      /// Checks if the next tokens match a production pattern
+      /// element. If the element has a look-ahead set it will be
+      /// used, otherwise the look-ahead set of the referenced
+      /// production or token will be used.
+      /// </summary>
+      /// <param name="elem">The pattern element to check</param>
+      /// <returns>
+      /// True if the next tokens match, or false otherwise
+      /// </returns>
+      private bool IsNext(ProductionPatternElement elem)
+      {
+         LookAheadSet set = elem.LookAhead;
+
+         if (set != null)
+         {
+            return set.IsNext(this);
+         }
+         else if (elem.IsToken)
+         {
+            return elem.IsMatch(this.PeekToken(0));
+         }
+         else
+         {
+            return this.IsNext(this.GetPattern(elem.Id));
+         }
+      }
+
+      /// <summary>
+      /// Calculates the look-ahead needed for the specified production
+      /// pattern. This method attempts to resolve any conflicts and
+      /// stores the results in the pattern look-ahead object.
+      /// </summary>
+      /// <param name="pattern">The production pattern</param>
+      /// <exception cref="ParserCreationException">
+      /// If the look-ahead set couldn't be determined due to inherent ambiguities
+      /// </exception>
+      private void CalculateLookAhead(ProductionPattern pattern)
+      {
+         ProductionPatternAlternative alt;
+         LookAheadSet result;
+         LookAheadSet[] alternatives;
+         LookAheadSet conflicts;
+         LookAheadSet previous = new LookAheadSet(0);
+         int length = 1;
+         int i;
+         CallStack stack = new CallStack();
+
+         // Calculate simple look-ahead
+         stack.Push(pattern.Name, 1);
+         result = new LookAheadSet(1);
+         alternatives = new LookAheadSet[pattern.Count];
+
+         for (i = 0; i < pattern.Count; i++)
+         {
+            alt = pattern[i];
+            alternatives[i] = this.FindLookAhead(alt, 1, 0, stack, null);
+            alt.LookAhead = alternatives[i];
+            result.AddAll(alternatives[i]);
+         }
+
+         if (pattern.LookAhead == null)
+         {
+            pattern.LookAhead = result;
+         }
+
+         conflicts = this.FindConflicts(pattern, 1);
+
+         // Resolve conflicts
+         while (conflicts.Size > 0)
+         {
+            length++;
+            stack.Clear();
+            stack.Push(pattern.Name, length);
+            conflicts.AddAll(previous);
+            for (i = 0; i < pattern.Count; i++)
+            {
+               alt = pattern[i];
+               if (alternatives[i].Intersects(conflicts))
+               {
+                  alternatives[i] =
+                      this.FindLookAhead(
+                          alt,
+                          length,
+                          0,
+                          stack,
+                          conflicts);
+                  alt.LookAhead = alternatives[i];
+               }
+
+               if (alternatives[i].Intersects(conflicts))
+               {
+                  if (pattern.DefaultAlternative == null)
+                  {
+                     pattern.DefaultAlternative = alt;
+                  }
+                  else if (pattern.DefaultAlternative != alt)
+                  {
+                     result = alternatives[i].CreateIntersection(conflicts);
+                     this.ThrowAmbiguityException(
+                         pattern.Name,
+                         null,
+                         result);
+                  }
+               }
+            }
+
+            previous = conflicts;
+            conflicts = this.FindConflicts(pattern, length);
+         }
+
+         // Resolve conflicts inside rules
+         for (i = 0; i < pattern.Count; i++)
+         {
+            this.CalculateLookAhead(pattern[i], 0);
+         }
+      }
+
+      /// <summary>
+      /// Calculates the look-aheads needed for the specified pattern
+      /// alternative. This method attempts to resolve any conflicts in
+      /// optional elements by recalculating look-aheads for referenced
+      /// productions.
+      /// </summary>
+      /// <param name="alt">The production pattern alternative</param>
+      /// <param name="pos">The pattern element position</param>
+      /// <exception cref="ParserCreationException">
+      /// If the look-ahead set couldn't be determined due to inherent ambiguities
+      /// </exception>
+      private void CalculateLookAhead(
+          ProductionPatternAlternative alt,
+          int pos)
+      {
+         ProductionPattern pattern;
+         ProductionPatternElement elem;
+         LookAheadSet first;
+         LookAheadSet follow;
+         LookAheadSet conflicts;
+         LookAheadSet previous = new LookAheadSet(0);
+         string location;
+         int length = 1;
+
+         // Check trivial cases
+         if (pos >= alt.Count)
+         {
+            return;
+         }
+
+         // Check for non-optional element
+         pattern = alt.Pattern;
+         elem = alt[pos];
+         if (elem.MinCount == elem.MaxCount)
+         {
+            this.CalculateLookAhead(alt, pos + 1);
+            return;
+         }
+
+         // Calculate simple look-aheads
+         first = this.FindLookAhead(elem, 1, new CallStack(), null);
+         follow = this.FindLookAhead(alt, 1, pos + 1, new CallStack(), null);
+
+         // Resolve conflicts
+         location = "at position " + (pos + 1);
+         conflicts = this.FindConflicts(
+             pattern.Name,
+             location,
+             first,
+             follow);
+         while (conflicts.Size > 0)
+         {
+            length++;
+            conflicts.AddAll(previous);
+            first = this.FindLookAhead(
+                elem,
+                length,
+                new CallStack(),
+                conflicts);
+            follow = this.FindLookAhead(
+                alt,
+                length,
+                pos + 1,
+                new CallStack(),
+                conflicts);
+            first = first.CreateCombination(follow);
+            elem.LookAhead = first;
+            if (first.Intersects(conflicts))
+            {
+               first = first.CreateIntersection(conflicts);
+               this.ThrowAmbiguityException(
+                   pattern.Name,
+                   location,
+                   first);
+            }
+
+            previous = conflicts;
+            conflicts = this.FindConflicts(
+                pattern.Name,
                 location,
-                list);
-        }
+                first,
+                follow);
+         }
 
-        /// <summary>
-        /// A name value stack. This stack is used to detect loops and
-        /// repetitions of the same production during look-ahead analysis.
-        /// </summary>
-        private class CallStack
-        {
-            /// <summary>
-            /// A stack with names.
-            /// </summary> 
-            private ArrayList nameStack = new ArrayList();
+         // Check remaining elements
+         this.CalculateLookAhead(alt, pos + 1);
+      }
 
-            /// <summary>
-            /// A stack with values.
-            /// </summary> 
-            private ArrayList valueStack = new ArrayList();
+      /// <summary>
+      /// Finds the look-ahead set for a production pattern. The maximum
+      /// look-ahead length must be specified. It is also possible to
+      /// specify a look-ahead set filter, which will make sure that
+      /// unnecessary token sequences will be avoided.
+      /// </summary>
+      /// <param name="pattern">The production pattern</param>
+      /// <param name="length">The maximum look-ahead length</param>
+      /// <param name="stack">The call stack used for loop detection</param>
+      /// <param name="filter">The look-ahead set filter</param>
+      /// <returns>The look-ahead set for the production pattern</returns>
+      /// <exception cref="ParserCreationException">
+      /// If an infinite loop was found in the grammar
+      /// </exception>
+      private LookAheadSet FindLookAhead(
+          ProductionPattern pattern,
+          int length,
+          CallStack stack,
+          LookAheadSet filter)
+      {
+         LookAheadSet result;
+         LookAheadSet temp;
 
-            /// <summary>
-            /// Checks if the specified name is on the stack.
-            /// </summary>
-            /// <param name="name">The name to search for</param>
-            /// <returns>True if the name is on the stack, or false if not</returns>            
-            public bool Contains(string name)
+         // Check for infinite loop
+         if (stack.Contains(pattern.Name, length))
+         {
+            throw new ParserCreationException(
+                ParserCreationException.ErrorType.InfiniteLoop,
+                pattern.Name,
+                (string)null);
+         }
+
+         // Find pattern look-ahead
+         stack.Push(pattern.Name, length);
+         result = new LookAheadSet(length);
+         for (int i = 0; i < pattern.Count; i++)
+         {
+            temp = this.FindLookAhead(
+                pattern[i],
+                length,
+                0,
+                stack,
+                filter);
+            result.AddAll(temp);
+         }
+
+         stack.Pop();
+
+         return result;
+      }
+
+      /// <summary>
+      /// Finds the look-ahead set for a production pattern alternative.
+      /// The pattern position and maximum look-ahead length must be
+      /// specified. It is also possible to specify a look-ahead set
+      /// filter, which will make sure that unnecessary token sequences
+      /// will be avoided.
+      /// </summary>
+      /// <param name="alt">The production pattern alternative</param>
+      /// <param name="length">The maximum look-ahead length</param>
+      /// <param name="pos">The pattern element position</param>
+      /// <param name="stack">The call stack used for loop detection</param>
+      /// <param name="filter">The look-ahead set filter</param>
+      /// <returns>
+      /// The look-ahead set for the pattern alternative
+      /// </returns>
+      /// <exception cref="ParserCreationException">
+      /// If an infinite loop was found in the grammar
+      /// </exception>
+      private LookAheadSet FindLookAhead(
+          ProductionPatternAlternative alt,
+          int length,
+          int pos,
+          CallStack stack,
+          LookAheadSet filter)
+      {
+         LookAheadSet first;
+         LookAheadSet follow;
+         LookAheadSet overlaps;
+
+         // Check trivial cases
+         if (length <= 0 || pos >= alt.Count)
+         {
+            return new LookAheadSet(0);
+         }
+
+         // Find look-ahead for this element
+         first = this.FindLookAhead(alt[pos], length, stack, filter);
+         if (alt[pos].MinCount == 0)
+         {
+            first.AddEmpty();
+         }
+
+         // Find remaining look-ahead
+         if (filter == null)
+         {
+            length -= first.MinLength;
+            if (length > 0)
             {
-                return this.nameStack.Contains(name);
+               follow = this.FindLookAhead(alt, length, pos + 1, stack, null);
+               first = first.CreateCombination(follow);
+            }
+         }
+         else if (filter.IsOverlap(first))
+         {
+            overlaps = first.CreateOverlaps(filter);
+            length -= overlaps.MinLength;
+            filter = filter.CreateFilter(overlaps);
+            follow = this.FindLookAhead(alt, length, pos + 1, stack, filter);
+            first.RemoveAll(overlaps);
+            first.AddAll(overlaps.CreateCombination(follow));
+         }
+
+         return first;
+      }
+
+      /// <summary>
+      /// Finds the look-ahead set for a production pattern element. The
+      /// maximum look-ahead length must be specified. This method takes
+      /// the element repeats into consideration when creating the
+      /// look-ahead set, but does NOT include an empty sequence even if
+      /// the minimum count is zero (0). It is also possible to specify a
+      /// look-ahead set filter, which will make sure that unnecessary
+      /// token sequences will be avoided.
+      /// </summary>
+      /// <param name="elem">The production pattern element</param>
+      /// <param name="length">The maximum look-ahead length</param>
+      /// <param name="stack">The call stack used for loop detection</param>
+      /// <param name="filter">The look-ahead set filter</param>
+      /// <returns>The look-ahead set for the pattern element</returns>
+      /// <exception cref="ParserCreationException">
+      /// If an infinite loop was found in the grammar
+      /// </exception>
+      private LookAheadSet FindLookAhead(
+          ProductionPatternElement elem,
+          int length,
+          CallStack stack,
+          LookAheadSet filter)
+      {
+         LookAheadSet result;
+         LookAheadSet first;
+         LookAheadSet follow;
+         int max;
+
+         // Find initial element look-ahead
+         first = this.FindLookAhead(elem, length, 0, stack, filter);
+         result = new LookAheadSet(length);
+         result.AddAll(first);
+         if (filter == null || !filter.IsOverlap(result))
+         {
+            return result;
+         }
+
+         // Handle element repetitions
+         if (elem.MaxCount == int.MaxValue)
+         {
+            first = first.CreateRepetitive();
+         }
+
+         max = elem.MaxCount;
+         if (length < max)
+         {
+            max = length;
+         }
+
+         for (int i = 1; i < max; i++)
+         {
+            first = first.CreateOverlaps(filter);
+            if (first.Size <= 0 || first.MinLength >= length)
+            {
+               break;
             }
 
-            /// <summary>
-            /// Checks if the specified name and value combination is on
-            /// the stack.
-            /// </summary>
-            /// <param name="name">The name to search for</param>
-            /// <param name="value">The value to search for</param>
-            /// <returns>True if the combination is on the stack, or
-            /// false if not.
-            /// </returns>
-            public bool Contains(string name, int value)
-            {
-                for (int i = 0; i < this.nameStack.Count; i++)
-                {
-                    if (this.nameStack[i].Equals(name)
-                     && this.valueStack[i].Equals(value))
-                    {
-                        return true;
-                    }
-                }
+            follow = this.FindLookAhead(
+                elem,
+                length,
+                0,
+                stack,
+                filter.CreateFilter(first));
+            first = first.CreateCombination(follow);
+            result.AddAll(first);
+         }
 
-                return false;
+         return result;
+      }
+
+      /// <summary>
+      /// Finds the look-ahead set for a production pattern element. The
+      /// maximum look-ahead length must be specified. This method does
+      /// NOT take the element repeat into consideration when creating
+      /// the look-ahead set. It is also possible to specify a look-ahead
+      /// set filter, which will make sure that unnecessary token
+      /// sequences will be avoided.
+      /// </summary>
+      /// <param name="elem">The production pattern element</param>
+      /// <param name="length">The maximum look ahead length</param>
+      /// <param name="dummy">A parameter to distinguish the method</param>
+      /// <param name="stack">The call stack used for loop detection</param>
+      /// <param name="filter">The look ahead set filter</param>
+      /// <returns>The look-ahead set for the pattern element</returns>
+      /// <exception cref="ParserCreationException">
+      /// If an infinite loop was found in the grammar
+      /// </exception>
+      private LookAheadSet FindLookAhead(
+          ProductionPatternElement elem,
+          int length,
+#pragma warning disable IDE0060 // Remove unused parameter
+          int dummy,
+#pragma warning restore IDE0060 // Remove unused parameter
+          CallStack stack,
+          LookAheadSet filter)
+      {
+         LookAheadSet result;
+         ProductionPattern pattern;
+
+         if (elem.IsToken)
+         {
+            result = new LookAheadSet(length);
+            result.Add(elem.Id);
+         }
+         else
+         {
+            pattern = this.GetPattern(elem.Id);
+            result = this.FindLookAhead(pattern, length, stack, filter);
+            if (stack.Contains(pattern.Name))
+            {
+               result = result.CreateRepetitive();
+            }
+         }
+
+         return result;
+      }
+
+      /// <summary>
+      /// Returns a look-ahead set with all conflicts between
+      /// alternatives in a production pattern.
+      /// </summary>
+      /// <param name="pattern">The production pattern</param>
+      /// <param name="maxLength">The maximum token sequence length</param>
+      /// <returns>A look-ahead set with the conflicts found</returns>
+      /// <exception cref="ParserCreationException">
+      /// If an inherent ambiguity was found among the look-ahead sets
+      /// </exception>
+      private LookAheadSet FindConflicts(
+          ProductionPattern pattern,
+          int maxLength)
+      {
+         LookAheadSet result = new LookAheadSet(maxLength);
+         LookAheadSet set1;
+         LookAheadSet set2;
+
+         for (int i = 0; i < pattern.Count; i++)
+         {
+            set1 = pattern[i].LookAhead;
+            for (int j = 0; j < i; j++)
+            {
+               set2 = pattern[j].LookAhead;
+               result.AddAll(set1.CreateIntersection(set2));
+            }
+         }
+
+         if (result.IsRepetitive)
+         {
+            this.ThrowAmbiguityException(pattern.Name, null, result);
+         }
+
+         return result;
+      }
+
+      /// <summary>
+      /// Returns a look-ahead set with all conflicts between two
+      /// look-ahead sets.
+      /// </summary>
+      /// <param name="pattern">The pattern name being analyzed</param>
+      /// <param name="location">The pattern location</param>
+      /// <param name="set1">The first look-ahead set</param>
+      /// <param name="set2">The second look-ahead set</param>
+      /// <returns>A look-ahead set with the conflicts found</returns>
+      /// <exception cref="ParserCreationException">
+      /// If an inherent ambiguity was found among the look-ahead sets
+      /// </exception>
+      private LookAheadSet FindConflicts(
+          string pattern,
+          string location,
+          LookAheadSet set1,
+          LookAheadSet set2)
+      {
+         LookAheadSet result;
+
+         result = set1.CreateIntersection(set2);
+         if (result.IsRepetitive)
+         {
+            this.ThrowAmbiguityException(pattern, location, result);
+         }
+
+         return result;
+      }
+
+      /// <summary>
+      /// Returns the union of all alternative look-ahead sets in a
+      /// production pattern.
+      /// </summary>
+      /// <param name="pattern">The production pattern</param>
+      /// <returns>A unified look-ahead set</returns>
+      private LookAheadSet FindUnion(ProductionPattern pattern)
+      {
+         LookAheadSet result;
+         int length = 0;
+         int i;
+
+         for (i = 0; i < pattern.Count; i++)
+         {
+            result = pattern[i].LookAhead;
+            if (result.MaxLength > length)
+            {
+               length = result.MaxLength;
+            }
+         }
+
+         result = new LookAheadSet(length);
+
+         for (i = 0; i < pattern.Count; i++)
+         {
+            result.AddAll(pattern[i].LookAhead);
+         }
+
+         return result;
+      }
+
+      /// <summary>
+      /// Throws a parse exception that matches the specified look-ahead
+      /// set. This method will take into account any initial matching
+      /// tokens in the look-ahead set.
+      /// </summary>
+      /// <param name="set">The look-ahead set to match</param>
+      /// <exception cref="ParseException">Always thrown by this method</exception>         
+      private void ThrowParseException(LookAheadSet set)
+      {
+         Token token;
+         IList<string> list = new List<string>();
+         int[] initials;
+
+         // Read tokens until mismatch
+         while (set.IsNext(this, 1))
+         {
+            set = set.CreateNextSet(this.NextToken().Id);
+         }
+
+         // Find next token descriptions
+         initials = set.InitialTokens;
+         for (int i = 0; i < initials.Length; i++)
+         {
+            list.Add(this.GetTokenDescription(initials[i]));
+         }
+
+         // Create exception
+         token = this.NextToken();
+         throw new ParseException(
+             ParseException.ErrorType.UnexpectedToken,
+             token.ToShortString(),
+             list,
+             token.StartLine,
+             token.StartColumn);
+      }
+
+      /// <summary>
+      /// Throws a parser creation exception for an ambiguity. The
+      /// specified look-ahead set contains the token conflicts to be
+      /// reported.
+      /// </summary>
+      /// <param name="pattern">The production pattern name</param>
+      /// <param name="location">The production pattern location, or null</param>
+      /// <param name="set">The look-ahead set with conflicts</param>
+      /// <exception cref="ParserCreationException">
+      /// Always thrown by this method
+      /// </exception>
+      private void ThrowAmbiguityException(
+          string pattern,
+          string location,
+          LookAheadSet set)
+      {
+         int[] initials;
+
+         // Find next token descriptions
+         initials = set.InitialTokens;
+         IList<string> list = initials.Select(i => this.GetTokenDescription(i)).ToList();
+
+         // Create exception
+         throw new ParserCreationException(
+             ParserCreationException.ErrorType.InherentAmbiguity,
+             pattern,
+             location,
+             list);
+      }
+
+      /// <summary>
+      /// A name value stack. This stack is used to detect loops and
+      /// repetitions of the same production during look-ahead analysis.
+      /// </summary>
+      private class CallStack
+      {
+         /// <summary>
+         /// A stack with names.
+         /// </summary> 
+         private readonly ArrayList nameStack = new ArrayList();
+
+         /// <summary>
+         /// A stack with values.
+         /// </summary> 
+         private readonly ArrayList valueStack = new ArrayList();
+
+         /// <summary>
+         /// Checks if the specified name is on the stack.
+         /// </summary>
+         /// <param name="name">The name to search for</param>
+         /// <returns>True if the name is on the stack, or false if not</returns>            
+         public bool Contains(string name)
+         {
+            return this.nameStack.Contains(name);
+         }
+
+         /// <summary>
+         /// Checks if the specified name and value combination is on
+         /// the stack.
+         /// </summary>
+         /// <param name="name">The name to search for</param>
+         /// <param name="value">The value to search for</param>
+         /// <returns>True if the combination is on the stack, or
+         /// false if not.
+         /// </returns>
+         public bool Contains(string name, int value)
+         {
+            for (int i = 0; i < this.nameStack.Count; i++)
+            {
+               if (this.nameStack[i].Equals(name)
+                && this.valueStack[i].Equals(value))
+               {
+                  return true;
+               }
             }
 
-            /// <summary>
-            /// Clears the stack. This method removes all elements on
-            /// the stack.
-            /// </summary> 
-            public void Clear()
-            {
-                this.nameStack.Clear();
-                this.valueStack.Clear();
-            }
+            return false;
+         }
 
-            /// <summary>
-            /// Adds a new element to the top of the stack.
-            /// </summary>
-            /// <param name="name">The stack name</param>
-            /// <param name="value">The stack value</param>
-            public void Push(string name, int value)
-            {
-                this.nameStack.Add(name);
-                this.valueStack.Add(value);
-            }
+         /// <summary>
+         /// Clears the stack. This method removes all elements on
+         /// the stack.
+         /// </summary> 
+         public void Clear()
+         {
+            this.nameStack.Clear();
+            this.valueStack.Clear();
+         }
 
-            /// <summary>
-            /// Removes the top element of the stack.
-            /// </summary>
-            public void Pop()
+         /// <summary>
+         /// Adds a new element to the top of the stack.
+         /// </summary>
+         /// <param name="name">The stack name</param>
+         /// <param name="value">The stack value</param>
+         public void Push(string name, int value)
+         {
+            this.nameStack.Add(name);
+            this.valueStack.Add(value);
+         }
+
+         /// <summary>
+         /// Removes the top element of the stack.
+         /// </summary>
+         public void Pop()
+         {
+            if (this.nameStack.Count > 0)
             {
-                if (this.nameStack.Count > 0)
-                {
-                    this.nameStack.RemoveAt(this.nameStack.Count - 1);
-                    this.valueStack.RemoveAt(this.valueStack.Count - 1);
-                }
+               this.nameStack.RemoveAt(this.nameStack.Count - 1);
+               this.valueStack.RemoveAt(this.valueStack.Count - 1);
             }
-        }
-    }
+         }
+      }
+   }
 }

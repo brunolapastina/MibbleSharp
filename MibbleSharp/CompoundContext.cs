@@ -21,67 +21,67 @@
 
 namespace MibbleSharp
 {
-    /// <summary>
-    /// A compound MIB context. This class attempts to resolve all symbols
-    /// with either one of two MIB contexts, one of which will have
-    /// priority.
-    /// </summary>
-    public class CompoundContext : IMibContext
-    {
-        /// <summary>
-        /// The primary MIB context
-        /// </summary>
-        private readonly IMibContext first;
+   /// <summary>
+   /// A compound MIB context. This class attempts to resolve all symbols
+   /// with either one of two MIB contexts, one of which will have
+   /// priority.
+   /// </summary>
+   public class CompoundContext : IMibContext
+   {
+      /// <summary>
+      /// The primary MIB context
+      /// </summary>
+      private readonly IMibContext first;
 
-        /// <summary>
-        /// The secondary MIB context
-        /// </summary>
-        private readonly IMibContext second;
+      /// <summary>
+      /// The secondary MIB context
+      /// </summary>
+      private readonly IMibContext second;
 
-        /// <summary>Initializes a new instance of the <see cref="CompoundContext"/> class.</summary>
-        /// <param name="first">The primary MIB context</param>
-        /// <param name="second">The secondary MIB context</param>
-        public CompoundContext(IMibContext first, IMibContext second)
-        {
-            this.first = first;
-            this.second = second;
-        }
+      /// <summary>Initializes a new instance of the <see cref="CompoundContext"/> class.</summary>
+      /// <param name="first">The primary MIB context</param>
+      /// <param name="second">The secondary MIB context</param>
+      public CompoundContext(IMibContext first, IMibContext second)
+      {
+         this.first = first;
+         this.second = second;
+      }
 
-        /// <summary>
-        /// Searches for a named MIB symbol. This method may search outside
-        /// the normal (or strict) scope, thereby allowing a form of
-        /// relaxed search. Note that the results from the normal and
-        /// expanded search may not be identical, due to the context
-        /// chaining and the same symbol name appearing in various
-        /// contexts.
-        /// </summary>
-        /// <remark>
-        /// NOTE: This is an internal method that should
-        /// only be called by the MIB loader.
-        /// </remark>
-        /// <param name="name">The symbol name</param>
-        /// <param name="expanded">The expanded scope flag</param>
-        /// <returns>The MIBSymbol, or null if not found</returns>
-        public MibSymbol FindSymbol(string name, bool expanded)
-        {
-            MibSymbol symbol;
+      /// <summary>
+      /// Searches for a named MIB symbol. This method may search outside
+      /// the normal (or strict) scope, thereby allowing a form of
+      /// relaxed search. Note that the results from the normal and
+      /// expanded search may not be identical, due to the context
+      /// chaining and the same symbol name appearing in various
+      /// contexts.
+      /// </summary>
+      /// <remark>
+      /// NOTE: This is an internal method that should
+      /// only be called by the MIB loader.
+      /// </remark>
+      /// <param name="name">The symbol name</param>
+      /// <param name="expanded">The expanded scope flag</param>
+      /// <returns>The MIBSymbol, or null if not found</returns>
+      public MibSymbol FindSymbol(string name, bool expanded)
+      {
+         MibSymbol symbol;
 
-            symbol = this.first.FindSymbol(name, expanded);
-            if (symbol == null)
-            {
-                symbol = this.second.FindSymbol(name, expanded);
-            }
+         symbol = this.first.FindSymbol(name, expanded);
+         if (symbol == null)
+         {
+            symbol = this.second.FindSymbol(name, expanded);
+         }
 
-            return symbol;
-        }
+         return symbol;
+      }
 
-        /// <summary>
-        /// Get a string representation of the Compound Context
-        /// </summary>
-        /// <returns>A string representing the Compound Context</returns>
-        public override string ToString()
-        {
-            return this.first.ToString() + ", " + this.second.ToString();
-        }
-    }
+      /// <summary>
+      /// Get a string representation of the Compound Context
+      /// </summary>
+      /// <returns>A string representing the Compound Context</returns>
+      public override string ToString()
+      {
+         return this.first.ToString() + ", " + this.second.ToString();
+      }
+   }
 }

@@ -21,152 +21,152 @@
 
 namespace MibbleSharp.Snmp
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
+   using System;
+   using System.Collections.Generic;
+   using System.Linq;
+   using System.Text;
 
-    /// <summary>
-    /// An SNMP module compliance value. This declaration is used inside
-    /// the module compliance macro type.
-    /// </summary>
-    /// <see cref="SnmpModuleCompliance"/>
-    public class SnmpModule
-    {
-        /// <summary>The module name</summary>
-        private readonly string module;
+   /// <summary>
+   /// An SNMP module compliance value. This declaration is used inside
+   /// the module compliance macro type.
+   /// </summary>
+   /// <see cref="SnmpModuleCompliance"/>
+   public class SnmpModule
+   {
+      /// <summary>The module name</summary>
+      private readonly string module;
 
-        /// <summary>The list of mandatory group values.</summary>
-        private IList<MibValue> groups;
+      /// <summary>The list of mandatory group values.</summary>
+      private IList<MibValue> groups;
 
-        /// <summary>The list of compliances.</summary>
-        private readonly IList<SnmpCompliance> compliances;
+      /// <summary>The list of compliances.</summary>
+      private readonly IList<SnmpCompliance> compliances;
 
-        /// <summary>The module comment.</summary>
-        private string comment = null;
+      /// <summary>The module comment.</summary>
+      private string comment = null;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SnmpModule"/> class.
-        /// </summary>
-        /// <param name="module">the module name, or null</param>
-        /// <param name="groups">the list of mandatory group values</param>
-        /// <param name="compliances">the list of compliances</param>
-        public SnmpModule(
-            string module,
-            IList<MibValue> groups,
-            IList<SnmpCompliance> compliances)
-        {
-            this.module = module;
-            this.groups = groups;
-            this.compliances = compliances;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="SnmpModule"/> class.
+      /// </summary>
+      /// <param name="module">the module name, or null</param>
+      /// <param name="groups">the list of mandatory group values</param>
+      /// <param name="compliances">the list of compliances</param>
+      public SnmpModule(
+          string module,
+          IList<MibValue> groups,
+          IList<SnmpCompliance> compliances)
+      {
+         this.module = module;
+         this.groups = groups;
+         this.compliances = compliances;
+      }
 
-        /// <summary>
-        /// Gets the module name
-        /// </summary>
-        public string Module
-        {
-            get
+      /// <summary>
+      /// Gets the module name
+      /// </summary>
+      public string Module
+      {
+         get
+         {
+            return this.module;
+         }
+      }
+
+      /// <summary>
+      /// Gets the enumeration of mandatory group values. The returned list
+      /// will consist of MibValue instances.
+      /// </summary>
+      /// <see cref="MibValue"/>
+      public IEnumerable<MibValue> Groups
+      {
+         get
+         {
+            return this.groups;
+         }
+      }
+
+      /// <summary>
+      /// Gets the enumeration of compliances. The returned list will
+      /// consist of <c>SnmpCompliance</c> instances.
+      /// </summary>
+      /// <see cref="SnmpCompliance"></see>
+      public IEnumerable<SnmpCompliance> Compliances
+      {
+         get
+         {
+            return this.compliances;
+         }
+      }
+
+      /// <summary>
+      /// Gets or sets the module comment
+      /// </summary>
+      public string Comment
+      {
+         get
+         {
+            return this.comment;
+         }
+
+         set
+         {
+            if (this.module != null || !"THIS MODULE".Equals(value, StringComparison.CurrentCultureIgnoreCase))
             {
-                return this.module;
+               this.comment = value;
             }
-        }
+         }
+      }
 
-        /// <summary>
-        /// Gets the enumeration of mandatory group values. The returned list
-        /// will consist of MibValue instances.
-        /// </summary>
-        /// <see cref="MibValue"/>
-        public IEnumerable<MibValue> Groups
-        {
-            get
-            {
-                return this.groups;
-            }
-        }
+      /// <summary>
+      /// Initializes the object. This will remove all levels of
+      /// indirection present, such as references to other types, and
+      /// returns the basic type. No type information is lost by this
+      /// operation. This method may modify this object as a
+      /// side-effect, and will be called by the MIB loader.
+      /// </summary>
+      /// <param name="log">the MIB loader log</param>
+      /// <exception cref="MibException">
+      /// if an error was encountered during
+      /// the initialization
+      /// </exception>
+      public void Initialize(MibLoaderLog log)
+      {
+         this.groups = this.groups.Select(g => g.Initialize(log, null)).ToList();
 
-        /// <summary>
-        /// Gets the enumeration of compliances. The returned list will
-        /// consist of <c>SnmpCompliance</c> instances.
-        /// </summary>
-        /// <see cref="SnmpCompliance"></see>
-        public IEnumerable<SnmpCompliance> Compliances
-        {
-            get
-            {
-                return this.compliances;
-            }
-        }
+         foreach (SnmpCompliance c in this.compliances)
+         {
+            c.Initialize(log);
+         }
+      }
 
-        /// <summary>
-        /// Gets or sets the module comment
-        /// </summary>
-        public string Comment
-        {
-            get
-            {
-                return this.comment;
-            }
+      /// <summary>
+      /// Provides a string representation of an <c>SnmpModule</c>
+      /// </summary>
+      /// <returns>
+      /// A string containing a representation of the <c>SnmpModule</c>
+      /// </returns>
+      public override string ToString()
+      {
+         StringBuilder builder = new StringBuilder();
 
-            set
-            {
-                if (this.module != null || !"THIS MODULE".Equals(value, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    this.comment = value;
-                }
-            }
-        }
+         if (this.module != null)
+         {
+            builder.Append(this.module);
+         }
 
-        /// <summary>
-        /// Initializes the object. This will remove all levels of
-        /// indirection present, such as references to other types, and
-        /// returns the basic type. No type information is lost by this
-        /// operation. This method may modify this object as a
-        /// side-effect, and will be called by the MIB loader.
-        /// </summary>
-        /// <param name="log">the MIB loader log</param>
-        /// <exception cref="MibException">
-        /// if an error was encountered during
-        /// the initialization
-        /// </exception>
-        public void Initialize(MibLoaderLog log)
-        {
-            this.groups = this.groups.Select(g => g.Initialize(log, null)).ToList();
+         if (this.groups.Count > 0)
+         {
+            builder.Append("\n    Mandatory Groups: ");
+            builder.Append(this.groups);
+         }
 
-            foreach (SnmpCompliance c in this.compliances)
-            {
-                c.Initialize(log);
-            }    
-        }
+         foreach (SnmpCompliance c in this.compliances)
+         {
+            builder.Append("\n    Module: ");
+            builder.Append(c);
+         }
 
-        /// <summary>
-        /// Provides a string representation of an <c>SnmpModule</c>
-        /// </summary>
-        /// <returns>
-        /// A string containing a representation of the <c>SnmpModule</c>
-        /// </returns>
-        public override string ToString()
-        {
-            StringBuilder builder = new StringBuilder();
-
-            if (this.module != null)
-            {
-                builder.Append(this.module);
-            }
-
-            if (this.groups.Count > 0)
-            {
-                builder.Append("\n    Mandatory Groups: ");
-                builder.Append(this.groups);
-            }
-
-            foreach (SnmpCompliance c in this.compliances)
-            {
-                builder.Append("\n    Module: ");
-                builder.Append(c);
-            }
-
-            return builder.ToString();
-        }
-    }
+         return builder.ToString();
+      }
+   }
 }

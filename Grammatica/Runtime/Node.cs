@@ -15,273 +15,273 @@
 
 namespace PerCederberg.Grammatica.Runtime
 {
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.IO;
+   using System.Collections;
+   using System.Collections.Generic;
+   using System.IO;
 
-    /// <summary>
-    /// An abstract parse tree node. This class is inherited by all
-    /// nodes in the parse tree, i.e. by the token and production
-    /// classes.
-    /// </summary>
-    public abstract class Node
-    {
-        /// <summary>
-        /// The parent node.
-        /// </summary>
-        private Node parent = null;
+   /// <summary>
+   /// An abstract parse tree node. This class is inherited by all
+   /// nodes in the parse tree, i.e. by the token and production
+   /// classes.
+   /// </summary>
+   public abstract class Node
+   {
+      /// <summary>
+      /// The parent node.
+      /// </summary>
+      private Node parent = null;
 
-        /// <summary>
-        /// The computed node values.
-        /// </summary>
-        private ArrayList values = null;
+      /// <summary>
+      /// The computed node values.
+      /// </summary>
+      private ArrayList values = null;
 
-        /// <summary>
-        /// Gets the node type id (read-only). This value is set as
-        /// a unique identifier for each type of node, in order to
-        /// simplify later identification.
-        /// </summary>
-        public abstract int Id
-        {
-            get;
-        }
+      /// <summary>
+      /// Gets the node type id (read-only). This value is set as
+      /// a unique identifier for each type of node, in order to
+      /// simplify later identification.
+      /// </summary>
+      public abstract int Id
+      {
+         get;
+      }
 
-        /// <summary>
-        /// Gets the node name (read-only).
-        /// </summary>
-        public abstract string Name
-        {
-            get;
-        }
+      /// <summary>
+      /// Gets the node name (read-only).
+      /// </summary>
+      public abstract string Name
+      {
+         get;
+      }
 
-        /// <summary>
-        /// Gets the line number of the first character in this
-        /// node (read-only). If the node has child elements, this
-        /// value will be fetched from the first child.
-        /// </summary>
-        public virtual int StartLine
-        {
-            get
-            {
-                int line;
+      /// <summary>
+      /// Gets the line number of the first character in this
+      /// node (read-only). If the node has child elements, this
+      /// value will be fetched from the first child.
+      /// </summary>
+      public virtual int StartLine
+      {
+         get
+         {
+            int line;
 
-                for (int i = 0; i < this.ChildCount; i++)
-                {
-                    line = this[i].StartLine;
-                    if (line >= 0)
-                    {
-                        return line;
-                    }
-                }
-
-                return -1;
-            }
-        }
-
-        /// <summary>
-        /// Gets the column number of the first character in this
-        /// node (read-only). If the node has child elements, this
-        /// value will be fetched from the first child.
-        /// </summary>
-        public virtual int StartColumn
-        {
-            get
-            {
-                int col;
-
-                for (int i = 0; i < this.ChildCount; i++)
-                {
-                    col = this[i].StartColumn;
-                    if (col >= 0)
-                    {
-                        return col;
-                    }
-                }
-
-                return -1;
-            }
-        }
-
-        /// <summary>
-        /// Gets the line number of the last character in this node
-        /// (read-only). If the node has child elements, this value
-        /// will be fetched from the last child.
-        /// </summary>       
-        public virtual int EndLine
-        {
-            get
-            {
-                int line;
-
-                for (int i = this.ChildCount - 1; i >= 0; i--)
-                {
-                    line = this[i].EndLine;
-                    if (line >= 0)
-                    {
-                        return line;
-                    }
-                }
-
-                return -1;
-            }
-        }
-
-        /// <summary>
-        /// Gets the column number of the last character in this
-        /// node (read-only). If the node has child elements, this
-        /// value will be fetched from the last child.
-        /// </summary>
-        public virtual int EndColumn
-        {
-            get
-            {
-                int col;
-
-                for (int i = this.ChildCount - 1; i >= 0; i--)
-                {
-                    col = this[i].EndColumn;
-                    if (col >= 0)
-                    {
-                        return col;
-                    }
-                }
-
-                return -1;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the parent node
-        /// </summary>
-        public Node Parent
-        {
-            get
-            {
-                return this.parent;
-            }
-
-            set
-            {
-                this.parent = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets child node count (read-only).
-        /// </summary>
-        public virtual int ChildCount
-        {
-            get
-            {
-                return 0;
-            }
-        }
-
-        /// <summary>
-        /// Gets the number of descendant nodes.
-        /// </summary>
-        public int DescendantCount
-        {
-            get
-            {
-                int count = 0;
-
-                for (int i = 0; i < this.ChildCount; i++)
-                {
-                    count += 1 + this[i].DescendantCount;
-                }
-
-                return count;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the node values. This property provides direct
-        /// access to the list of computed values associated with this
-        /// node during analysis. Note that setting this property to
-        /// null will remove all node values. Any operation on the
-        /// value array list is allowed and is immediately reflected
-        /// through the various value reading and manipulation methods.
-        /// </summary>
-        public ArrayList Values
-        {
-            get
-            {
-                if (this.values == null)
-                {
-                    this.values = new ArrayList();
-                }
-
-                return this.values;
-            }
-
-            set
-            {
-                this.values = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets the list of children as an IList of Node
-        /// </summary>
-        public virtual IList<Node> Children
-        {
-            get
-            {
-                return new List<Node>();
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether this node is 
-        /// hidden, i.e. if it should not be visible outside the parser.
-        /// </summary>
-        internal virtual bool Hidden
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Gets the child node index (read-only).
-        /// </summary>
-        /// <param name="index">The child index from 0 to ChildCount - 1</param>
-        /// <returns>The child at the given index</returns>
-        public virtual Node this[int index]
-        {
-            get
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Prints this node and all sub-nodes to the specified output
-        /// stream.
-        /// </summary>
-        /// <param name="output">The output stream to use</param>      
-        public void PrintTo(TextWriter output)
-        {
-            this.PrintTo(output, string.Empty);
-            output.Flush();
-        }
-
-        /// <summary>
-        /// Prints this node and all sub-nodes to the specified output
-        /// stream.
-        /// </summary>
-        /// <param name="output">The output stream to use</param>
-        /// <param name="indent">The indentation string</param>
-        private void PrintTo(TextWriter output, string indent)
-        {
-            output.WriteLine(indent + ToString());
-            indent = indent + "  ";
             for (int i = 0; i < this.ChildCount; i++)
             {
-                this[i].PrintTo(output, indent);
+               line = this[i].StartLine;
+               if (line >= 0)
+               {
+                  return line;
+               }
             }
-        }
-    }
+
+            return -1;
+         }
+      }
+
+      /// <summary>
+      /// Gets the column number of the first character in this
+      /// node (read-only). If the node has child elements, this
+      /// value will be fetched from the first child.
+      /// </summary>
+      public virtual int StartColumn
+      {
+         get
+         {
+            int col;
+
+            for (int i = 0; i < this.ChildCount; i++)
+            {
+               col = this[i].StartColumn;
+               if (col >= 0)
+               {
+                  return col;
+               }
+            }
+
+            return -1;
+         }
+      }
+
+      /// <summary>
+      /// Gets the line number of the last character in this node
+      /// (read-only). If the node has child elements, this value
+      /// will be fetched from the last child.
+      /// </summary>       
+      public virtual int EndLine
+      {
+         get
+         {
+            int line;
+
+            for (int i = this.ChildCount - 1; i >= 0; i--)
+            {
+               line = this[i].EndLine;
+               if (line >= 0)
+               {
+                  return line;
+               }
+            }
+
+            return -1;
+         }
+      }
+
+      /// <summary>
+      /// Gets the column number of the last character in this
+      /// node (read-only). If the node has child elements, this
+      /// value will be fetched from the last child.
+      /// </summary>
+      public virtual int EndColumn
+      {
+         get
+         {
+            int col;
+
+            for (int i = this.ChildCount - 1; i >= 0; i--)
+            {
+               col = this[i].EndColumn;
+               if (col >= 0)
+               {
+                  return col;
+               }
+            }
+
+            return -1;
+         }
+      }
+
+      /// <summary>
+      /// Gets or sets the parent node
+      /// </summary>
+      public Node Parent
+      {
+         get
+         {
+            return this.parent;
+         }
+
+         set
+         {
+            this.parent = value;
+         }
+      }
+
+      /// <summary>
+      /// Gets child node count (read-only).
+      /// </summary>
+      public virtual int ChildCount
+      {
+         get
+         {
+            return 0;
+         }
+      }
+
+      /// <summary>
+      /// Gets the number of descendant nodes.
+      /// </summary>
+      public int DescendantCount
+      {
+         get
+         {
+            int count = 0;
+
+            for (int i = 0; i < this.ChildCount; i++)
+            {
+               count += 1 + this[i].DescendantCount;
+            }
+
+            return count;
+         }
+      }
+
+      /// <summary>
+      /// Gets or sets the node values. This property provides direct
+      /// access to the list of computed values associated with this
+      /// node during analysis. Note that setting this property to
+      /// null will remove all node values. Any operation on the
+      /// value array list is allowed and is immediately reflected
+      /// through the various value reading and manipulation methods.
+      /// </summary>
+      public ArrayList Values
+      {
+         get
+         {
+            if (this.values == null)
+            {
+               this.values = new ArrayList();
+            }
+
+            return this.values;
+         }
+
+         set
+         {
+            this.values = value;
+         }
+      }
+
+      /// <summary>
+      /// Gets the list of children as an IList of Node
+      /// </summary>
+      public virtual IList<Node> Children
+      {
+         get
+         {
+            return new List<Node>();
+         }
+      }
+
+      /// <summary>
+      /// Gets a value indicating whether this node is 
+      /// hidden, i.e. if it should not be visible outside the parser.
+      /// </summary>
+      internal virtual bool Hidden
+      {
+         get
+         {
+            return false;
+         }
+      }
+
+      /// <summary>
+      /// Gets the child node index (read-only).
+      /// </summary>
+      /// <param name="index">The child index from 0 to ChildCount - 1</param>
+      /// <returns>The child at the given index</returns>
+      public virtual Node this[int index]
+      {
+         get
+         {
+            return null;
+         }
+      }
+
+      /// <summary>
+      /// Prints this node and all sub-nodes to the specified output
+      /// stream.
+      /// </summary>
+      /// <param name="output">The output stream to use</param>      
+      public void PrintTo(TextWriter output)
+      {
+         this.PrintTo(output, string.Empty);
+         output.Flush();
+      }
+
+      /// <summary>
+      /// Prints this node and all sub-nodes to the specified output
+      /// stream.
+      /// </summary>
+      /// <param name="output">The output stream to use</param>
+      /// <param name="indent">The indentation string</param>
+      private void PrintTo(TextWriter output, string indent)
+      {
+         output.WriteLine(indent + ToString());
+         indent += "  ";
+         for (int i = 0; i < this.ChildCount; i++)
+         {
+            this[i].PrintTo(output, indent);
+         }
+      }
+   }
 }

@@ -21,106 +21,106 @@
 
 namespace MibbleSharp.Value
 {
-    using System.Numerics;
-    using System.Text;
-    using MibbleSharp.Util;
+   using MibbleSharp.Util;
+   using System.Numerics;
+   using System.Text;
 
-    /// <summary>
-    /// A hexadecimal numeric MIB value.
-    /// </summary>
-    public class HexNumberValue : NumberValue
-    {
-        /// <summary>
-        /// The minimum number of hexadecimal characters to print.
-        /// </summary>
-        private int minLength;
+   /// <summary>
+   /// A hexadecimal numeric MIB value.
+   /// </summary>
+   public class HexNumberValue : NumberValue
+   {
+      /// <summary>
+      /// The minimum number of hexadecimal characters to print.
+      /// </summary>
+      private int minLength;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HexNumberValue"/> class. 
-        /// A default minimum print length of one(1) will be used.
-        /// </summary>
-        /// <param name="value">The numeric value</param>
-        public HexNumberValue(BigInteger value) : this(value, 1)
-        {
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="HexNumberValue"/> class. 
+      /// A default minimum print length of one(1) will be used.
+      /// </summary>
+      /// <param name="value">The numeric value</param>
+      public HexNumberValue(BigInteger value) : this(value, 1)
+      {
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HexNumberValue"/> class.
-        /// </summary>
-        /// <param name="value">The numeric value</param>
-        /// <param name="minLength">The minimum print length</param>
-        public HexNumberValue(BigInteger value, int minLength) : base(value)
-        {
-            this.minLength = minLength;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="HexNumberValue"/> class.
+      /// </summary>
+      /// <param name="value">The numeric value</param>
+      /// <param name="minLength">The minimum print length</param>
+      public HexNumberValue(BigInteger value, int minLength) : base(value)
+      {
+         this.minLength = minLength;
+      }
 
-        /// <summary>
-        /// Gets a hexadecimal representation of this value.
-        /// </summary>
-        private string HexString
-        {
-            get
-            {
-                return this.Value.ToHexadecimalString();
-            }
-        }
+      /// <summary>
+      /// Gets a hexadecimal representation of this value.
+      /// </summary>
+      private string HexString
+      {
+         get
+         {
+            return this.Value.ToHexadecimalString();
+         }
+      }
 
-        /// <summary>
-        /// Initializes the MIB value. This will remove all levels of
-        /// indirection present, such as references to other values. No
-        /// value information is lost by this operation. This method may
-        /// modify this object as a side-effect, and will return the basic
-        /// value.
-        /// </summary>
-        /// <remarks>
-        /// This is an internal method that should only be called by 
-        /// the MIB loader.
-        /// </remarks>
-        /// <param name="log">The MIB loader log</param>
-        /// <param name="type">The value type</param>
-        /// <returns>The basic MIB value</returns>
-        public override MibValue Initialize(MibLoaderLog log, MibType type)
-        {
-            int bytes = (this.minLength / 2) + ((this.minLength % 2 > 0) ? 1 : 0);
-            int length = NumberValue.GetByteSize(type, bytes) * 2;
+      /// <summary>
+      /// Initializes the MIB value. This will remove all levels of
+      /// indirection present, such as references to other values. No
+      /// value information is lost by this operation. This method may
+      /// modify this object as a side-effect, and will return the basic
+      /// value.
+      /// </summary>
+      /// <remarks>
+      /// This is an internal method that should only be called by 
+      /// the MIB loader.
+      /// </remarks>
+      /// <param name="log">The MIB loader log</param>
+      /// <param name="type">The value type</param>
+      /// <returns>The basic MIB value</returns>
+      public override MibValue Initialize(MibLoaderLog log, MibType type)
+      {
+         int bytes = (this.minLength / 2) + ((this.minLength % 2 > 0) ? 1 : 0);
+         int length = NumberValue.GetByteSize(type, bytes) * 2;
 
-            if (length > this.minLength)
-            {
-                this.minLength = length;
-            }
+         if (length > this.minLength)
+         {
+            this.minLength = length;
+         }
 
-            return this;
-        }
+         return this;
+      }
 
-        /// <summary>
-        /// Returns a string representation of this value.
-        /// </summary>
-        /// <returns>
-        /// A string representation of this value.
-        /// </returns>
-        public override string ToString()
-        {
-            StringBuilder builder = new StringBuilder();
-            string val;
+      /// <summary>
+      /// Returns a string representation of this value.
+      /// </summary>
+      /// <returns>
+      /// A string representation of this value.
+      /// </returns>
+      public override string ToString()
+      {
+         StringBuilder builder = new StringBuilder();
+         string val;
 
-            builder.Append("'");
+         builder.Append("'");
 
-            val = this.HexString;
+         val = this.HexString;
 
-            if (Value.Equals("0"))
-            {
-                val = string.Empty;
-            }
+         if (Value.Equals("0"))
+         {
+            val = string.Empty;
+         }
 
-            for (int i = val.Length; i < this.minLength; i++)
-            {
-                builder.Append("0");
-            }
+         for (int i = val.Length; i < this.minLength; i++)
+         {
+            builder.Append("0");
+         }
 
-            builder.Append(val);
-            builder.Append("'H");
+         builder.Append(val);
+         builder.Append("'H");
 
-            return builder.ToString();
-        }
-    }
+         return builder.ToString();
+      }
+   }
 }

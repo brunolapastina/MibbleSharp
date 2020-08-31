@@ -20,341 +20,333 @@
 
 namespace MibbleSharp.Type
 {
-    using System;
-    using System.Collections.Generic;
+   using System;
+   using System.Collections.Generic;
 
-    /// <summary>
-    /// A reference to a type symbol.  
-    /// </summary>
-    /// <remarks>
-    /// NOTE: This class is used internally during the
-    /// MIB parsing only. After loading a MIB file successfully, all type
-    /// references will have been resolved to other MIB types. Do
-    /// NOT use or reference this class.
-    /// </remarks>
-    public class TypeReference : MibType, IMibContext
-    {
-        /// <summary>
-        /// The reference location.
-        /// </summary>
-        private FileLocation location;
+   /// <summary>
+   /// A reference to a type symbol.  
+   /// </summary>
+   /// <remarks>
+   /// NOTE: This class is used internally during the
+   /// MIB parsing only. After loading a MIB file successfully, all type
+   /// references will have been resolved to other MIB types. Do
+   /// NOT use or reference this class.
+   /// </remarks>
+   public class TypeReference : MibType, IMibContext
+   {
+      /// <summary>
+      /// The reference location.
+      /// </summary>
+      private readonly FileLocation location;
 
-        /// <summary>
-        /// The reference context.
-        /// </summary>
-        private IMibContext context;
+      /// <summary>
+      /// The reference context.
+      /// </summary>
+      private readonly IMibContext context;
 
-        /// <summary>
-        /// The referenced type.
-        /// </summary>
-        private MibType type = null;
+      /// <summary>
+      /// The referenced type.
+      /// </summary>
+      private MibType type = null;
 
-        /// <summary>
-        /// The additional type constraints.
-        /// </summary>
-        private IConstraint constraint = null;
+      /// <summary>
+      /// The additional type constraints.
+      /// </summary>
+      private readonly IConstraint constraint = null;
 
-        /// <summary>
-        /// The additional defined symbols.
-        /// </summary>
-        private IList<MibValueSymbol> values = null;
+      /// <summary>
+      /// The additional defined symbols.
+      /// </summary>
+      private readonly IList<MibValueSymbol> values = null;
 
-        /// <summary>
-        /// The MIB type tag to set on the referenced type.
-        /// </summary>
-        private MibTypeTag tag = null;
+      /// <summary>
+      /// The MIB type tag to set on the referenced type.
+      /// </summary>
+      private MibTypeTag tag = null;
 
-        /// <summary>
-        /// The implicit type tag flag.
-        /// </summary>
-        private bool implicitTag = true;
+      /// <summary>
+      /// The implicit type tag flag.
+      /// </summary>
+      private bool implicitTag = true;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TypeReference"/> class.
-        /// </summary>
-        /// <param name="location">The reference location</param>
-        /// <param name="context">The reference context</param>
-        /// <param name="name">The reference name</param>
-        public TypeReference(
-            FileLocation location,
-            IMibContext context,
-            string name)
-            : base("ReferenceToType(" + name + ")", false)
-        {
-            this.location = location;
-            this.context = context;
-            this.Name = name;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="TypeReference"/> class.
+      /// </summary>
+      /// <param name="location">The reference location</param>
+      /// <param name="context">The reference context</param>
+      /// <param name="name">The reference name</param>
+      public TypeReference(
+          FileLocation location,
+          IMibContext context,
+          string name)
+          : base("ReferenceToType(" + name + ")", false)
+      {
+         this.location = location;
+         this.context = context;
+         this.Name = name;
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TypeReference"/> class.
-        /// </summary>
-        /// <param name="location">The reference location</param>
-        /// <param name="context">The reference context</param>
-        /// <param name="name">The reference name</param>
-        /// <param name="constraint">The additional type constraint</param>
-        public TypeReference(
-            FileLocation location,
-            IMibContext context,
-            string name,
-            IConstraint constraint)
-            : this(location, context, name)
-        {
-            this.constraint = constraint;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="TypeReference"/> class.
+      /// </summary>
+      /// <param name="location">The reference location</param>
+      /// <param name="context">The reference context</param>
+      /// <param name="name">The reference name</param>
+      /// <param name="constraint">The additional type constraint</param>
+      public TypeReference(
+          FileLocation location,
+          IMibContext context,
+          string name,
+          IConstraint constraint)
+          : this(location, context, name)
+      {
+         this.constraint = constraint;
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TypeReference"/> class.
-        /// </summary>
-        /// <param name="location">The reference location</param>
-        /// <param name="context">The reference context</param>
-        /// <param name="name">The reference name</param>
-        /// <param name="values">The additional defined symbols</param>
-        public TypeReference(
-            FileLocation location,
-            IMibContext context,
-            string name,
-            IList<MibValueSymbol> values)
-            : this(location, context, name)
-        {
-            this.values = values;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="TypeReference"/> class.
+      /// </summary>
+      /// <param name="location">The reference location</param>
+      /// <param name="context">The reference context</param>
+      /// <param name="name">The reference name</param>
+      /// <param name="values">The additional defined symbols</param>
+      public TypeReference(
+          FileLocation location,
+          IMibContext context,
+          string name,
+          IList<MibValueSymbol> values)
+          : this(location, context, name)
+      {
+         this.values = values;
+      }
 
-        /// <summary>
-        /// Gets the file containing the reference.
-        /// </summary>
-        public FileLocation Location
-        {
-            get
+      /// <summary>
+      /// Gets the file containing the reference.
+      /// </summary>
+      public FileLocation Location
+      {
+         get
+         {
+            return this.location;
+         }
+      }
+
+      /// <summary>
+      /// Gets the referenced symbol.
+      /// </summary>
+      public MibSymbol Symbol
+      {
+         get
+         {
+            return this.GetSymbol(null);
+         }
+      }
+
+      /// <summary>
+      /// Initializes the MIB type. This will remove all levels of
+      /// indirection present, such as references to types or values. No
+      /// information is lost by this operation. This method may modify
+      /// this object as a side-effect, and will return the basic
+      /// type.
+      /// NOTE: This is an internal method that should
+      /// only be called by the MIB loader.
+      /// </summary>
+      /// <param name="symbol">The MIB symbol containing this type</param>
+      /// <param name="log">The MIB loader log</param>
+      /// <returns>The basic MIB type</returns>
+      public override MibType Initialize(MibSymbol symbol, MibLoaderLog log)
+      {
+         MibSymbol sym = this.GetSymbol(log);
+         if (sym is MibTypeSymbol symb)
+         {
+            this.type = this.InitializeReference(symbol, log, symb);
+            if (this.type == null)
             {
-                return this.location;
-            }
-        }
-
-        /// <summary>
-        /// Gets the referenced symbol.
-        /// </summary>
-        public MibSymbol Symbol
-        {
-            get
-            {
-                return this.GetSymbol(null);
-            }
-        }
-
-        /// <summary>
-        /// Initializes the MIB type. This will remove all levels of
-        /// indirection present, such as references to types or values. No
-        /// information is lost by this operation. This method may modify
-        /// this object as a side-effect, and will return the basic
-        /// type.
-        /// NOTE: This is an internal method that should
-        /// only be called by the MIB loader.
-        /// </summary>
-        /// <param name="symbol">The MIB symbol containing this type</param>
-        /// <param name="log">The MIB loader log</param>
-        /// <returns>The basic MIB type</returns>
-        public override MibType Initialize(MibSymbol symbol, MibLoaderLog log)
-        {
-            MibSymbol sym;
-            string message;
-
-            sym = this.GetSymbol(log);
-            if (sym is MibTypeSymbol)
-            {
-                this.type = this.InitializeReference(symbol, log, (MibTypeSymbol)sym);
-                if (this.type == null)
-                {
-                    message = "referenced symbol '" + sym.Name +
-                              "' contains undefined type";
-                    throw new MibException(this.location, message);
-                }
-
-                return this.type;
-            }
-            else if (sym == null)
-            {
-                message = "undefined symbol '" + this.Name + "'";
-                throw new MibException(this.location, message);
-            }
-            else
-            {
-                message = "referenced symbol '" + this.Name + "' is not a type";
-                throw new MibException(this.location, message);
-            }
-        }
-        
-        /// <summary>
-        /// Checks if the specified value is compatible with this
-        /// type. This method always returns false for reference types
-        /// </summary>
-        /// <param name="value">The value to check</param>
-        /// <returns>True if the value is compatible, or
-        /// false otherwise
-        /// </returns>
-        public override bool IsCompatible(MibValue value)
-        {
-            return false;
-        }
-
-        /// <summary>
-        /// Searches for a named MIB symbol. This method may search outside
-        /// the normal (or strict) scope, thereby allowing a form of
-        /// relaxed search. Note that the results from the normal and
-        /// expanded search may not be identical, due to the context
-        /// chaining and the same symbol name appearing in various
-        /// contexts. This method checks the referenced type for a
-        /// MibContext implementation.
-        /// NOTE: This is an internal method that should
-        /// only be called by the MIB loader.
-        /// </summary>
-        /// <param name="name">The symbol name</param>
-        /// <param name="expanded">The expanded scope flag</param>
-        /// <returns>The MIB symbol, or null if none was found</returns>
-        public MibSymbol FindSymbol(string name, bool expanded)
-        {
-            IMibContext mc = this.type as IMibContext;
-            if (mc == null)
-            {
-                return null;
+               throw new MibException(this.location, "referenced symbol '" + sym.Name + "' contains undefined type");
             }
 
+            return this.type;
+         }
+         else if (sym == null)
+         {
+            throw new MibException(this.location, "undefined symbol '" + this.Name + "'");
+         }
+         else
+         {
+            throw new MibException(this.location, "referenced symbol '" + this.Name + "' is not a type");
+         }
+      }
+
+      /// <summary>
+      /// Checks if the specified value is compatible with this
+      /// type. This method always returns false for reference types
+      /// </summary>
+      /// <param name="value">The value to check</param>
+      /// <returns>True if the value is compatible, or
+      /// false otherwise
+      /// </returns>
+      public override bool IsCompatible(MibValue value)
+      {
+         return false;
+      }
+
+      /// <summary>
+      /// Searches for a named MIB symbol. This method may search outside
+      /// the normal (or strict) scope, thereby allowing a form of
+      /// relaxed search. Note that the results from the normal and
+      /// expanded search may not be identical, due to the context
+      /// chaining and the same symbol name appearing in various
+      /// contexts. This method checks the referenced type for a
+      /// MibContext implementation.
+      /// NOTE: This is an internal method that should
+      /// only be called by the MIB loader.
+      /// </summary>
+      /// <param name="name">The symbol name</param>
+      /// <param name="expanded">The expanded scope flag</param>
+      /// <returns>The MIB symbol, or null if none was found</returns>
+      public MibSymbol FindSymbol(string name, bool expanded)
+      {
+         if (this.type is IMibContext mc)
+         {
             return mc.FindSymbol(name, expanded);
-        }
+         }
 
-        /// <summary>
-        /// Sets the type tag. This method will keep the type tag stored
-        /// until the type reference is resolved.
-        /// </summary>
-        /// <param name="implicitly">The implicit inheritance tag</param>
-        /// <param name="tag">The new type tag</param>
-        public override void SetTag(bool implicitly, MibTypeTag tag)
-        {
-            if (this.tag == null)
-            {
-                this.tag = tag;
-                this.implicitTag = implicitly;
-            }
-            else if (implicitly)
-            {
-                tag.Next = this.tag.Next;
-                this.tag = tag;
-            }
-            else
-            {
-                tag.Next = this.tag;
-                this.tag = tag;
-            }
-        }
-        
-        /// <summary>
-        /// Initializes the referenced MIB type symbol. This will remove
-        /// all levels of indirection present, such as references to other
-        /// types, and returns the basic type. This method will add any
-        /// constraints or defined values if possible.
-        /// </summary>
-        /// <param name="symbol">the MIB symbol containing this type</param>
-        /// <param name="log">The MIB loader log</param>
-        /// <param name="tref">the referenced MIB type symbol</param>
-        /// <returns>
-        /// The basic MIB type, or null if the basic type was unresolved
-        /// </returns>
-        /// <exception cref="MibException">
-        /// If an error was encountered during the
-        /// initialization</exception>
-        private MibType InitializeReference(
-            MibSymbol symbol,
-            MibLoaderLog log,
-            MibTypeSymbol tref)
-        {
-            MibType type = tref.Type;
+         return null;
+      }
 
-            if (type != null)
-            {
-                type = type.Initialize(symbol, log);
-            }
+      /// <summary>
+      /// Sets the type tag. This method will keep the type tag stored
+      /// until the type reference is resolved.
+      /// </summary>
+      /// <param name="implicitly">The implicit inheritance tag</param>
+      /// <param name="tag">The new type tag</param>
+      public override void SetTag(bool implicitly, MibTypeTag tag)
+      {
+         if (this.tag == null)
+         {
+            this.tag = tag;
+            this.implicitTag = implicitly;
+         }
+         else if (implicitly)
+         {
+            tag.Next = this.tag.Next;
+            this.tag = tag;
+         }
+         else
+         {
+            tag.Next = this.tag;
+            this.tag = tag;
+         }
+      }
 
-            if (type == null)
-            {
-                return null;
-            }
+      /// <summary>
+      /// Initializes the referenced MIB type symbol. This will remove
+      /// all levels of indirection present, such as references to other
+      /// types, and returns the basic type. This method will add any
+      /// constraints or defined values if possible.
+      /// </summary>
+      /// <param name="symbol">the MIB symbol containing this type</param>
+      /// <param name="log">The MIB loader log</param>
+      /// <param name="tref">the referenced MIB type symbol</param>
+      /// <returns>
+      /// The basic MIB type, or null if the basic type was unresolved
+      /// </returns>
+      /// <exception cref="MibException">
+      /// If an error was encountered during the
+      /// initialization</exception>
+      private MibType InitializeReference(
+          MibSymbol symbol,
+          MibLoaderLog log,
+          MibTypeSymbol tref)
+      {
+         MibType type = tref.Type;
 
-            try
-            {
-                if (this.constraint != null)
-                {
-                    type = type.CreateReference(this.constraint);
-                }
-                else if (this.values != null)
-                {
-                    type = type.CreateReference(this.values);
-                }
-                else
-                {
-                    type = type.CreateReference();
-                }
+         if (type != null)
+         {
+            type = type.Initialize(symbol, log);
+         }
 
-                type = type.Initialize(symbol, log);
-            }
-            catch (NotSupportedException e)
-            {
-                throw new MibException(this.location, e.Message);
-            }
+         if (type == null)
+         {
+            return null;
+         }
 
-            type.ReferenceSymbol = tref;
-            this.InitializeTypeTag(type, this.tag);
-            return type;
-        }
-
-        /// <summary>
-        /// Initializes the type tags for the specified type. The type tag
-        /// may be part in a chain of type tags, in which case the chain
-        /// is preserved. The last tag in the chain will be added first,
-        /// in order to be able to override (or preserve) a previous tag.
-        /// </summary>
-        /// <param name="type">The MIB type</param>
-        /// <param name="tag">The MIB type tag</param>
-        private void InitializeTypeTag(MibType type, MibTypeTag tag)
-        {
-            if (tag == null)
+         try
+         {
+            if (this.constraint != null)
             {
-                return;
+               type = type.CreateReference(this.constraint);
             }
-            else if (tag.Next == null)
+            else if (this.values != null)
             {
-                type.SetTag(this.implicitTag, tag);
+               type = type.CreateReference(this.values);
             }
             else
             {
-                this.InitializeTypeTag(type, tag.Next);
-                type.SetTag(false, tag);
+               type = type.CreateReference();
             }
-        }
 
-        /// <summary>
-        /// Gets the referenced symbol.
-        /// </summary>
-        /// <param name="log">The optional loader log</param>
-        /// <returns>The referenced symbol</returns>
-        private MibSymbol GetSymbol(MibLoaderLog log)
-        {
-            MibSymbol sym;
-            string message;
+            type = type.Initialize(symbol, log);
+         }
+         catch (NotSupportedException e)
+         {
+            throw new MibException(this.location, e.Message);
+         }
 
-            sym = this.context.FindSymbol(this.Name, false);
+         type.ReferenceSymbol = tref;
+         this.InitializeTypeTag(type, this.tag);
+         return type;
+      }
 
-            if (sym == null)
+      /// <summary>
+      /// Initializes the type tags for the specified type. The type tag
+      /// may be part in a chain of type tags, in which case the chain
+      /// is preserved. The last tag in the chain will be added first,
+      /// in order to be able to override (or preserve) a previous tag.
+      /// </summary>
+      /// <param name="type">The MIB type</param>
+      /// <param name="tag">The MIB type tag</param>
+      private void InitializeTypeTag(MibType type, MibTypeTag tag)
+      {
+         if (tag == null)
+         {
+            return;
+         }
+         else if (tag.Next == null)
+         {
+            type.SetTag(this.implicitTag, tag);
+         }
+         else
+         {
+            this.InitializeTypeTag(type, tag.Next);
+            type.SetTag(false, tag);
+         }
+      }
+
+      /// <summary>
+      /// Gets the referenced symbol.
+      /// </summary>
+      /// <param name="log">The optional loader log</param>
+      /// <returns>The referenced symbol</returns>
+      private MibSymbol GetSymbol(MibLoaderLog log)
+      {
+         MibSymbol sym;
+         string message;
+
+         sym = this.context.FindSymbol(this.Name, false);
+
+         if (sym == null)
+         {
+            sym = this.context.FindSymbol(this.Name, true);
+            if (sym != null && log != null)
             {
-                sym = this.context.FindSymbol(this.Name, true);
-                if (sym != null && log != null)
-                {
-                    message = "missing import for '" + this.Name + "', using " +
-                              "definition from " + sym.Mib.Name;
-                    log.AddWarning(this.location, message);
-                }
+               message = "missing import for '" + this.Name + "', using " +
+                         "definition from " + sym.Mib.Name;
+               log.AddWarning(this.location, message);
             }
+         }
 
-            return sym;
-        }
-    }
+         return sym;
+      }
+   }
 }

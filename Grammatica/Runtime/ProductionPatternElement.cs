@@ -15,231 +15,227 @@
 
 namespace PerCederberg.Grammatica.Runtime
 {
-    using System;
-    using System.Text;
+   using System.Text;
 
-    /// <summary>
-    /// A production pattern element. This class represents a reference to
-    /// either a token or a production. Each element also contains minimum
-    /// and maximum occurrence counters, controlling the number of
-    /// repetitions allowed. A production pattern element is always
-    /// contained within a production pattern rule.
-    /// </summary>
-    public class ProductionPatternElement
-    {
-        /// <summary>
-        /// The token flag. This flag is true for token elements, and
-        /// false for production elements.
-        /// </summary> 
-        private readonly bool token;
+   /// <summary>
+   /// A production pattern element. This class represents a reference to
+   /// either a token or a production. Each element also contains minimum
+   /// and maximum occurrence counters, controlling the number of
+   /// repetitions allowed. A production pattern element is always
+   /// contained within a production pattern rule.
+   /// </summary>
+   public class ProductionPatternElement
+   {
+      /// <summary>
+      /// The token flag. This flag is true for token elements, and
+      /// false for production elements.
+      /// </summary> 
+      private readonly bool token;
 
-        /// <summary>
-        /// The node identity.
-        /// </summary> 
-        private readonly int id;
+      /// <summary>
+      /// The node identity.
+      /// </summary> 
+      private readonly int id;
 
-        /// <summary>
-        /// The minimum occurrence count.
-        /// </summary> 
-        private readonly int min;
+      /// <summary>
+      /// The minimum occurrence count.
+      /// </summary> 
+      private readonly int min;
 
-        /// <summary>
-        /// The maximum occurrence count.
-        /// </summary> 
-        private readonly int max;
+      /// <summary>
+      /// The maximum occurrence count.
+      /// </summary> 
+      private readonly int max;
 
-        /// <summary>
-        /// The look-ahead set associated with this element.
-        /// </summary> 
-        private LookAheadSet lookAhead;
+      /// <summary>
+      /// The look-ahead set associated with this element.
+      /// </summary> 
+      private LookAheadSet lookAhead;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ProductionPatternElement"/> class.
-        /// If the maximum value if zero (0) or negative, it will be set to <c>int.MaxValue</c>.
-        /// </summary>
-        /// <param name="isToken">The token flag</param>
-        /// <param name="id">The node identity</param>
-        /// <param name="min">The minimum number of occurrences</param>
-        /// <param name="max">
-        /// The maximum number of occurrences, or a negative value for infinite
-        /// </param>
-        public ProductionPatternElement(
-            bool isToken,
-            int id,
-            int min,
-            int max)
-        {
-            this.token = isToken;
-            this.id = id;
-            if (min < 0)
-            {
-                min = 0;
-            }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="ProductionPatternElement"/> class.
+      /// If the maximum value if zero (0) or negative, it will be set to <c>int.MaxValue</c>.
+      /// </summary>
+      /// <param name="isToken">The token flag</param>
+      /// <param name="id">The node identity</param>
+      /// <param name="min">The minimum number of occurrences</param>
+      /// <param name="max">
+      /// The maximum number of occurrences, or a negative value for infinite
+      /// </param>
+      public ProductionPatternElement(
+          bool isToken,
+          int id,
+          int min,
+          int max)
+      {
+         this.token = isToken;
+         this.id = id;
+         if (min < 0)
+         {
+            min = 0;
+         }
 
-            this.min = min;
+         this.min = min;
 
-            if (max <= 0)
-            {
-                max = int.MaxValue;
-            }
-            else if (max < min)
-            {
-                max = min;
-            }
+         if (max <= 0)
+         {
+            max = int.MaxValue;
+         }
+         else if (max < min)
+         {
+            max = min;
+         }
 
-            this.max = max;
-            this.lookAhead = null;
-        }
+         this.max = max;
+         this.lookAhead = null;
+      }
 
-        /// <summary>
-        /// Gets the node identity (read-only).
-        /// </summary>
-        public int Id
-        {
-            get
-            {
-                return this.id;
-            }
-        }
-        
-        /// <summary>
-        /// Gets the minimum occurrence count (read-only).
-        /// </summary>
-        public int MinCount
-        {
-            get
-            {
-                return this.min;
-            }
-        }
+      /// <summary>
+      /// Gets the node identity (read-only).
+      /// </summary>
+      public int Id
+      {
+         get
+         {
+            return this.id;
+         }
+      }
 
-        /// <summary>
-        /// Gets the maximum occurrence count (read-only).
-        /// </summary>
-        public int MaxCount
-        {
-            get
-            {
-                return this.max;
-            }
-        }
+      /// <summary>
+      /// Gets the minimum occurrence count (read-only).
+      /// </summary>
+      public int MinCount
+      {
+         get
+         {
+            return this.min;
+         }
+      }
 
-        /// <summary>
-        /// Gets a value indicating whether this element represents a token.
-        /// </summary>
-        public bool IsToken
-        {
-            get
-            {
-                return this.token;
-            }
-        }
-        
-        /// <summary>
-        /// Gets a value indicating whether this element represents a production.
-        /// </summary>
-        public bool IsProduction
-        {
-            get
-            {
-                return !this.token;
-            }
-        }
-        
-        /// <summary>
-        /// Gets or sets the look-ahead set property. This is the look-ahead set
-        /// associated with this alternative.
-        /// </summary> 
-        internal LookAheadSet LookAhead
-        {
-            get
-            {
-                return this.lookAhead;
-            }
+      /// <summary>
+      /// Gets the maximum occurrence count (read-only).
+      /// </summary>
+      public int MaxCount
+      {
+         get
+         {
+            return this.max;
+         }
+      }
 
-            set
-            {
-                this.lookAhead = value;
-            }
-        }
+      /// <summary>
+      /// Gets a value indicating whether this element represents a token.
+      /// </summary>
+      public bool IsToken
+      {
+         get
+         {
+            return this.token;
+         }
+      }
 
-        /// <summary>
-        /// Checks if a specific token matches this element. This
-        /// method will only return true if this element is a token
-        /// element, and the token has the same id and this element.
-        /// </summary>
-        /// <param name="token">The token to check</param>
-        /// <returns>True if the token matches this element, false if not
-        /// </returns>
-        public bool IsMatch(Token token)
-        {
-            return this.IsToken && token != null && token.Id == this.id;
-        }
+      /// <summary>
+      /// Gets a value indicating whether this element represents a production.
+      /// </summary>
+      public bool IsProduction
+      {
+         get
+         {
+            return !this.token;
+         }
+      }
 
-        /// <summary>
-        /// Checks if this object is equal to another. This method only
-        /// returns true for another identical production pattern
-        /// element.
-        /// </summary>
-        /// <param name="obj">The object to compare with</param>
-        /// <returns>
-        /// True if the object is identical to this one, or false otherwise
-        /// </returns>
-        public override bool Equals(object obj)
-        {
-            ProductionPatternElement elem;
+      /// <summary>
+      /// Gets or sets the look-ahead set property. This is the look-ahead set
+      /// associated with this alternative.
+      /// </summary> 
+      internal LookAheadSet LookAhead
+      {
+         get
+         {
+            return this.lookAhead;
+         }
 
-            if (obj is ProductionPatternElement)
-            {
-                elem = (ProductionPatternElement)obj;
-                return this.token == elem.token
-                    && this.id == elem.id
-                    && this.min == elem.min
-                    && this.max == elem.max;
-            }
-            else
-            {
-                return false;
-            }
-        }
+         set
+         {
+            this.lookAhead = value;
+         }
+      }
 
-        /// <summary>
-        /// Returns a hash code for this object.
-        /// </summary>
-        /// <returns>A hash code for this object</returns>
-        public override int GetHashCode()
-        {
-            return this.id * 37;
-        }
+      /// <summary>
+      /// Checks if a specific token matches this element. This
+      /// method will only return true if this element is a token
+      /// element, and the token has the same id and this element.
+      /// </summary>
+      /// <param name="token">The token to check</param>
+      /// <returns>True if the token matches this element, false if not
+      /// </returns>
+      public bool IsMatch(Token token)
+      {
+         return this.IsToken && token != null && token.Id == this.id;
+      }
 
-        /// <summary>
-        /// Returns a string representation of this object.
-        /// </summary>
-        /// <returns>A string representation of this object</returns>
-        public override string ToString()
-        {
-            StringBuilder buffer = new StringBuilder();
+      /// <summary>
+      /// Checks if this object is equal to another. This method only
+      /// returns true for another identical production pattern
+      /// element.
+      /// </summary>
+      /// <param name="obj">The object to compare with</param>
+      /// <returns>
+      /// True if the object is identical to this one, or false otherwise
+      /// </returns>
+      public override bool Equals(object obj)
+      {
+         if (obj is ProductionPatternElement elem)
+         {
+            return this.token == elem.token
+                && this.id == elem.id
+                && this.min == elem.min
+                && this.max == elem.max;
+         }
+         else
+         {
+            return false;
+         }
+      }
 
-            buffer.Append(this.id);
-            if (this.token)
-            {
-                buffer.Append("(Token)");
-            }
-            else
-            {
-                buffer.Append("(Production)");
-            }
+      /// <summary>
+      /// Returns a hash code for this object.
+      /// </summary>
+      /// <returns>A hash code for this object</returns>
+      public override int GetHashCode()
+      {
+         return this.id * 37;
+      }
 
-            if (this.min != 1 || this.max != 1)
-            {
-                buffer.Append("{");
-                buffer.Append(this.min);
-                buffer.Append(",");
-                buffer.Append(this.max);
-                buffer.Append("}");
-            }
+      /// <summary>
+      /// Returns a string representation of this object.
+      /// </summary>
+      /// <returns>A string representation of this object</returns>
+      public override string ToString()
+      {
+         StringBuilder buffer = new StringBuilder();
 
-            return buffer.ToString();
-        }
-    }
+         buffer.Append(this.id);
+         if (this.token)
+         {
+            buffer.Append("(Token)");
+         }
+         else
+         {
+            buffer.Append("(Production)");
+         }
+
+         if (this.min != 1 || this.max != 1)
+         {
+            buffer.Append("{");
+            buffer.Append(this.min);
+            buffer.Append(",");
+            buffer.Append(this.max);
+            buffer.Append("}");
+         }
+
+         return buffer.ToString();
+      }
+   }
 }

@@ -21,84 +21,77 @@
 
 namespace MibbleSharp
 {
-    using System;
-    using MibbleSharp.Snmp;
-    using MibbleSharp.Type;
-    using MibbleSharp.Value;
+   using MibbleSharp.Snmp;
+   using MibbleSharp.Type;
+   using MibbleSharp.Value;
 
-    /// <summary>
-    /// A MIB type context. This class attempts to resolve all symbols as
-    /// defined enumeration values in the contained MIB type.
-    /// </summary>
-    public class MibTypeContext : IMibContext
-    {
-        /// <summary>The MIB symbol, value or type.</summary>
-        private object context;
+   /// <summary>
+   /// A MIB type context. This class attempts to resolve all symbols as
+   /// defined enumeration values in the contained MIB type.
+   /// </summary>
+   public class MibTypeContext : IMibContext
+   {
+      /// <summary>The MIB symbol, value or type.</summary>
+      private object context;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MibTypeContext"/> class.
-        /// </summary>
-        /// <param name="context">The MIB Symbol, Value or Type</param>
-        public MibTypeContext(object context)
-        {
-            this.context = context;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="MibTypeContext"/> class.
+      /// </summary>
+      /// <param name="context">The MIB Symbol, Value or Type</param>
+      public MibTypeContext(object context)
+      {
+         this.context = context;
+      }
 
-        /// <summary>Searches for a named MIB symbol. This method may search outside
-        /// the normal (or strict) scope, thereby allowing a form of
-        /// relaxed search. Note that the results from the normal and
-        /// expanded search may not be identical, due to the context
-        /// chaining and the same symbol name appearing in various
-        /// contexts.
-        /// NOTE: This is an internal method that should
-        /// only be called by the MIB loader.
-        /// </summary>
-        /// <param name="name">The symbol name</param>
-        /// <param name="expanded">The expanded scope flag</param>
-        /// <returns>The MIB symbol, or null if the symbol is not found</returns>
-        public MibSymbol FindSymbol(string name, bool expanded)
-        {
-            IMibContext ctx = null;
+      /// <summary>Searches for a named MIB symbol. This method may search outside
+      /// the normal (or strict) scope, thereby allowing a form of
+      /// relaxed search. Note that the results from the normal and
+      /// expanded search may not be identical, due to the context
+      /// chaining and the same symbol name appearing in various
+      /// contexts.
+      /// NOTE: This is an internal method that should
+      /// only be called by the MIB loader.
+      /// </summary>
+      /// <param name="name">The symbol name</param>
+      /// <param name="expanded">The expanded scope flag</param>
+      /// <returns>The MIB symbol, or null if the symbol is not found</returns>
+      public MibSymbol FindSymbol(string name, bool expanded)
+      {
+         if (this.context is ValueReference valref)
+         {
+            this.context = valref.Symbol;
+         }
 
-            if (this.context is ValueReference)
-            {
-                this.context = ((ValueReference)this.context).Symbol;
-            }
+         if (this.context is MibTypeSymbol mibTpSymb)
+         {
+            this.context = mibTpSymb.Type;
+         }
 
-            if (this.context is MibTypeSymbol)
-            {
-                this.context = ((MibTypeSymbol)this.context).Type;
-            }
+         if (this.context is MibValueSymbol mibValSymb)
+         {
+            this.context = mibValSymb.Type;
+         }
 
-            if (this.context is MibValueSymbol)
-            {
-                this.context = ((MibValueSymbol)this.context).Type;
-            }
+         if (this.context is SnmpObjectType snmpObjTp)
+         {
+            this.context = snmpObjTp.Syntax;
+         }
 
-            if (this.context is SnmpObjectType)
-            {
-                this.context = ((SnmpObjectType)this.context).Syntax;
-            }
+         if (this.context is TypeReference tpRef)
+         {
+            this.context = tpRef.Symbol;
+            return this.FindSymbol(name, expanded);
+         }
 
-            if (this.context is TypeReference)
-            {
-                this.context = ((TypeReference)this.context).Symbol;
-                return this.FindSymbol(name, expanded);
-            }
+         IMibContext ctx = this.context as IMibContext;
+         return ctx?.FindSymbol(name, expanded);
+      }
 
-            if (this.context is IMibContext)
-            {
-                ctx = (IMibContext)this.context;
-            }
-
-            return (ctx == null) ? null : ctx.FindSymbol(name, expanded);
-        }
-
-        /// <summary>Returns a string representation of this object.</summary>
-        /// <returns>A string representation of this object</returns>
-        public override string ToString()
-        {
-            return "<type context>";
-        }
-    }
+      /// <summary>Returns a string representation of this object.</summary>
+      /// <returns>A string representation of this object</returns>
+      public override string ToString()
+      {
+         return "<type context>";
+      }
+   }
 }

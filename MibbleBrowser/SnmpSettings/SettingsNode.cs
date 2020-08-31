@@ -19,76 +19,76 @@
 
 namespace MibbleBrowser.SnmpSettings
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Runtime.Serialization;
+   using System;
+   using System.Collections.Generic;
+   using System.Runtime.Serialization;
 
-    [Serializable()]
-    class SettingsNode : ISerializable
-    {
-        private readonly SettingsNode parent;
+   [Serializable()]
+   class SettingsNode : ISerializable
+   {
+      private readonly SettingsNode parent;
 
-        private readonly List<SettingsNode> children = new List<SettingsNode>();
+      private readonly List<SettingsNode> children = new List<SettingsNode>();
 
-        public SettingsNode()
-        {
-            this.parent = null;
-        }
+      public SettingsNode()
+      {
+         this.parent = null;
+      }
 
-        public SettingsNode(SettingsNode parent)
-        {
-            this.parent = parent;
-        }
+      public SettingsNode(SettingsNode parent)
+      {
+         this.parent = parent;
+      }
 
-        public SettingsNode(SerializationInfo info, StreamingContext ctxt)
-        {
+      public SettingsNode(SerializationInfo info, StreamingContext ctxt)
+      {
 
-        }
+      }
 
-        /// <summary>
-        /// The enumeration of SettingsNode types
-        /// </summary>
-        public enum SettingsNodeType
-        {
-            /// <summary>
-            /// A Group stores settings for a set of Groups and Hosts.
-            /// </summary>
-            Group,
+      /// <summary>
+      /// The enumeration of SettingsNode types
+      /// </summary>
+      public enum SettingsNodeType
+      {
+         /// <summary>
+         /// A Group stores settings for a set of Groups and Hosts.
+         /// </summary>
+         Group,
 
-            /// <summary>
-            /// A Host represents settings for an individual host device.
-            /// It cannot have child nodes.
-            /// </summary>
-            Host
-        }
+         /// <summary>
+         /// A Host represents settings for an individual host device.
+         /// It cannot have child nodes.
+         /// </summary>
+         Host
+      }
 
-        /// <summary>
-        /// Gets the parent SettingsNode for this node
-        /// </summary>
-        public SettingsNode Parent
-        {
-            get; set;
-        }
+      /// <summary>
+      /// Gets the parent SettingsNode for this node
+      /// </summary>
+      public SettingsNode Parent
+      {
+         get; set;
+      }
 
-        /// <summary>
-        /// Gets the list of child SettingsNode objects
-        /// </summary>
-        public IList<SettingsNode> Children
-        {
-            get
-            {
-                return children;
-            }
-        }
+      /// <summary>
+      /// Gets the list of child SettingsNode objects
+      /// </summary>
+      public IList<SettingsNode> Children
+      {
+         get
+         {
+            return children;
+         }
+      }
 
-        /// <summary>
-        /// Serializes this object
-        /// </summary>
-        /// <param name="info">The SerializationInfo object</param>
-        /// <param name="ctxt">The StreamingContext object</param>
-        public void GetObjectData(SerializationInfo info, StreamingContext ctxt)
-        {
+      /// <summary>
+      /// Serializes this object
+      /// </summary>
+      /// <param name="info">The SerializationInfo object</param>
+      /// <param name="ctxt">The StreamingContext object</param>
+      public void GetObjectData(SerializationInfo info, StreamingContext ctxt)
+      {
 
-        }
-    }
+      }
+   }
 }

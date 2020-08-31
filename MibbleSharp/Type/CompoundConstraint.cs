@@ -21,130 +21,130 @@
 
 namespace MibbleSharp.Type
 {
-    using System.Collections.Generic;
-    using System.Text;
+   using System.Collections.Generic;
+   using System.Text;
 
-    /// <summary>
-    /// A compound MIB type constraint. This class holds two constraints,
-    /// either one that must be compatible for this constraint to return
-    /// true. Effectively this class represents an OR composition of the
-    /// two constraints.
-    /// </summary>
-    public class CompoundConstraint : IConstraint
-    {
-        /// <summary>
-        /// The first constraint.
-        /// </summary>
-        private readonly IConstraint first;
+   /// <summary>
+   /// A compound MIB type constraint. This class holds two constraints,
+   /// either one that must be compatible for this constraint to return
+   /// true. Effectively this class represents an OR composition of the
+   /// two constraints.
+   /// </summary>
+   public class CompoundConstraint : IConstraint
+   {
+      /// <summary>
+      /// The first constraint.
+      /// </summary>
+      private readonly IConstraint first;
 
-        /// <summary>
-        /// The second constraint.
-        /// </summary>
-        private readonly IConstraint second;
+      /// <summary>
+      /// The second constraint.
+      /// </summary>
+      private readonly IConstraint second;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CompoundConstraint"/> class.
-        /// </summary>
-        /// <param name="first">The first constraint</param>
-        /// <param name="second">The second constraint</param>
-        public CompoundConstraint(IConstraint first, IConstraint second)
-        {
-            this.first = first;
-            this.second = second;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="CompoundConstraint"/> class.
+      /// </summary>
+      /// <param name="first">The first constraint</param>
+      /// <param name="second">The second constraint</param>
+      public CompoundConstraint(IConstraint first, IConstraint second)
+      {
+         this.first = first;
+         this.second = second;
+      }
 
-        /// <summary>
-        /// Gets a list of the constraints in this compound. All
-        /// compound constraints will be flattened out and their contents
-        /// will be added to the list.
-        /// </summary>
-        public IList<IConstraint> ConstraintList
-        {
-            get
+      /// <summary>
+      /// Gets a list of the constraints in this compound. All
+      /// compound constraints will be flattened out and their contents
+      /// will be added to the list.
+      /// </summary>
+      public IList<IConstraint> ConstraintList
+      {
+         get
+         {
+            List<IConstraint> list = new List<IConstraint>();
+
+            if (this.first is CompoundConstraint constraint)
             {
-                List<IConstraint> list = new List<IConstraint>();
-
-                if (this.first is CompoundConstraint)
-                {
-                    list.AddRange(((CompoundConstraint)this.first).ConstraintList);
-                }
-                else
-                {
-                    list.Add(this.first);
-                }
-
-                if (this.second is CompoundConstraint)
-                {
-                    list.AddRange(((CompoundConstraint)this.second).ConstraintList);
-                }
-                else
-                {
-                    list.Add(this.second);
-                }
-
-                return list;
+               list.AddRange(constraint.ConstraintList);
             }
-        }
+            else
+            {
+               list.Add(this.first);
+            }
 
-        /// <summary>
-        /// Initializes the MIB type. This will remove all levels of
-        /// indirection present, such as references to types or values. No
-        /// information is lost by this operation. This method may modify
-        /// this object as a side-effect.
-        /// </summary>
-        /// <remarks>
-        /// This is an internal method that should
-        /// only be called by the MIB loader.
-        /// </remarks>
-        /// <param name="type">The MIB type</param>
-        /// <param name="log">The MIB loader log</param>
-        /// <exception cref="MibException">If an error occurred during initialization</exception>
-        public void Initialize(MibType type, MibLoaderLog log)
-        {
-            this.first.Initialize(type, log);
-            this.second.Initialize(type, log);
-        }
+            if (this.second is CompoundConstraint constraint1)
+            {
+               list.AddRange(constraint1.ConstraintList);
+            }
+            else
+            {
+               list.Add(this.second);
+            }
 
-        /// <summary>
-        /// Checks if the specified value is compatible with this type. A
-        /// values is considered compatible with this type, it is compatible with 
-        /// both constraints
-        /// </summary>
-        /// <param name="type">The type to check</param>
-        /// <returns>True if the value is compatible, false if not</returns>
-        public bool IsCompatible(MibType type)
-        {
-            return this.first.IsCompatible(type) 
-                && this.second.IsCompatible(type);
-        }
+            return list;
+         }
+      }
 
-        /// <summary>
-        /// Checks if the specified value is compatible with this constraint set.
-        /// A value is considered compatible if it is compatible with 
-        /// either of the two constraints
-        /// </summary>
-        /// <param name="value">The value to check</param>
-        /// <returns>True if the value is compatible, false if not</returns>
-        public bool IsCompatible(MibValue value)
-        {
-            return this.first.IsCompatible(value) || this.second.IsCompatible(value);
-        }
+      /// <summary>
+      /// Initializes the MIB type. This will remove all levels of
+      /// indirection present, such as references to types or values. No
+      /// information is lost by this operation. This method may modify
+      /// this object as a side-effect.
+      /// </summary>
+      /// <remarks>
+      /// This is an internal method that should
+      /// only be called by the MIB loader.
+      /// </remarks>
+      /// <param name="type">The MIB type</param>
+      /// <param name="log">The MIB loader log</param>
+      /// <exception cref="MibException">If an error occurred during initialization</exception>
+      public void Initialize(MibType type, MibLoaderLog log)
+      {
+         this.first.Initialize(type, log);
+         this.second.Initialize(type, log);
+      }
 
-        /// <summary>
-        /// Returns a string representation of this object.
-        /// </summary>
-        /// <returns>
-        /// A string representation of this object
-        /// </returns>
-        public override string ToString()
-        {
-            StringBuilder builder = new StringBuilder();
+      /// <summary>
+      /// Checks if the specified value is compatible with this type. A
+      /// values is considered compatible with this type, it is compatible with 
+      /// both constraints
+      /// </summary>
+      /// <param name="type">The type to check</param>
+      /// <returns>True if the value is compatible, false if not</returns>
+      public bool IsCompatible(MibType type)
+      {
+         return this.first.IsCompatible(type)
+             && this.second.IsCompatible(type);
+      }
 
-            builder.Append(this.first.ToString());
-            builder.Append(" | ");
-            builder.Append(this.second.ToString());
+      /// <summary>
+      /// Checks if the specified value is compatible with this constraint set.
+      /// A value is considered compatible if it is compatible with 
+      /// either of the two constraints
+      /// </summary>
+      /// <param name="value">The value to check</param>
+      /// <returns>True if the value is compatible, false if not</returns>
+      public bool IsCompatible(MibValue value)
+      {
+         return this.first.IsCompatible(value) || this.second.IsCompatible(value);
+      }
 
-            return builder.ToString();
-        }
-    }
+      /// <summary>
+      /// Returns a string representation of this object.
+      /// </summary>
+      /// <returns>
+      /// A string representation of this object
+      /// </returns>
+      public override string ToString()
+      {
+         StringBuilder builder = new StringBuilder();
+
+         builder.Append(this.first.ToString());
+         builder.Append(" | ");
+         builder.Append(this.second.ToString());
+
+         return builder.ToString();
+      }
+   }
 }

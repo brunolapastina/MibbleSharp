@@ -15,73 +15,73 @@
 
 namespace PerCederberg.Grammatica.Runtime
 {
-    /// <summary>
-    /// The token match status. This class contains logic to ensure that
-    /// only the longest match is considered. It also prefers lower token
-    /// pattern identifiers if two matches have the same length.
-    /// </summary>
-    internal class TokenMatch
-    {
-        /// <summary>
-        /// The length of the longest match.
-        /// </summary>
-        private int length = 0;
+   /// <summary>
+   /// The token match status. This class contains logic to ensure that
+   /// only the longest match is considered. It also prefers lower token
+   /// pattern identifiers if two matches have the same length.
+   /// </summary>
+   internal class TokenMatch
+   {
+      /// <summary>
+      /// The length of the longest match.
+      /// </summary>
+      private int length = 0;
 
-        /// <summary>
-        /// The pattern in the longest match.
-        /// </summary>
-        private TokenPattern pattern = null;
+      /// <summary>
+      /// The pattern in the longest match.
+      /// </summary>
+      private TokenPattern pattern = null;
 
-        /// <summary>
-        /// Gets the length of the longest match found (read-only).
-        /// </summary>
-        public int Length
-        {
-            get
-            {
-                return this.length;
-            }
-        }
+      /// <summary>
+      /// Gets the length of the longest match found (read-only).
+      /// </summary>
+      public int Length
+      {
+         get
+         {
+            return this.length;
+         }
+      }
 
-        /// <summary>
-        /// Gets the token pattern for the longest match found (read-only).
-        /// </summary>
-        public TokenPattern Pattern
-        {
-            get
-            {
-                return this.pattern;
-            }
-        }
- 
-        /// <summary>
-        /// Clears the current match information.
-        /// </summary>
-        public void Clear()
-        {
-            this.length = 0;
-            this.pattern = null;
-        }
+      /// <summary>
+      /// Gets the token pattern for the longest match found (read-only).
+      /// </summary>
+      public TokenPattern Pattern
+      {
+         get
+         {
+            return this.pattern;
+         }
+      }
 
-        /// <summary>
-        /// Updates this match with new values. The new values will only
-        /// be considered if the length is longer than any previous match
-        /// found.
-        /// </summary>
-        /// <param name="matchLength">The matched length</param>
-        /// <param name="matchPattern">The matched pattern</param>
-        public void Update(int matchLength, TokenPattern matchPattern)
-        {
-            if (this.length < matchLength)
-            {
-                this.length = matchLength;
-                this.pattern = matchPattern;
-            }
-            else if (this.length == matchLength && this.pattern.Id > matchPattern.Id)
-            {
-                this.length = matchLength;
-                this.pattern = matchPattern;
-            }
-        }
-    }
+      /// <summary>
+      /// Clears the current match information.
+      /// </summary>
+      public void Clear()
+      {
+         this.length = 0;
+         this.pattern = null;
+      }
+
+      /// <summary>
+      /// Updates this match with new values. The new values will only
+      /// be considered if the length is longer than any previous match
+      /// found.
+      /// </summary>
+      /// <param name="matchLength">The matched length</param>
+      /// <param name="matchPattern">The matched pattern</param>
+      public void Update(int matchLength, TokenPattern matchPattern)
+      {
+         if (this.length < matchLength)
+         {
+            this.length = matchLength;
+            this.pattern = matchPattern;
+         }
+         else if (this.length == matchLength && this.pattern.Id > matchPattern.Id)
+         {
+            this.length = matchLength;
+            this.pattern = matchPattern;
+         }
+      }
+   }
 }

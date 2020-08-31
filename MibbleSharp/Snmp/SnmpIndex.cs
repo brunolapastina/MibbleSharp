@@ -21,125 +21,124 @@
 
 namespace MibbleSharp.Snmp
 {
-    using System;
-    using System.Text;
+   using System.Text;
 
-    /// <summary>
-    /// An SNMP index object. This declaration is used inside an object
-    /// type index declaration.An index contains either a type or a
-    /// value. Indices based on values may be implied.
-    /// </summary>
-    /// <see cref="SnmpObjectType"/>
-    public class SnmpIndex
-    {
-        /// <summary>The implied flag</summary>
-        private readonly bool implied;
+   /// <summary>
+   /// An SNMP index object. This declaration is used inside an object
+   /// type index declaration.An index contains either a type or a
+   /// value. Indices based on values may be implied.
+   /// </summary>
+   /// <see cref="SnmpObjectType"/>
+   public class SnmpIndex
+   {
+      /// <summary>The implied flag</summary>
+      private readonly bool implied;
 
-        /// <summary>
-        /// The index value, or null.
-        /// </summary>
-        private MibValue value;
+      /// <summary>
+      /// The index value, or null.
+      /// </summary>
+      private MibValue value;
 
-        /// <summary>
-        /// The index type, or null.
-        /// </summary>
-        private MibType type;
+      /// <summary>
+      /// The index type, or null.
+      /// </summary>
+      private MibType type;
 
-        /// <summary>Initializes a new instance of the <see cref="SnmpIndex"/> class.
-        /// Exactly one of the value or type arguments are supposed to be non-null.
-        /// </summary> 
-        /// <param name="implied">The implied flag</param>
-        /// <param name="value">The index value, or null</param>
-        /// <param name="type">The index type, or null</param>
-        public SnmpIndex(bool implied, MibValue value, MibType type)
-        {
-            this.implied = implied;
-            this.value = value;
-            this.type = type;
-        }
+      /// <summary>Initializes a new instance of the <see cref="SnmpIndex"/> class.
+      /// Exactly one of the value or type arguments are supposed to be non-null.
+      /// </summary> 
+      /// <param name="implied">The implied flag</param>
+      /// <param name="value">The index value, or null</param>
+      /// <param name="type">The index type, or null</param>
+      public SnmpIndex(bool implied, MibValue value, MibType type)
+      {
+         this.implied = implied;
+         this.value = value;
+         this.type = type;
+      }
 
-        /// <summary>
-        /// Gets a value indicating whether this index is an implied value. If this is true, the
-        /// index also represents a value index.
-        /// </summary>
-        public bool Implied
-        {
-            get
-            {
-                return this.implied;
-            }
-        }
+      /// <summary>
+      /// Gets a value indicating whether this index is an implied value. If this is true, the
+      /// index also represents a value index.
+      /// </summary>
+      public bool Implied
+      {
+         get
+         {
+            return this.implied;
+         }
+      }
 
-        /// <summary>
-        /// Gets the index value
-        /// </summary>
-        /// <see cref="MibValue"/>
-        public MibValue Value
-        {
-            get
-            {
-                return this.value;
-            }
-        }
+      /// <summary>
+      /// Gets the index value
+      /// </summary>
+      /// <see cref="MibValue"/>
+      public MibValue Value
+      {
+         get
+         {
+            return this.value;
+         }
+      }
 
-        /// <summary>
-        /// Gets the index type
-        /// </summary>
-        /// <see cref="MibType"/>
-        public MibType Type
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+      /// <summary>
+      /// Gets the index type
+      /// </summary>
+      /// <see cref="MibType"/>
+      public MibType Type
+      {
+         get
+         {
+            return this.type;
+         }
+      }
 
-        /// <summary>
-        /// Initializes the object. This will remove all levels of
-        /// indirection present, such as references to other types and
-        /// values.No information is lost by this operation.This method
-        /// may modify this object as a side-effect, and will be called by
-        /// the MIB loader.
-        /// </summary>
-        /// <param name="symbol">the MIB symbol containing this object</param>
-        /// <param name="log">the MIB loader log</param>
-        /// <exception cref="MibException">
-        /// If an error was encountered during the initialization
-        /// </exception>
-        public void Initialize(MibSymbol symbol, MibLoaderLog log)
-        {
-            if (this.value != null)
-            {
-                this.value = this.value.Initialize(log, null);
-            }
+      /// <summary>
+      /// Initializes the object. This will remove all levels of
+      /// indirection present, such as references to other types and
+      /// values.No information is lost by this operation.This method
+      /// may modify this object as a side-effect, and will be called by
+      /// the MIB loader.
+      /// </summary>
+      /// <param name="symbol">the MIB symbol containing this object</param>
+      /// <param name="log">the MIB loader log</param>
+      /// <exception cref="MibException">
+      /// If an error was encountered during the initialization
+      /// </exception>
+      public void Initialize(MibSymbol symbol, MibLoaderLog log)
+      {
+         if (this.value != null)
+         {
+            this.value = this.value.Initialize(log, null);
+         }
 
-            if (this.type != null)
-            {
-                this.type = this.type.Initialize(symbol, log);
-            }
-        }
+         if (this.type != null)
+         {
+            this.type = this.type.Initialize(symbol, log);
+         }
+      }
 
-        /// <summary>Returns a string representation of this object.</summary>
-        /// <returns>a string representation of this object</returns>
-        public override string ToString()
-        {
-            StringBuilder builder = new StringBuilder();
+      /// <summary>Returns a string representation of this object.</summary>
+      /// <returns>a string representation of this object</returns>
+      public override string ToString()
+      {
+         StringBuilder builder = new StringBuilder();
 
-            if (this.implied)
-            {
-                builder.Append("IMPLIED ");
-            }
+         if (this.implied)
+         {
+            builder.Append("IMPLIED ");
+         }
 
-            if (this.type != null)
-            {
-                builder.Append(this.type);
-            }
-            else
-            {
-                builder.Append(this.value);
-            }
+         if (this.type != null)
+         {
+            builder.Append(this.type);
+         }
+         else
+         {
+            builder.Append(this.value);
+         }
 
-            return builder.ToString();
-        }
-    }
+         return builder.ToString();
+      }
+   }
 }

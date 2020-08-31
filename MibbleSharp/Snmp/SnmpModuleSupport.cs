@@ -21,132 +21,132 @@
 
 namespace MibbleSharp.Snmp
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
+   using System.Collections.Generic;
+   using System.Linq;
+   using System.Text;
 
-    /// <summary>
-    /// An SNMP module support value. This declaration is used inside the
-    /// agent capabilities type.
-    /// </summary>
-    /// <see cref="SnmpAgentCapabilities"/>
-    public class SnmpModuleSupport
-    {
-        /// <summary>
-        /// The module name.
-        /// </summary>
-        private readonly string module;
+   /// <summary>
+   /// An SNMP module support value. This declaration is used inside the
+   /// agent capabilities type.
+   /// </summary>
+   /// <see cref="SnmpAgentCapabilities"/>
+   public class SnmpModuleSupport
+   {
+      /// <summary>
+      /// The module name.
+      /// </summary>
+      private readonly string module;
 
-        /// <summary>
-        /// The list of included group values.
-        /// </summary>
-        private IList<MibValue> groups;
+      /// <summary>
+      /// The list of included group values.
+      /// </summary>
+      private IList<MibValue> groups;
 
-        /// <summary>
-        /// The list of variations.
-        /// </summary>
-        private readonly IList<SnmpVariation> variations;
+      /// <summary>
+      /// The list of variations.
+      /// </summary>
+      private readonly IList<SnmpVariation> variations;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SnmpModuleSupport"/> class.
-        /// </summary>
-        /// <param name="module">The module name, or null</param>
-        /// <param name="groups">The list of included group values</param>
-        /// <param name="variations">The list of variations</param>
-        public SnmpModuleSupport(
-            string module,
-            IList<MibValue> groups,
-            IList<SnmpVariation> variations)
-        {
-            this.module = module;
-            this.groups = groups;
-            this.variations = variations;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="SnmpModuleSupport"/> class.
+      /// </summary>
+      /// <param name="module">The module name, or null</param>
+      /// <param name="groups">The list of included group values</param>
+      /// <param name="variations">The list of variations</param>
+      public SnmpModuleSupport(
+          string module,
+          IList<MibValue> groups,
+          IList<SnmpVariation> variations)
+      {
+         this.module = module;
+         this.groups = groups;
+         this.variations = variations;
+      }
 
-        /// <summary>
-        /// Gets the module name
-        /// </summary>
-        public string Module
-        {
-            get
+      /// <summary>
+      /// Gets the module name
+      /// </summary>
+      public string Module
+      {
+         get
+         {
+            return this.module;
+         }
+      }
+
+      /// <summary>
+      /// Gets the list of included group values.
+      /// </summary>
+      /// <see cref="MibValue"/>
+      public IEnumerable<MibValue> Groups
+      {
+         get
+         {
+            return this.groups;
+         }
+      }
+
+      /// <summary>
+      /// Gets the list of variations
+      /// </summary>
+      /// <see cref="SnmpVariation"/>
+      public IEnumerable<SnmpVariation> Variations
+      {
+         get
+         {
+            return this.variations;
+         }
+      }
+
+      /// <summary>
+      /// Initializes the MIB type. This will remove all levels of
+      /// indirection present, such as references to types or values. No
+      /// information is lost by this operation. This method may modify
+      /// this object as a side-effect.
+      /// NOTE: This is an internal method that should
+      /// only be called by the MIB loader.
+      /// </summary>
+      /// <param name="log">The MIB loader log</param>
+      public void Initialize(MibLoaderLog log)
+      {
+         this.groups = this.groups.Select(g => g.Initialize(log, null)).ToList();
+
+         foreach (var variation in this.variations)
+         {
+            try
             {
-                return this.module;
+               variation.Initialize(log);
             }
-        }
-
-        /// <summary>
-        /// Gets the list of included group values.
-        /// </summary>
-        /// <see cref="MibValue"/>
-        public IEnumerable<MibValue> Groups
-        {
-            get
+            catch (MibException e)
             {
-                return this.groups;
+               log.AddError(e.Location, e.Message);
             }
-        }
+         }
+      }
 
-        /// <summary>
-        /// Gets the list of variations
-        /// </summary>
-        /// <see cref="SnmpVariation"/>
-        public IEnumerable<SnmpVariation> Variations
-        {
-            get
-            {
-                return this.variations;
-            }
-        }
+      /// <summary>
+      /// Returns a string representation of this object.
+      /// </summary>
+      /// <returns>A string representation of this object.</returns>
+      public override string ToString()
+      {
+         StringBuilder builder = new StringBuilder();
 
-        /// <summary>
-        /// Initializes the MIB type. This will remove all levels of
-        /// indirection present, such as references to types or values. No
-        /// information is lost by this operation. This method may modify
-        /// this object as a side-effect.
-        /// NOTE: This is an internal method that should
-        /// only be called by the MIB loader.
-        /// </summary>
-        /// <param name="log">The MIB loader log</param>
-        public void Initialize(MibLoaderLog log)
-        {
-            this.groups = this.groups.Select(g => g.Initialize(log, null)).ToList();
+         if (this.module != null)
+         {
+            builder.Append(this.module);
+         }
 
-            foreach (var variation in this.variations)
-            {
-                try
-                {
-                    variation.Initialize(log);
-                }
-                catch (MibException e)
-                {
-                    log.AddError(e.Location, e.Message);
-                }
-            }
-        }
-                
-        /// <summary>
-        /// Returns a string representation of this object.
-        /// </summary>
-        /// <returns>A string representation of this object.</returns>
-        public override string ToString()
-        {
-            StringBuilder builder = new StringBuilder();
+         builder.Append("\n    Includes: ");
+         builder.Append(this.groups);
 
-            if (this.module != null)
-            {
-                builder.Append(this.module);
-            }
+         foreach (var variation in this.variations)
+         {
+            builder.Append("\n    Variation: ");
+            builder.Append(variation);
+         }
 
-            builder.Append("\n    Includes: ");
-            builder.Append(this.groups);
-
-            foreach (var variation in this.variations)
-            {
-                builder.Append("\n    Variation: ");
-                builder.Append(variation);
-            }
-
-            return builder.ToString();
-        }
-    }
+         return builder.ToString();
+      }
+   }
 }

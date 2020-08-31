@@ -15,395 +15,394 @@
 
 namespace PerCederberg.Grammatica.Runtime.RE
 {
-    using System;
-    using System.Collections;
-    using System.IO;
+   using System.Collections;
+   using System.IO;
 
-    /// <summary>
-    /// A regular expression element repeater. The element repeats the
-    /// matches from a specified element, attempting to reach the
-    /// maximum repetition count.
-    /// </summary>
-    internal class RepeatElement : Element
-    {
-        /// <summary>
-        /// The element to repeat.
-        /// </summary>
-        private readonly Element elem;
+   /// <summary>
+   /// A regular expression element repeater. The element repeats the
+   /// matches from a specified element, attempting to reach the
+   /// maximum repetition count.
+   /// </summary>
+   internal class RepeatElement : Element
+   {
+      /// <summary>
+      /// The element to repeat.
+      /// </summary>
+      private readonly Element elem;
 
-        /// <summary>
-        /// The minimum number of repetitions.
-        /// </summary>
-        private readonly int min;
+      /// <summary>
+      /// The minimum number of repetitions.
+      /// </summary>
+      private readonly int min;
 
-        /// <summary>
-        /// The maximum number of repetitions.
-        /// </summary>
-        private readonly int max;
+      /// <summary>
+      /// The maximum number of repetitions.
+      /// </summary>
+      private readonly int max;
 
-        /// <summary>
-        /// The repeat type.
-        /// </summary>
-        private readonly RepeatType type;
+      /// <summary>
+      /// The repeat type.
+      /// </summary>
+      private readonly RepeatType type;
 
-        /// <summary>
-        /// The start position of the last set of matches.
-        /// </summary>
-        private int matchStart;
+      /// <summary>
+      /// The start position of the last set of matches.
+      /// </summary>
+      private int matchStart;
 
-        /// <summary>
-        /// A set with all matches starting at matchStart. A match with
-        /// a specific length is reported by a non-zero bit in the bit
-        /// array.
-        /// </summary>
-        private BitArray matches;
+      /// <summary>
+      /// A set with all matches starting at matchStart. A match with
+      /// a specific length is reported by a non-zero bit in the bit
+      /// array.
+      /// </summary>
+      private BitArray matches;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RepeatElement"/> class.
-        /// </summary>
-        /// <param name="elem">The element to repeat</param>
-        /// <param name="min">The minimum count</param>
-        /// <param name="max">The maximum count</param>
-        /// <param name="type">The repeat type constant</param>   
-        public RepeatElement(
-            Element elem,
-            int min,
-            int max,
-            RepeatType type)
-        {
-            this.elem = elem;
-            this.min = min;
-            if (max <= 0)
-            {
-                this.max = int.MaxValue;
-            }
-            else
-            {
-                this.max = max;
-            }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="RepeatElement"/> class.
+      /// </summary>
+      /// <param name="elem">The element to repeat</param>
+      /// <param name="min">The minimum count</param>
+      /// <param name="max">The maximum count</param>
+      /// <param name="type">The repeat type constant</param>   
+      public RepeatElement(
+          Element elem,
+          int min,
+          int max,
+          RepeatType type)
+      {
+         this.elem = elem;
+         this.min = min;
+         if (max <= 0)
+         {
+            this.max = int.MaxValue;
+         }
+         else
+         {
+            this.max = max;
+         }
 
-            this.type = type;
+         this.type = type;
+         this.matchStart = -1;
+         this.matches = null;
+      }
+
+      /// <summary>
+      /// The repeat type constants.
+      /// </summary> 
+      public enum RepeatType
+      {
+         /// <summary>
+         /// The greedy repeat type constant.
+         /// </summary> 
+         GREEDY = 1,
+
+         /// <summary>
+         /// The reluctant repeat type constant.
+         /// </summary>
+         RELUCTANT = 2,
+
+         /// <summary>
+         /// The possessive repeat type constant.
+         /// </summary>
+         POSSESSIVE = 3
+      }
+
+      /// <summary>
+      /// Creates a copy of this element. The copy will be an
+      /// instance of the same class matching the same strings.
+      /// Copies of elements are necessary to allow elements to cache
+      /// intermediate results while matching strings without
+      /// interfering with other threads.
+      /// </summary>
+      /// <returns>A copy of this element</returns>         
+      public override object Clone()
+      {
+         return new RepeatElement(
+             (Element)this.elem.Clone(),
+             this.min,
+             this.max,
+             this.type);
+      }
+
+      /// <summary>
+      /// Returns the length of a matching string starting at the
+      /// specified position. The number of matches to skip can also be
+      /// specified.
+      /// </summary>
+      /// <param name="m">The matcher being used</param>
+      /// <param name="buffer">The input character buffer to match</param>
+      /// <param name="start">The starting position</param>
+      /// <param name="skip">The number of matches to skip</param>
+      /// <returns>
+      /// The length of the matching string, or
+      /// -1 if no match was found
+      /// </returns>
+      /// <exception cref="IOException">If an I/O error occurred</exception>
+      public override int Match(
+          Matcher m,
+          ReaderBuffer buffer,
+          int start,
+          int skip)
+      {
+         if (skip == 0)
+         {
             this.matchStart = -1;
             this.matches = null;
-        }
+         }
 
-       /// <summary>
-        /// The repeat type constants.
-        /// </summary> 
-        public enum RepeatType
-        {
-            /// <summary>
-            /// The greedy repeat type constant.
-            /// </summary> 
-            GREEDY = 1,
+         switch (this.type)
+         {
+            case RepeatType.GREEDY:
+               return this.MatchGreedy(m, buffer, start, skip);
+            case RepeatType.RELUCTANT:
+               return this.MatchReluctant(m, buffer, start, skip);
+            case RepeatType.POSSESSIVE:
+               if (skip == 0)
+               {
+                  return this.MatchPossessive(m, buffer, start, 0);
+               }
 
-            /// <summary>
-            /// The reluctant repeat type constant.
-            /// </summary>
-            RELUCTANT = 2,
+               break;
+         }
 
-            /// <summary>
-            /// The possessive repeat type constant.
-            /// </summary>
-            POSSESSIVE = 3
-        }
+         return -1;
+      }
 
-        /// <summary>
-        /// Creates a copy of this element. The copy will be an
-        /// instance of the same class matching the same strings.
-        /// Copies of elements are necessary to allow elements to cache
-        /// intermediate results while matching strings without
-        /// interfering with other threads.
-        /// </summary>
-        /// <returns>A copy of this element</returns>         
-        public override object Clone()
-        {
-            return new RepeatElement(
-                (Element)this.elem.Clone(),
-                this.min,
-                this.max,
-                this.type);
-        }
+      /// <summary>
+      /// Prints this element to the specified output stream.
+      /// </summary>
+      /// <param name="output">The output stream to use</param>
+      /// <param name="indent">The current indentation</param>
+      public override void PrintTo(TextWriter output, string indent)
+      {
+         output.Write(indent + "Repeat (" + this.min + "," + this.max + ")");
 
-        /// <summary>
-        /// Returns the length of a matching string starting at the
-        /// specified position. The number of matches to skip can also be
-        /// specified.
-        /// </summary>
-        /// <param name="m">The matcher being used</param>
-        /// <param name="buffer">The input character buffer to match</param>
-        /// <param name="start">The starting position</param>
-        /// <param name="skip">The number of matches to skip</param>
-        /// <returns>
-        /// The length of the matching string, or
-        /// -1 if no match was found
-        /// </returns>
-        /// <exception cref="IOException">If an I/O error occurred</exception>
-        public override int Match(
-            Matcher m,
-            ReaderBuffer buffer,
-            int start,
-            int skip)
-        {
-            if (skip == 0)
+         if (this.type == RepeatType.RELUCTANT)
+         {
+            output.Write("?");
+         }
+         else if (this.type == RepeatType.POSSESSIVE)
+         {
+            output.Write("+");
+         }
+
+         output.WriteLine();
+         this.elem.PrintTo(output, indent + "  ");
+      }
+
+      /// <summary>
+      /// Returns the length of the longest possible matching string
+      /// starting at the specified position. The number of matches
+      /// to skip can also be specified.
+      /// </summary>
+      /// <param name="m">The matcher being used</param>
+      /// <param name="buffer">The input character buffer to match</param>
+      /// <param name="start">The starting position</param>
+      /// <param name="skip">The number of matches to skip</param>
+      /// <returns>
+      /// The length of the matching string, or
+      /// -1 if no match was found
+      /// </returns>
+      /// <exception cref="IOException">If an I/O error occurred</exception>
+      private int MatchGreedy(
+          Matcher m,
+          ReaderBuffer buffer,
+          int start,
+          int skip)
+      {
+         // Check for simple case
+         if (skip == 0)
+         {
+            return this.MatchPossessive(m, buffer, start, 0);
+         }
+
+         // Find all matches
+         if (this.matchStart != start)
+         {
+            this.matchStart = start;
+            this.matches = new BitArray(10);
+            this.FindMatches(m, buffer, start, 0, 0, 0);
+         }
+
+         // Find first non-skipped match
+         for (int i = this.matches.Count - 1; i >= 0; i--)
+         {
+            if (this.matches[i])
             {
-                this.matchStart = -1;
-                this.matches = null;
-            }
+               if (skip == 0)
+               {
+                  return i;
+               }
 
-            switch (this.type)
+               skip--;
+            }
+         }
+
+         return -1;
+      }
+
+      /// <summary>
+      /// Returns the length of the shortest possible matching string
+      /// starting at the specified position. The number of matches to
+      /// skip can also be specified.
+      /// </summary>
+      /// <param name="m">The matcher being used</param>
+      /// <param name="buffer">The input character buffer to match</param>
+      /// <param name="start">The starting position</param>
+      /// <param name="skip">The number of matches to skip</param>
+      /// <returns>
+      /// The length of the matching string, or
+      /// -1 if no match was found
+      /// </returns>
+      /// <exception cref="IOException">If an I/O error occurred</exception>
+      private int MatchReluctant(
+          Matcher m,
+          ReaderBuffer buffer,
+          int start,
+          int skip)
+      {
+         // Find all matches
+         if (this.matchStart != start)
+         {
+            this.matchStart = start;
+            this.matches = new BitArray(10);
+            this.FindMatches(m, buffer, start, 0, 0, 0);
+         }
+
+         // Find first non-skipped match
+         for (int i = 0; i < this.matches.Count; i++)
+         {
+            if (this.matches[i])
             {
-                case RepeatType.GREEDY:
-                    return this.MatchGreedy(m, buffer, start, skip);
-                case RepeatType.RELUCTANT:
-                    return this.MatchReluctant(m, buffer, start, skip);
-                case RepeatType.POSSESSIVE:
-                    if (skip == 0)
-                    {
-                        return this.MatchPossessive(m, buffer, start, 0);
-                    }
+               if (skip == 0)
+               {
+                  return i;
+               }
 
-                    break;
+               skip--;
             }
+         }
 
+         return -1;
+      }
+
+      /// <summary>
+      /// Returns the length of the maximum number of elements matching
+      /// the string starting at the specified position. This method
+      /// allows no backtracking, i.e. no skips..
+      /// </summary>
+      /// <param name="m">The matcher being used</param>
+      /// <param name="buffer">The input character buffer to match</param>
+      /// <param name="start">The starting position</param>
+      /// <param name="count">The repeat count</param>
+      /// <returns>
+      /// The length of the matching string, or
+      /// -1 if no match was found
+      /// </returns>
+      /// <exception cref="IOException">If an I/O error occurred</exception>
+      private int MatchPossessive(
+          Matcher m,
+          ReaderBuffer buffer,
+          int start,
+          int count)
+      {
+         int length = 0;
+         int subLength = 1;
+
+         // Match as many elements as possible
+         while (subLength > 0 && count < this.max)
+         {
+            subLength = this.elem.Match(m, buffer, start + length, 0);
+            if (subLength >= 0)
+            {
+               count++;
+               length += subLength;
+            }
+         }
+
+         // Return result
+         if (this.min <= count && count <= this.max)
+         {
+            return length;
+         }
+         else
+         {
             return -1;
-        }
+         }
+      }
 
-        /// <summary>
-        /// Prints this element to the specified output stream.
-        /// </summary>
-        /// <param name="output">The output stream to use</param>
-        /// <param name="indent">The current indentation</param>
-        public override void PrintTo(TextWriter output, string indent)
-        {
-            output.Write(indent + "Repeat (" + this.min + "," + this.max + ")");
+      /// <summary>
+      /// Finds all matches and adds the lengths to the matches set.
+      /// </summary>
+      /// <param name="m">the matcher being used</param>
+      /// <param name="buffer">The input character buffer to match</param>
+      /// <param name="start">The starting position</param>
+      /// <param name="length">The match length at the start position</param>
+      /// <param name="count">The number of sub-elements matched</param>
+      /// <param name="attempt">The number of match attempts here</param>
+      /// <exception cref="IOException">If an I/O error occurred</exception>
+      private void FindMatches(
+          Matcher m,
+          ReaderBuffer buffer,
+          int start,
+          int length,
+          int count,
+          int attempt)
+      {
+         int subLength;
 
-            if (this.type == RepeatType.RELUCTANT)
-            {
-                output.Write("?");
-            }
-            else if (this.type == RepeatType.POSSESSIVE)
-            {
-                output.Write("+");
-            }
+         // Check match ending here
+         if (count > this.max)
+         {
+            return;
+         }
 
-            output.WriteLine();
-            this.elem.PrintTo(output, indent + "  ");
-        }
-        
-        /// <summary>
-        /// Returns the length of the longest possible matching string
-        /// starting at the specified position. The number of matches
-        /// to skip can also be specified.
-        /// </summary>
-        /// <param name="m">The matcher being used</param>
-        /// <param name="buffer">The input character buffer to match</param>
-        /// <param name="start">The starting position</param>
-        /// <param name="skip">The number of matches to skip</param>
-        /// <returns>
-        /// The length of the matching string, or
-        /// -1 if no match was found
-        /// </returns>
-        /// <exception cref="IOException">If an I/O error occurred</exception>
-        private int MatchGreedy(
-            Matcher m,
-            ReaderBuffer buffer,
-            int start,
-            int skip)
-        {
-            // Check for simple case
-            if (skip == 0)
+         if (this.min <= count && attempt == 0)
+         {
+            if (this.matches.Length <= length)
             {
-                return this.MatchPossessive(m, buffer, start, 0);
+               this.matches.Length = length + 10;
             }
 
-            // Find all matches
-            if (this.matchStart != start)
+            this.matches[length] = true;
+         }
+
+         // Check element match
+         subLength = this.elem.Match(m, buffer, start, attempt);
+         if (subLength < 0)
+         {
+            return;
+         }
+         else if (subLength == 0)
+         {
+            if (this.min == count + 1)
             {
-                this.matchStart = start;
-                this.matches = new BitArray(10);
-                this.FindMatches(m, buffer, start, 0, 0, 0);
+               if (this.matches.Length <= length)
+               {
+                  this.matches.Length = length + 10;
+               }
+
+               this.matches[length] = true;
             }
 
-            // Find first non-skipped match
-            for (int i = this.matches.Count - 1; i >= 0; i--)
-            {
-                if (this.matches[i])
-                {
-                    if (skip == 0)
-                    {
-                        return i;
-                    }
+            return;
+         }
 
-                    skip--;
-                }
-            }
-
-            return -1;
-        }
-
-        /// <summary>
-        /// Returns the length of the shortest possible matching string
-        /// starting at the specified position. The number of matches to
-        /// skip can also be specified.
-        /// </summary>
-        /// <param name="m">The matcher being used</param>
-        /// <param name="buffer">The input character buffer to match</param>
-        /// <param name="start">The starting position</param>
-        /// <param name="skip">The number of matches to skip</param>
-        /// <returns>
-        /// The length of the matching string, or
-        /// -1 if no match was found
-        /// </returns>
-        /// <exception cref="IOException">If an I/O error occurred</exception>
-        private int MatchReluctant(
-            Matcher m,
-            ReaderBuffer buffer,
-            int start,
-            int skip)
-        {
-            // Find all matches
-            if (this.matchStart != start)
-            {
-                this.matchStart = start;
-                this.matches = new BitArray(10);
-                this.FindMatches(m, buffer, start, 0, 0, 0);
-            }
-
-            // Find first non-skipped match
-            for (int i = 0; i < this.matches.Count; i++)
-            {
-                if (this.matches[i])
-                {
-                    if (skip == 0)
-                    {
-                        return i;
-                    }
-
-                    skip--;
-                }
-            }
-
-            return -1;
-        }
-
-        /// <summary>
-        /// Returns the length of the maximum number of elements matching
-        /// the string starting at the specified position. This method
-        /// allows no backtracking, i.e. no skips..
-        /// </summary>
-        /// <param name="m">The matcher being used</param>
-        /// <param name="buffer">The input character buffer to match</param>
-        /// <param name="start">The starting position</param>
-        /// <param name="count">The repeat count</param>
-        /// <returns>
-        /// The length of the matching string, or
-        /// -1 if no match was found
-        /// </returns>
-        /// <exception cref="IOException">If an I/O error occurred</exception>
-        private int MatchPossessive(
-            Matcher m,
-            ReaderBuffer buffer,
-            int start,
-            int count)
-        {
-            int length = 0;
-            int subLength = 1;
-
-            // Match as many elements as possible
-            while (subLength > 0 && count < this.max)
-            {
-                subLength = this.elem.Match(m, buffer, start + length, 0);
-                if (subLength >= 0)
-                {
-                    count++;
-                    length += subLength;
-                }
-            }
-
-            // Return result
-            if (this.min <= count && count <= this.max)
-            {
-                return length;
-            }
-            else
-            {
-                return -1;
-            }
-        }
-
-        /// <summary>
-        /// Finds all matches and adds the lengths to the matches set.
-        /// </summary>
-        /// <param name="m">the matcher being used</param>
-        /// <param name="buffer">The input character buffer to match</param>
-        /// <param name="start">The starting position</param>
-        /// <param name="length">The match length at the start position</param>
-        /// <param name="count">The number of sub-elements matched</param>
-        /// <param name="attempt">The number of match attempts here</param>
-        /// <exception cref="IOException">If an I/O error occurred</exception>
-        private void FindMatches(
-            Matcher m,
-            ReaderBuffer buffer,
-            int start,
-            int length,
-            int count,
-            int attempt)
-        {
-            int subLength;
-
-            // Check match ending here
-            if (count > this.max)
-            {
-                return;
-            }
-
-            if (this.min <= count && attempt == 0)
-            {
-                if (this.matches.Length <= length)
-                {
-                    this.matches.Length = length + 10;
-                }
-
-                this.matches[length] = true;
-            }
-
-            // Check element match
-            subLength = this.elem.Match(m, buffer, start, attempt);
-            if (subLength < 0)
-            {
-                return;
-            }
-            else if (subLength == 0)
-            {
-                if (this.min == count + 1)
-                {
-                    if (this.matches.Length <= length)
-                    {
-                        this.matches.Length = length + 10;
-                    }
-
-                    this.matches[length] = true;
-                }
-
-                return;
-            }
-
-            // Find alternative and subsequent matches
-            this.FindMatches(
-                m,
-                buffer, 
-                start, 
-                length, 
-                count, 
-                attempt + 1);
-            this.FindMatches(
-                m,
-                buffer,
-                start + subLength,
-                length + subLength,
-                count + 1,
-                0);
-        }
-    }
+         // Find alternative and subsequent matches
+         this.FindMatches(
+             m,
+             buffer,
+             start,
+             length,
+             count,
+             attempt + 1);
+         this.FindMatches(
+             m,
+             buffer,
+             start + subLength,
+             length + subLength,
+             count + 1,
+             0);
+      }
+   }
 }

@@ -21,90 +21,90 @@
 
 namespace MibbleSharp
 {
-    using System;
-    using System.Runtime.Serialization;
-    using System.Security.Permissions;
+   using System;
+   using System.Runtime.Serialization;
+   using System.Security.Permissions;
 
-    /// <summary>
-    /// A MIB loader exception. This exception is thrown when a MIB file
-    /// couldn't be loaded properly, normally due to syntactical or
-    /// semantical errors in the file.
-    /// </summary>
-    [Serializable]
-    public class MibLoaderException : Exception
-    {
-        /// <summary>
-        /// The Mib Loader log
-        /// </summary>
-        private readonly MibLoaderLog log;
+   /// <summary>
+   /// A MIB loader exception. This exception is thrown when a MIB file
+   /// couldn't be loaded properly, normally due to syntactical or
+   /// semantical errors in the file.
+   /// </summary>
+   [Serializable]
+   public class MibLoaderException : Exception
+   {
+      /// <summary>
+      /// The Mib Loader log
+      /// </summary>
+      private readonly MibLoaderLog log;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MibLoaderException"/> class.
-        /// </summary>
-        /// <param name="log">The MIB loader log</param>
-        public MibLoaderException(MibLoaderLog log)
-        {
-            this.log = log;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="MibLoaderException"/> class.
+      /// </summary>
+      /// <param name="log">The MIB loader log</param>
+      public MibLoaderException(MibLoaderLog log)
+      {
+         this.log = log;
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MibLoaderException"/> class.
-        /// The specified message will
-        /// be added to a new MIB loader log as an error.
-        /// </summary>
-        /// <param name="file">The MIB file for which an exception was raised during loading</param>
-        /// <param name="message">The detailed error message</param>
-        public MibLoaderException(string file, string message)
-        {
-            this.log = new MibLoaderLog();
-            this.log.AddError(file, -1, -1, message);
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="MibLoaderException"/> class.
+      /// The specified message will
+      /// be added to a new MIB loader log as an error.
+      /// </summary>
+      /// <param name="file">The MIB file for which an exception was raised during loading</param>
+      /// <param name="message">The detailed error message</param>
+      public MibLoaderException(string file, string message)
+      {
+         this.log = new MibLoaderLog();
+         this.log.AddError(file, -1, -1, message);
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MibLoaderException"/> class. This constructor
-        /// is used during de-serialization.
-        /// </summary>
-        /// <param name="info">The SerializationInfo object</param>
-        /// <param name="context">The StreamingContext object</param>
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
-        protected MibLoaderException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-            this.log = (MibLoaderLog)info.GetValue("Log", typeof(MibLoaderLog));
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="MibLoaderException"/> class. This constructor
+      /// is used during de-serialization.
+      /// </summary>
+      /// <param name="info">The SerializationInfo object</param>
+      /// <param name="context">The StreamingContext object</param>
+      [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+      protected MibLoaderException(SerializationInfo info, StreamingContext context)
+          : base(info, context)
+      {
+         this.log = (MibLoaderLog)info.GetValue("Log", typeof(MibLoaderLog));
+      }
 
-        /// <summary>
-        /// Gets the MIBLoader log
-        /// </summary>
-        public MibLoaderLog Log
-        {
-            get
-            {
-                return this.log;
-            }
-        }
+      /// <summary>
+      /// Gets the MIBLoader log
+      /// </summary>
+      public MibLoaderLog Log
+      {
+         get
+         {
+            return this.log;
+         }
+      }
 
-        /// <summary>
-        /// Gets the detailed error message
-        /// </summary>
-        public override string Message
-        {
-            get
-            {
-                return "found " + this.log.ErrorCount + " MIB loader errors";
-            }
-        }
+      /// <summary>
+      /// Gets the detailed error message
+      /// </summary>
+      public override string Message
+      {
+         get
+         {
+            return "found " + this.log.ErrorCount + " MIB loader errors";
+         }
+      }
 
-        /// <summary>
-        /// Serialize a MibLoader log
-        /// </summary>
-        /// <param name="info">The SerializationInfo object</param>
-        /// <param name="context">The StreamingContext object</param>
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("Log", this.log);
-            base.GetObjectData(info, context);
-        }
-    }
+      /// <summary>
+      /// Serialize a MibLoader log
+      /// </summary>
+      /// <param name="info">The SerializationInfo object</param>
+      /// <param name="context">The StreamingContext object</param>
+      [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+      public override void GetObjectData(SerializationInfo info, StreamingContext context)
+      {
+         info.AddValue("Log", this.log);
+         base.GetObjectData(info, context);
+      }
+   }
 }

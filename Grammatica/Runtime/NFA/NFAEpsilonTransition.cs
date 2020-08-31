@@ -15,53 +15,53 @@
 
 namespace PerCederberg.Grammatica.Runtime.NFA
 {
-    /// <summary>
-    /// The special epsilon transition. This transition matches the
-    /// empty input, i.e. it is an automatic transition that doesn't
-    /// read any input. As such, it returns false in the match method
-    /// and is handled specially everywhere.
-    /// </summary>
-    internal class NFAEpsilonTransition : NFATransition
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NFAEpsilonTransition"/> class.
-        /// </summary>
-        /// <param name="state">The target state</param>
-        public NFAEpsilonTransition(NFAState state) : base(state)
-        {
-        }
+   /// <summary>
+   /// The special epsilon transition. This transition matches the
+   /// empty input, i.e. it is an automatic transition that doesn't
+   /// read any input. As such, it returns false in the match method
+   /// and is handled specially everywhere.
+   /// </summary>
+   internal class NFAEpsilonTransition : NFATransition
+   {
+      /// <summary>
+      /// Initializes a new instance of the <see cref="NFAEpsilonTransition"/> class.
+      /// </summary>
+      /// <param name="state">The target state</param>
+      public NFAEpsilonTransition(NFAState state) : base(state)
+      {
+      }
 
-        /// <summary>
-        /// Gets a value indicating whether this transition only matches ASCII characters.
-        /// I.e. characters with numeric values between 0 and 127.
-        /// </summary>
-        public override bool IsAscii
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Checks if the specified character matches the transition.
-        /// </summary>
-        /// <param name="ch">The character to check</param>
-        /// <returns>True if the character matches, false if not</returns>
-        public override bool Match(char ch)
-        {
+      /// <summary>
+      /// Gets a value indicating whether this transition only matches ASCII characters.
+      /// I.e. characters with numeric values between 0 and 127.
+      /// </summary>
+      public override bool IsAscii
+      {
+         get
+         {
             return false;
-        }
+         }
+      }
 
-        /// <summary>
-        /// Creates a copy of this transition but with another target
-        /// state.
-        /// </summary>
-        /// <param name="state">The new target state</param>
-        /// <returns>An identical copy of this transition</returns>
-        public override NFATransition Copy(NFAState state)
-        {
-            return new NFAEpsilonTransition(state);
-        }
-    }
+      /// <summary>
+      /// Checks if the specified character matches the transition.
+      /// </summary>
+      /// <param name="ch">The character to check</param>
+      /// <returns>True if the character matches, false if not</returns>
+      public override bool Match(char ch)
+      {
+         return false;
+      }
+
+      /// <summary>
+      /// Creates a copy of this transition but with another target
+      /// state.
+      /// </summary>
+      /// <param name="state">The new target state</param>
+      /// <returns>An identical copy of this transition</returns>
+      public override NFATransition Copy(NFAState state)
+      {
+         return new NFAEpsilonTransition(state);
+      }
+   }
 }

@@ -15,349 +15,349 @@
 
 namespace PerCederberg.Grammatica.Runtime
 {
-    using System.Text;
+   using System.Text;
 
-    /// <summary>
-    /// A token pattern. This class contains the definition of a token
-    /// (i.e. it's pattern), and allows testing a string against this
-    /// pattern. A token pattern is uniquely identified by an integer id,
-    /// that must be provided upon creation.
-    /// </summary>
-    public class TokenPattern
-    {
-        /// <summary>
-        /// The token pattern identity.
-        /// </summary>
-        private int id;
+   /// <summary>
+   /// A token pattern. This class contains the definition of a token
+   /// (i.e. it's pattern), and allows testing a string against this
+   /// pattern. A token pattern is uniquely identified by an integer id,
+   /// that must be provided upon creation.
+   /// </summary>
+   public class TokenPattern
+   {
+      /// <summary>
+      /// The token pattern identity.
+      /// </summary>
+      private readonly int id;
 
-        /// <summary>
-        /// The token pattern name.
-        /// </summary>
-        private string name;
+      /// <summary>
+      /// The token pattern name.
+      /// </summary>
+      private readonly string name;
 
-        /// <summary>
-        /// The token pattern type.
-        /// </summary>
-        private PatternType type;
+      /// <summary>
+      /// The token pattern type.
+      /// </summary>
+      private readonly PatternType type;
 
-        /// <summary>
-        /// The token pattern.
-        /// </summary>
-        private string pattern;
+      /// <summary>
+      /// The token pattern.
+      /// </summary>
+      private readonly string pattern;
 
-        /// <summary>
-        /// The token error flag. If this flag is set, it means that an
-        /// error should be reported if the token is found. The error
-        /// message is present in the errorMessage variable.
-        /// </summary>
-        /// <see cref="ErrorMessage"/>
-        private bool error = false;
+      /// <summary>
+      /// The token error flag. If this flag is set, it means that an
+      /// error should be reported if the token is found. The error
+      /// message is present in the errorMessage variable.
+      /// </summary>
+      /// <see cref="ErrorMessage"/>
+      private bool error = false;
 
-        /// <summary>
-        /// The token error message. This message will only be set if the
-        /// token error flag is set.
-        /// </summary>
-        /// <see cref="Error"/>
-        private string errorMessage = null;
+      /// <summary>
+      /// The token error message. This message will only be set if the
+      /// token error flag is set.
+      /// </summary>
+      /// <see cref="Error"/>
+      private string errorMessage = null;
 
-        /// <summary>
-        /// The token ignore flag. If this flag is set, it means that the
-        /// token should be ignored if found. If an ignore message is
-        /// present in the ignoreMessage variable, it will also be reported
-        /// as a warning.
-        /// </summary>
-        /// <see cref="IgnoreMessage"/>
-        private bool ignore = false;
+      /// <summary>
+      /// The token ignore flag. If this flag is set, it means that the
+      /// token should be ignored if found. If an ignore message is
+      /// present in the ignoreMessage variable, it will also be reported
+      /// as a warning.
+      /// </summary>
+      /// <see cref="IgnoreMessage"/>
+      private bool ignore = false;
 
-        /// <summary>
-        /// The token ignore message. If this message is set when the token
-        /// ignore flag is also set, a warning message will be printed if
-        /// the token is found.
-        /// </summary>
-        /// <see cref="Ignore"/>
-        private string ignoreMessage = null;
+      /// <summary>
+      /// The token ignore message. If this message is set when the token
+      /// ignore flag is also set, a warning message will be printed if
+      /// the token is found.
+      /// </summary>
+      /// <see cref="Ignore"/>
+      private string ignoreMessage = null;
 
-        /// <summary>
-        /// The optional debug information message. This is normally set
-        /// when the token pattern is analyzed by the tokenizer.
-        /// </summary> 
-        private string debugInfo = null;
-        
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TokenPattern"/> class.
-        /// </summary>
-        /// <param name="id">The token pattern id</param>
-        /// <param name="name">The token pattern name</param>
-        /// <param name="type">The token pattern type</param>
-        /// <param name="pattern">The token pattern</param>
-        public TokenPattern(
-            int id,
-            string name,
-            PatternType type,
-            string pattern)
-        {
-            this.id = id;
-            this.name = name;
-            this.type = type;
-            this.pattern = pattern;
-        }
+      /// <summary>
+      /// The optional debug information message. This is normally set
+      /// when the token pattern is analyzed by the tokenizer.
+      /// </summary> 
+      private string debugInfo = null;
 
-        /// <summary>
-        /// The pattern type enumeration.
-        /// </summary>
-        public enum PatternType
-        {
-            /// <summary>
-            /// The string pattern type is used for tokens that only
-            /// match an exact string.
-            /// </summary> 
-            String,
+      /// <summary>
+      /// Initializes a new instance of the <see cref="TokenPattern"/> class.
+      /// </summary>
+      /// <param name="id">The token pattern id</param>
+      /// <param name="name">The token pattern name</param>
+      /// <param name="type">The token pattern type</param>
+      /// <param name="pattern">The token pattern</param>
+      public TokenPattern(
+          int id,
+          string name,
+          PatternType type,
+          string pattern)
+      {
+         this.id = id;
+         this.name = name;
+         this.type = type;
+         this.pattern = pattern;
+      }
 
-            /// <summary>
-            /// The regular expression pattern type is used for tokens
-            /// that match a regular expression.
-            /// </summary>
-            RegExp
-        }
+      /// <summary>
+      /// The pattern type enumeration.
+      /// </summary>
+      public enum PatternType
+      {
+         /// <summary>
+         /// The string pattern type is used for tokens that only
+         /// match an exact string.
+         /// </summary> 
+         String,
 
-        /// <summary>
-        /// Gets the token pattern id (read-only). This
-        /// property contains the unique token pattern identity value.
-        /// </summary>
-        public int Id
-        {
-            get
+         /// <summary>
+         /// The regular expression pattern type is used for tokens
+         /// that match a regular expression.
+         /// </summary>
+         RegExp
+      }
+
+      /// <summary>
+      /// Gets the token pattern id (read-only). This
+      /// property contains the unique token pattern identity value.
+      /// </summary>
+      public int Id
+      {
+         get
+         {
+            return this.id;
+         }
+      }
+
+      /// <summary>
+      /// Gets token pattern name (read-only).
+      /// </summary>         
+      public string Name
+      {
+         get
+         {
+            return this.name;
+         }
+      }
+
+      /// <summary>
+      /// Gets the token pattern type (read-only).
+      /// </summary>
+      public PatternType Type
+      {
+         get
+         {
+            return this.type;
+         }
+      }
+
+      /// <summary>
+      /// Gets the token pattern (read-only). This property
+      /// contains the actual pattern (string or regexp) which have
+      /// to be matched.
+      /// </summary>
+      public string Pattern
+      {
+         get
+         {
+            return this.pattern;
+         }
+      }
+
+      /// <summary>
+      /// Gets or sets a value indicating whether to report en error if
+      /// this token is found. If this property is true, the
+      /// token pattern corresponds to an error token and an error
+      /// should be reported if a match is found. When setting this
+      /// property to true, a default error message is created if
+      /// none was previously set.
+      /// </summary>
+      public bool Error
+      {
+         get
+         {
+            return this.error;
+         }
+
+         set
+         {
+            this.error = value;
+            if (this.error && this.errorMessage == null)
             {
-                return this.id;
+               this.errorMessage = "unrecognized token found";
             }
-        }
+         }
+      }
 
-        /// <summary>
-        /// Gets token pattern name (read-only).
-        /// </summary>         
-        public string Name
-        {
-            get
+      /// <summary>
+      /// Gets or sets the token error message. The error message is
+      /// printed whenever the token is matched. Setting the error
+      /// message property also sets the error flag to true.
+      /// </summary>
+      /// <see cref="Error"/>
+      public string ErrorMessage
+      {
+         get
+         {
+            return this.errorMessage;
+         }
+
+         set
+         {
+            this.error = true;
+            this.errorMessage = value;
+         }
+      }
+
+      /// <summary>
+      /// Gets or sets a value indicating whether to ignore this token when found.
+      /// If this property is true, the token pattern corresponds to an ignore 
+      /// token and should be skipped if a match is found.
+      /// </summary>
+      public bool Ignore
+      {
+         get
+         {
+            return this.ignore;
+         }
+
+         set
+         {
+            this.ignore = value;
+         }
+      }
+
+      /// <summary>
+      /// Gets or sets the token ignore message. The ignore message is
+      /// printed whenever the token is matched. Setting the ignore
+      /// message property also sets the ignore flag to true.
+      /// </summary>
+      /// <see cref="Ignore"/>
+      public string IgnoreMessage
+      {
+         get
+         {
+            return this.ignoreMessage;
+         }
+
+         set
+         {
+            this.ignore = true;
+            this.ignoreMessage = value;
+         }
+      }
+
+      /// <summary>
+      /// Gets or sets the token debug info message. This is normally be
+      /// set when the token pattern is analyzed by the tokenizer.
+      /// </summary>
+      public string DebugInfo
+      {
+         get
+         {
+            return this.debugInfo;
+         }
+
+         set
+         {
+            this.debugInfo = value;
+         }
+      }
+
+      /// <summary>
+      /// Returns a string representation of this object.
+      /// </summary>
+      /// <returns>A token pattern string representation</returns>
+      public override string ToString()
+      {
+         StringBuilder buffer = new StringBuilder();
+
+         buffer.Append(this.name);
+         buffer.Append(" (");
+         buffer.Append(this.id);
+         buffer.Append("): ");
+
+         switch (this.type)
+         {
+            case PatternType.String:
+               buffer.Append("\"");
+               buffer.Append(this.pattern);
+               buffer.Append("\"");
+               break;
+            case PatternType.RegExp:
+               buffer.Append("<<");
+               buffer.Append(this.pattern);
+               buffer.Append(">>");
+               break;
+         }
+
+         if (this.error)
+         {
+            buffer.Append(" ERROR: \"");
+            buffer.Append(this.errorMessage);
+            buffer.Append("\"");
+         }
+
+         if (this.ignore)
+         {
+            buffer.Append(" IGNORE");
+            if (this.ignoreMessage != null)
             {
-                return this.name;
+               buffer.Append(": \"");
+               buffer.Append(this.ignoreMessage);
+               buffer.Append("\"");
             }
-        }
+         }
 
-        /// <summary>
-        /// Gets the token pattern type (read-only).
-        /// </summary>
-        public PatternType Type
-        {
-            get
+         if (this.debugInfo != null)
+         {
+            buffer.Append("\n  ");
+            buffer.Append(this.debugInfo);
+         }
+
+         return buffer.ToString();
+      }
+
+      /// <summary>
+      /// Returns a short string representation of this object.
+      /// </summary>
+      /// <returns>A short string representation of this object</returns>
+      public string ToShortString()
+      {
+         StringBuilder buffer = new StringBuilder();
+         int newline = this.pattern.IndexOf('\n');
+
+         if (this.type == PatternType.String)
+         {
+            buffer.Append("\"");
+            if (newline >= 0)
             {
-                return this.type;
-            }
-        }
+               if (newline > 0 && this.pattern[newline - 1] == '\r')
+               {
+                  newline--;
+               }
 
-        /// <summary>
-        /// Gets the token pattern (read-only). This property
-        /// contains the actual pattern (string or regexp) which have
-        /// to be matched.
-        /// </summary>
-        public string Pattern
-        {
-            get
-            {
-                return this.pattern;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to report en error if
-        /// this token is found. If this property is true, the
-        /// token pattern corresponds to an error token and an error
-        /// should be reported if a match is found. When setting this
-        /// property to true, a default error message is created if
-        /// none was previously set.
-        /// </summary>
-        public bool Error
-        {
-            get
-            {
-                return this.error;
-            }
-
-            set
-            {
-                this.error = value;
-                if (this.error && this.errorMessage == null)
-                {
-                    this.errorMessage = "unrecognized token found";
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the token error message. The error message is
-        /// printed whenever the token is matched. Setting the error
-        /// message property also sets the error flag to true.
-        /// </summary>
-        /// <see cref="Error"/>
-        public string ErrorMessage
-        {
-            get
-            {
-                return this.errorMessage;
-            }
-
-            set
-            {
-                this.error = true;
-                this.errorMessage = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to ignore this token when found.
-        /// If this property is true, the token pattern corresponds to an ignore 
-        /// token and should be skipped if a match is found.
-        /// </summary>
-        public bool Ignore
-        {
-            get
-            {
-                return this.ignore;
-            }
-
-            set
-            {
-                this.ignore = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the token ignore message. The ignore message is
-        /// printed whenever the token is matched. Setting the ignore
-        /// message property also sets the ignore flag to true.
-        /// </summary>
-        /// <see cref="Ignore"/>
-        public string IgnoreMessage
-        {
-            get
-            {
-                return this.ignoreMessage;
-            }
-
-            set
-            {
-                this.ignore = true;
-                this.ignoreMessage = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the token debug info message. This is normally be
-        /// set when the token pattern is analyzed by the tokenizer.
-       /// </summary>
-        public string DebugInfo
-        {
-            get
-            {
-                return this.debugInfo;
-            }
-
-            set
-            {
-                this.debugInfo = value;
-            }
-        }
-
-        /// <summary>
-        /// Returns a string representation of this object.
-        /// </summary>
-        /// <returns>A token pattern string representation</returns>
-        public override string ToString()
-        {
-            StringBuilder buffer = new StringBuilder();
-
-            buffer.Append(this.name);
-            buffer.Append(" (");
-            buffer.Append(this.id);
-            buffer.Append("): ");
-
-            switch (this.type)
-            {
-                case PatternType.String:
-                    buffer.Append("\"");
-                    buffer.Append(this.pattern);
-                    buffer.Append("\"");
-                    break;
-                case PatternType.RegExp:
-                    buffer.Append("<<");
-                    buffer.Append(this.pattern);
-                    buffer.Append(">>");
-                    break;
-            }
-
-            if (this.error)
-            {
-                buffer.Append(" ERROR: \"");
-                buffer.Append(this.errorMessage);
-                buffer.Append("\"");
-            }
-
-            if (this.ignore)
-            {
-                buffer.Append(" IGNORE");
-                if (this.ignoreMessage != null)
-                {
-                    buffer.Append(": \"");
-                    buffer.Append(this.ignoreMessage);
-                    buffer.Append("\"");
-                }
-            }
-
-            if (this.debugInfo != null)
-            {
-                buffer.Append("\n  ");
-                buffer.Append(this.debugInfo);
-            }
-
-            return buffer.ToString();
-        }
-
-        /// <summary>
-        /// Returns a short string representation of this object.
-        /// </summary>
-        /// <returns>A short string representation of this object</returns>
-        public string ToShortString()
-        {
-            StringBuilder buffer = new StringBuilder();
-            int newline = this.pattern.IndexOf('\n');
-
-            if (this.type == PatternType.String)
-            {
-                buffer.Append("\"");
-                if (newline >= 0)
-                {
-                    if (newline > 0 && this.pattern[newline - 1] == '\r')
-                    {
-                        newline--;
-                    }
-
-                    buffer.Append(this.pattern.Substring(0, newline));
-                    buffer.Append("(...)");
-                }
-                else
-                {
-                    buffer.Append(this.pattern);
-                }
-
-                buffer.Append("\"");
+               buffer.Append(this.pattern.Substring(0, newline));
+               buffer.Append("(...)");
             }
             else
             {
-                buffer.Append("<");
-                buffer.Append(this.name);
-                buffer.Append(">");
+               buffer.Append(this.pattern);
             }
 
-            return buffer.ToString();
-        }
-    }
+            buffer.Append("\"");
+         }
+         else
+         {
+            buffer.Append("<");
+            buffer.Append(this.name);
+            buffer.Append(">");
+         }
+
+         return buffer.ToString();
+      }
+   }
 }

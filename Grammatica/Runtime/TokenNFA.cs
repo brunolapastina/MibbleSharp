@@ -15,215 +15,214 @@
 
 namespace PerCederberg.Grammatica.Runtime
 {
-    using System.Linq;
-    using PerCederberg.Grammatica.Runtime.NFA;
+   using PerCederberg.Grammatica.Runtime.NFA;
 
-    /// <summary>
-    /// A non-deterministic finite state automaton (NFA) for matching
-    /// tokens. It supports both fixed strings and simple regular
-    /// expressions, but should perform similar to a DFA due to highly
-    /// optimized data structures and tuning. The memory footprint during
-    /// matching should be near zero, since no heap memory is allocated
-    /// unless the pre-allocated queues need to be enlarged. The NFA also
-    /// does not use recursion, but iterates in a loop instead.
-    /// </summary>
-    internal class TokenNFA
-    {
-        /// <summary>
-        /// The initial state lookup table, indexed by the first ASCII
-        /// character. This array is used to for speed optimizing the
-        /// first step in the match, since the initial state would
-        /// otherwise have a long list of transitions to consider.
-        /// </summary> 
-        private NFAState[] initialChar = new NFAState[128];
+   /// <summary>
+   /// A non-deterministic finite state automaton (NFA) for matching
+   /// tokens. It supports both fixed strings and simple regular
+   /// expressions, but should perform similar to a DFA due to highly
+   /// optimized data structures and tuning. The memory footprint during
+   /// matching should be near zero, since no heap memory is allocated
+   /// unless the pre-allocated queues need to be enlarged. The NFA also
+   /// does not use recursion, but iterates in a loop instead.
+   /// </summary>
+   internal class TokenNFA
+   {
+      /// <summary>
+      /// The initial state lookup table, indexed by the first ASCII
+      /// character. This array is used to for speed optimizing the
+      /// first step in the match, since the initial state would
+      /// otherwise have a long list of transitions to consider.
+      /// </summary> 
+      private readonly NFAState[] initialChar = new NFAState[128];
 
-        /// <summary>
-        /// The initial state. This state contains any transitions not
-        /// already stored in the initial text state array, i.e. non-ASCII
-        /// or complex transitions (such as regular expressions).
-        /// </summary>
-        private NFAState initial = new NFAState();
+      /// <summary>
+      /// The initial state. This state contains any transitions not
+      /// already stored in the initial text state array, i.e. non-ASCII
+      /// or complex transitions (such as regular expressions).
+      /// </summary>
+      private readonly NFAState initial = new NFAState();
 
-        /// <summary>
-        /// The NFA state queue to use.
-        /// </summary>
-        private NFAStateQueue queue = new NFAStateQueue();
+      /// <summary>
+      /// The NFA state queue to use.
+      /// </summary>
+      private readonly NFAStateQueue queue = new NFAStateQueue();
 
-        /// <summary>
-        /// Adds a string match to this automaton. New states and
-        /// transitions will be added to extend this automaton to support
-        /// the specified string.
-        /// </summary>
-        /// <param name="str">The string to match</param>
-        /// <param name="ignoreCase">The case-insensitive match flag</param>
-        /// <param name="value">The match value</param>
-        public void AddTextMatch(string str, bool ignoreCase, TokenPattern value)
-        {
-            NFAState state;
-            char ch = str[0];
+      /// <summary>
+      /// Adds a string match to this automaton. New states and
+      /// transitions will be added to extend this automaton to support
+      /// the specified string.
+      /// </summary>
+      /// <param name="str">The string to match</param>
+      /// <param name="ignoreCase">The case-insensitive match flag</param>
+      /// <param name="value">The match value</param>
+      public void AddTextMatch(string str, bool ignoreCase, TokenPattern value)
+      {
+         NFAState state;
+         char ch = str[0];
 
-            if (ch < 128 && !ignoreCase)
+         if (ch < 128 && !ignoreCase)
+         {
+            state = this.initialChar[ch];
+            if (state == null)
             {
-                state = this.initialChar[ch];
-                if (state == null)
-                {
-                    state = this.initialChar[ch] = new NFAState();
-                }
+               state = this.initialChar[ch] = new NFAState();
             }
-            else
+         }
+         else
+         {
+            state = this.initial.AddOut(ch, ignoreCase, null);
+         }
+
+         for (int i = 1; i < str.Length; i++)
+         {
+            state = state.AddOut(str[i], ignoreCase, null);
+         }
+
+         state.Value = value;
+      }
+
+      /// <summary>
+      /// Adds a regular expression match to this automaton. New states
+      /// and transitions will be added to extend this automaton to
+      /// support the specified string. Note that this method only
+      /// supports a subset of the full regular expression syntax, so
+      /// a more complete regular expression library must also be
+      /// provided.
+      /// </summary>
+      /// <param name="pattern">The regular expression string</param>
+      /// <param name="ignoreCase">The case-insensitive match flag</param>
+      /// <param name="value">The match value</param>
+      /// <exception cref="Grammatica.RE.RegExpException">If the regular expression parsing 
+      /// failed</exception>
+      public void AddRegExpMatch(
+          string pattern,
+          bool ignoreCase,
+          TokenPattern value)
+      {
+         TokenRegExpParser parser = new TokenRegExpParser(pattern, ignoreCase);
+         string debug = "DFA regexp; " + parser.DebugInfo;
+         bool isAscii;
+
+         isAscii = parser.Start.IsAsciiOutgoing;
+         for (int i = 0; isAscii && i < 128; i++)
+         {
+            bool match = false;
+            foreach (var outTrans in parser.Start.Outgoing)
             {
-                state = this.initial.AddOut(ch, ignoreCase, null);
+               if (outTrans.Match((char)i))
+               {
+                  if (match)
+                  {
+                     isAscii = false;
+                     break;
+                  }
+
+                  match = true;
+               }
             }
 
-            for (int i = 1; i < str.Length; i++)
+            if (match && this.initialChar[i] != null)
             {
-                state = state.AddOut(str[i], ignoreCase, null);
+               isAscii = false;
             }
+         }
 
-            state.Value = value;
-        }
-
-        /// <summary>
-        /// Adds a regular expression match to this automaton. New states
-        /// and transitions will be added to extend this automaton to
-        /// support the specified string. Note that this method only
-        /// supports a subset of the full regular expression syntax, so
-        /// a more complete regular expression library must also be
-        /// provided.
-        /// </summary>
-        /// <param name="pattern">The regular expression string</param>
-        /// <param name="ignoreCase">The case-insensitive match flag</param>
-        /// <param name="value">The match value</param>
-        /// <exception cref="Grammatica.RE.RegExpException">If the regular expression parsing 
-        /// failed</exception>
-        public void AddRegExpMatch(
-            string pattern,
-            bool ignoreCase,
-            TokenPattern value)
-        {
-            TokenRegExpParser parser = new TokenRegExpParser(pattern, ignoreCase);
-            string debug = "DFA regexp; " + parser.DebugInfo;
-            bool isAscii;
-
-            isAscii = parser.Start.IsAsciiOutgoing;
+         if (parser.Start.Incoming.Count > 0)
+         {
+            this.initial.AddOut(new NFAEpsilonTransition(parser.Start));
+            debug += ", uses initial epsilon";
+         }
+         else if (isAscii && !ignoreCase)
+         {
             for (int i = 0; isAscii && i < 128; i++)
             {
-                bool match = false;
-                foreach (var outTrans in parser.Start.Outgoing)
-                {
-                    if (outTrans.Match((char)i))
-                    {
-                        if (match)
-                        {
-                            isAscii = false;
-                            break;
-                        }
-
-                        match = true;
-                    }
-                }
-
-                if (match && this.initialChar[i] != null)
-                {
-                    isAscii = false;
-                }
+               foreach (var outTrans in parser.Start.Outgoing)
+               {
+                  if (outTrans.Match((char)i))
+                  {
+                     this.initialChar[i] = outTrans.State;
+                  }
+               }
             }
 
-            if (parser.Start.Incoming.Count > 0)
+            debug += ", uses ASCII lookup";
+         }
+         else
+         {
+            parser.Start.MergeInto(this.initial);
+            debug += ", uses initial state";
+         }
+
+         parser.End.Value = value;
+         value.DebugInfo = debug;
+      }
+
+      /// <summary>
+      /// Checks if this NFA matches the specified input text. The
+      /// matching will be performed from position zero (0) in the
+      /// buffer. This method will not read any characters from the
+      /// stream, just peek ahead.
+      /// </summary>
+      /// <param name="buffer">The input buffer to check</param>
+      /// <param name="match">The token match to update</param>
+      /// <returns>The number of characters matched</returns>
+      /// <exception cref="System.IO.IOException">
+      /// If an I/O error occurred
+      /// </exception>
+      public int Match(ReaderBuffer buffer, TokenMatch match)
+      {
+         int length = 0;
+         int pos = 1;
+         int peekChar;
+         NFAState state;
+
+         // The first step of the match loop has been unrolled and
+         // optimized for performance below.
+         this.queue.Clear();
+         peekChar = buffer.Peek(0);
+
+         if (peekChar >= 0 && peekChar < 128)
+         {
+            state = this.initialChar[peekChar];
+            if (state != null)
             {
-                this.initial.AddOut(new NFAEpsilonTransition(parser.Start));
-                debug += ", uses initial epsilon";
+               this.queue.AddLast(state);
             }
-            else if (isAscii && !ignoreCase)
-            {
-                for (int i = 0; isAscii && i < 128; i++)
-                {
-                    foreach (var outTrans in parser.Start.Outgoing)
-                    {
-                        if (outTrans.Match((char)i))
-                        {
-                            this.initialChar[i] = outTrans.State;
-                        }
-                    }
-                }
+         }
 
-                debug += ", uses ASCII lookup";
+         if (peekChar >= 0)
+         {
+            this.initial.MatchTransitions((char)peekChar, this.queue, true);
+         }
+
+         this.queue.MarkEnd();
+         peekChar = buffer.Peek(1);
+
+         // The remaining match loop processes all subsequent states
+         while (!this.queue.Empty)
+         {
+            if (this.queue.Marked)
+            {
+               pos++;
+               peekChar = buffer.Peek(pos);
+               this.queue.MarkEnd();
             }
-            else
+
+            state = this.queue.RemoveFirst();
+
+            if (state.Value != null)
             {
-                parser.Start.MergeInto(this.initial);
-                debug += ", uses initial state";
-            }
-
-            parser.End.Value = value;
-            value.DebugInfo = debug;
-        }
-
-        /// <summary>
-        /// Checks if this NFA matches the specified input text. The
-        /// matching will be performed from position zero (0) in the
-        /// buffer. This method will not read any characters from the
-        /// stream, just peek ahead.
-        /// </summary>
-        /// <param name="buffer">The input buffer to check</param>
-        /// <param name="match">The token match to update</param>
-        /// <returns>The number of characters matched</returns>
-        /// <exception cref="System.IO.IOException">
-        /// If an I/O error occurred
-        /// </exception>
-        public int Match(ReaderBuffer buffer, TokenMatch match)
-        {
-            int length = 0;
-            int pos = 1;
-            int peekChar;
-            NFAState state;
-
-            // The first step of the match loop has been unrolled and
-            // optimized for performance below.
-            this.queue.Clear();
-            peekChar = buffer.Peek(0);
-
-            if (peekChar >= 0 && peekChar < 128)
-            {
-                state = this.initialChar[peekChar];
-                if (state != null)
-                {
-                    this.queue.AddLast(state);
-                }
+               match.Update(pos, state.Value);
             }
 
             if (peekChar >= 0)
             {
-                this.initial.MatchTransitions((char)peekChar, this.queue, true);
+               state.MatchTransitions((char)peekChar, this.queue, false);
             }
+         }
 
-            this.queue.MarkEnd();
-            peekChar = buffer.Peek(1);
-
-            // The remaining match loop processes all subsequent states
-            while (!this.queue.Empty)
-            {
-                if (this.queue.Marked)
-                {
-                    pos++;
-                    peekChar = buffer.Peek(pos);
-                    this.queue.MarkEnd();
-                }
-
-                state = this.queue.RemoveFirst();
-
-                if (state.Value != null)
-                {
-                    match.Update(pos, state.Value);
-                }
-
-                if (peekChar >= 0)
-                {
-                    state.MatchTransitions((char)peekChar, this.queue, false);
-                }
-            }
-
-            return length;
-        }
-    }
+         return length;
+      }
+   }
 }

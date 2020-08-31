@@ -15,147 +15,147 @@
 
 namespace PerCederberg.Grammatica.Runtime
 {
-    using System.Collections.Generic;
+   using System.Collections.Generic;
 
-    /// <summary>
-    /// A production node. This class represents a grammar production
-    /// (i.e. a list of child nodes) in a parse tree. The productions
-    /// are created by a parser, that adds children a according to a
-    /// set of production patterns (i.e. grammar rules).
-    /// </summary>
-    public class Production : Node
-    {
-        /// <summary>
-        /// The production pattern used for this production.
-        /// </summary> 
-        private readonly ProductionPattern pattern;
+   /// <summary>
+   /// A production node. This class represents a grammar production
+   /// (i.e. a list of child nodes) in a parse tree. The productions
+   /// are created by a parser, that adds children a according to a
+   /// set of production patterns (i.e. grammar rules).
+   /// </summary>
+   public class Production : Node
+   {
+      /// <summary>
+      /// The production pattern used for this production.
+      /// </summary> 
+      private readonly ProductionPattern pattern;
 
-        /// <summary>
-        /// The child nodes.
-        /// </summary> 
-        private readonly IList<Node> children;
+      /// <summary>
+      /// The child nodes.
+      /// </summary> 
+      private readonly IList<Node> children;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Production"/> class.
-        /// </summary>
-        /// <param name="pattern">The production pattern</param>         
-        public Production(ProductionPattern pattern)
-        {
-            this.pattern = pattern;
-            this.children = new List<Node>();
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="Production"/> class.
+      /// </summary>
+      /// <param name="pattern">The production pattern</param>         
+      public Production(ProductionPattern pattern)
+      {
+         this.pattern = pattern;
+         this.children = new List<Node>();
+      }
 
-        /// <summary>
-        /// Get the node type id (read-only). This value is set as
-        /// a unique identifier for each type of node, in order to
-        /// simplify later identification.
-        /// </summary>
-        public override int Id
-        {
-            get
+      /// <summary>
+      /// Get the node type id (read-only). This value is set as
+      /// a unique identifier for each type of node, in order to
+      /// simplify later identification.
+      /// </summary>
+      public override int Id
+      {
+         get
+         {
+            return this.pattern.Id;
+         }
+      }
+
+      /// <summary>
+      /// Gets the node name (read-only).
+      /// </summary>
+      public override string Name
+      {
+         get
+         {
+            return this.pattern.Name;
+         }
+      }
+
+      /// <summary>
+      /// Gets the child node count (read-only).
+      /// </summary>
+      public override int ChildCount
+      {
+         get
+         {
+            return this.children.Count;
+         }
+      }
+
+      /// <summary>
+      /// Gets the production pattern (read-only). This property
+      /// contains the production pattern linked to this production.
+      /// </summary>
+      public ProductionPattern Pattern
+      {
+         get
+         {
+            return this.pattern;
+         }
+      }
+
+      /// <summary>
+      /// Gets the list of child nodes
+      /// </summary>
+      public override IList<Node> Children
+      {
+         get
+         {
+            return this.children;
+         }
+      }
+
+      /// <summary>
+      /// Gets a value indicating whether this node is hidden, i.e. 
+      /// if it should not be visible outside the parser.
+      /// </summary>
+      internal override bool Hidden
+      {
+         get
+         {
+            return this.pattern.Synthetic;
+         }
+      }
+
+      /// <summary>
+      /// The child node index (read-only).
+      /// </summary>
+      /// <param name="index">The child index from 0 to Count - 1</param>
+      /// <returns>The child at the given index</returns>
+      public override Node this[int index]
+      {
+         get
+         {
+            if (index < 0 || index >= this.children.Count)
             {
-                return this.pattern.Id;
+               return null;
             }
-        }
-
-        /// <summary>
-        /// Gets the node name (read-only).
-        /// </summary>
-        public override string Name
-        {
-            get
+            else
             {
-                return this.pattern.Name;
+               return this.children[index];
             }
-        }
+         }
+      }
 
-        /// <summary>
-        /// Gets the child node count (read-only).
-        /// </summary>
-        public override int ChildCount
-        {
-            get
-            {
-                return this.children.Count;
-            }
-        }
+      /// <summary>
+      /// Adds a child node. The node will be added last in the list of
+      /// children.
+      /// </summary>
+      /// <param name="child">The child node to add</param>
+      public void AddChild(Node child)
+      {
+         if (child != null)
+         {
+            child.Parent = this;
+            this.children.Add(child);
+         }
+      }
 
-        /// <summary>
-        /// Gets the production pattern (read-only). This property
-        /// contains the production pattern linked to this production.
-        /// </summary>
-        public ProductionPattern Pattern
-        {
-            get
-            {
-                return this.pattern;
-            }
-        }
-       
-        /// <summary>
-        /// Gets the list of child nodes
-        /// </summary>
-        public override IList<Node> Children
-        {
-            get
-            {
-                return this.children;
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether this node is hidden, i.e. 
-        /// if it should not be visible outside the parser.
-        /// </summary>
-        internal override bool Hidden
-        {
-            get
-            {
-                return this.pattern.Synthetic;
-            }
-        }
-
-        /// <summary>
-        /// The child node index (read-only).
-        /// </summary>
-        /// <param name="index">The child index from 0 to Count - 1</param>
-        /// <returns>The child at the given index</returns>
-        public override Node this[int index]
-        {
-            get
-            {
-                if (index < 0 || index >= this.children.Count)
-                {
-                    return null;
-                }
-                else
-                {
-                    return this.children[index];
-                }
-            }
-        }
-
-        /// <summary>
-        /// Adds a child node. The node will be added last in the list of
-        /// children.
-        /// </summary>
-        /// <param name="child">The child node to add</param>
-        public void AddChild(Node child)
-        {
-            if (child != null)
-            {
-                child.Parent = this;
-                this.children.Add(child);
-            }
-        }
-
-        /// <summary>
-        /// Returns a string representation of this production.
-        /// </summary>
-        /// <returns>A string representation of this production</returns>
-        public override string ToString()
-        {
-            return this.pattern.Name + '(' + this.pattern.Id + ')';
-        }
-    }
+      /// <summary>
+      /// Returns a string representation of this production.
+      /// </summary>
+      /// <returns>A string representation of this production</returns>
+      public override string ToString()
+      {
+         return this.pattern.Name + '(' + this.pattern.Id + ')';
+      }
+   }
 }

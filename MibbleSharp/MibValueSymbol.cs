@@ -21,352 +21,326 @@
 
 namespace MibbleSharp
 {
-    using System.Text;
-    using MibbleSharp.Snmp;
-    using MibbleSharp.Type;
-    using MibbleSharp.Value;
+   using MibbleSharp.Snmp;
+   using MibbleSharp.Type;
+   using MibbleSharp.Value;
+   using System.Text;
 
-    /// <summary>
-    /// A MIB value symbol. This class holds information relevant to a MIB
-    /// value assignment, i.e.a type and a value.Normally the value is
-    /// an object identifier.
-    /// </summary>
-    public class MibValueSymbol : MibSymbol
-    {
-        /// <summary>The symbol type.</summary>
-        private MibType type;
+   /// <summary>
+   /// A MIB value symbol. This class holds information relevant to a MIB
+   /// value assignment, i.e.a type and a value.Normally the value is
+   /// an object identifier.
+   /// </summary>
+   public class MibValueSymbol : MibSymbol
+   {
+      /// <summary>The symbol type.</summary>
+      private MibType type;
 
-        /// <summary>The symbol value.</summary>
-        private MibValue value;
+      /// <summary>The symbol value.</summary>
+      private MibValue value;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MibValueSymbol"/> class.
-        /// NOTE: This is an internal constructor that
-        /// should only be called by the MIB loader.
-        /// </summary>
-        /// <param name="location">The symbol location</param>
-        /// <param name="mib">The symbol MIB name</param>
-        /// <param name="name">The symbol name</param>
-        /// <param name="type">The symbol type</param>
-        /// <param name="value">The symbol value</param>
-        public MibValueSymbol(
-            FileLocation location,
-            Mib mib,
-            string name,
-            MibType type,
-            MibValue value)
-            : base(location, mib, name)
-        {
-            this.type = type;
-            this.value = value;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="MibValueSymbol"/> class.
+      /// NOTE: This is an internal constructor that
+      /// should only be called by the MIB loader.
+      /// </summary>
+      /// <param name="location">The symbol location</param>
+      /// <param name="mib">The symbol MIB name</param>
+      /// <param name="name">The symbol name</param>
+      /// <param name="type">The symbol type</param>
+      /// <param name="value">The symbol value</param>
+      public MibValueSymbol(
+          FileLocation location,
+          Mib mib,
+          string name,
+          MibType type,
+          MibValue value)
+          : base(location, mib, name)
+      {
+         this.type = type;
+         this.value = value;
+      }
 
-        /// <summary>Gets a value indicating whether this symbol corresponds to a scalar. A symbol is
-        /// considered a scalar if it has an <c>SnmpObjectType</c> type and does
-        /// not represent or reside within a table.
-        /// </summary>
-        /// <see cref="IsTable"/>
-        /// <see cref="IsTableRow"/>
-        /// <see cref="IsTableColumn"/>
-        /// <see cref="Snmp.SnmpObjectType"/>
-        public bool IsScalar
-        {
-            get
+      /// <summary>Gets a value indicating whether this symbol corresponds to a scalar. A symbol is
+      /// considered a scalar if it has an <c>SnmpObjectType</c> type and does
+      /// not represent or reside within a table.
+      /// </summary>
+      /// <see cref="IsTable"/>
+      /// <see cref="IsTableRow"/>
+      /// <see cref="IsTableColumn"/>
+      /// <see cref="Snmp.SnmpObjectType"/>
+      public bool IsScalar
+      {
+         get
+         {
+            return this.type is SnmpObjectType
+            && !this.IsTable && !this.IsTableRow && !this.IsTableColumn;
+         }
+      }
+
+      /// <summary>
+      /// Gets a value indicating whether this symbol corresponds to a table. A symbol is
+      /// considered a table if it has an <c>SnmpObjectType</c> type with
+      /// SEQUENCE OF syntax.
+      /// </summary>
+      /// <see cref="IsScalar"/>
+      /// <see cref="IsTableRow"/>
+      /// <see cref="IsTableColumn"/>
+      /// <see cref="Snmp.SnmpObjectType"/>
+      public bool IsTable
+      {
+         get
+         {
+            if (this.type is SnmpObjectType snmpObjTp)
             {
-                return this.type is SnmpObjectType
-                && !this.IsTable && !this.IsTableRow && !this.IsTableColumn;
+               MibType syntax = snmpObjTp.Syntax;
+               return syntax is SequenceOfType;
             }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether this symbol corresponds to a table. A symbol is
-        /// considered a table if it has an <c>SnmpObjectType</c> type with
-        /// SEQUENCE OF syntax.
-        /// </summary>
-        /// <see cref="IsScalar"/>
-        /// <see cref="IsTableRow"/>
-        /// <see cref="IsTableColumn"/>
-        /// <see cref="Snmp.SnmpObjectType"/>
-        public bool IsTable
-        {
-            get
+            else
             {
-                MibType syntax;
-
-                if (this.type is SnmpObjectType)
-                {
-                    syntax = ((SnmpObjectType)this.type).Syntax;
-                    return syntax is SequenceOfType;
-                }
-                else
-                {
-                    return false;
-                }
+               return false;
             }
-        }
+         }
+      }
 
-        /// <summary>
-        /// Gets a value indicating whether this symbol corresponds to a table row (or entry). A
-        /// symbol is considered a table row if it has an <c>SnmpObjectType</c>
-        /// type with SEQUENCE syntax.
-        /// </summary>
-        /// <see cref="IsScalar"/>
-        /// <see cref="IsTableRow"/>
-        /// <see cref="IsTableColumn"/>
-        /// <see cref="Snmp.SnmpObjectType"/>
-        public bool IsTableRow
-        {
-            get
+      /// <summary>
+      /// Gets a value indicating whether this symbol corresponds to a table row (or entry). A
+      /// symbol is considered a table row if it has an <c>SnmpObjectType</c>
+      /// type with SEQUENCE syntax.
+      /// </summary>
+      /// <see cref="IsScalar"/>
+      /// <see cref="IsTableRow"/>
+      /// <see cref="IsTableColumn"/>
+      /// <see cref="Snmp.SnmpObjectType"/>
+      public bool IsTableRow
+      {
+         get
+         {
+            if (this.type is SnmpObjectType snmpObjTp)
             {
-                MibType syntax;
-
-                if (this.type is SnmpObjectType)
-                {
-                    syntax = ((SnmpObjectType)this.type).Syntax;
-                    return syntax is SequenceType;
-                }
-                else
-                {
-                    return false;
-                }
+               MibType syntax = snmpObjTp.Syntax;
+               return syntax is SequenceType;
             }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether this symbol corresponds to a table column. A symbol
-        /// is considered a table column if it has an <c>SnmpObjectType</c> type
-        /// and a parent symbol that is a table row.
-        /// </summary>
-        /// <see cref="IsScalar"/>
-        /// <see cref="isTable"/>
-        /// <see cref="IsTableRow"/>
-        /// <see cref="Snmp.SnmpObjectType"/>
-        public bool IsTableColumn
-        {
-            get
+            else
             {
-                MibValueSymbol par = this.Parent;
-
-                return this.type is SnmpObjectType
-                && par != null
-                && par.IsTableRow;
+               return false;
             }
-        }
+         }
+      }
 
-        /// <summary>
-        /// Gets the symbol type
-        /// </summary>
-        public MibType Type
-        {
-            get
+      /// <summary>
+      /// Gets a value indicating whether this symbol corresponds to a table column. A symbol
+      /// is considered a table column if it has an <c>SnmpObjectType</c> type
+      /// and a parent symbol that is a table row.
+      /// </summary>
+      /// <see cref="IsScalar"/>
+      /// <see cref="isTable"/>
+      /// <see cref="IsTableRow"/>
+      /// <see cref="Snmp.SnmpObjectType"/>
+      public bool IsTableColumn
+      {
+         get
+         {
+            MibValueSymbol par = this.Parent;
+
+            return this.type is SnmpObjectType
+            && par != null
+            && par.IsTableRow;
+         }
+      }
+
+      /// <summary>
+      /// Gets the symbol type
+      /// </summary>
+      public MibType Type
+      {
+         get
+         {
+            return this.type;
+         }
+      }
+
+      /// <summary>
+      /// Gets the symbol value
+      /// </summary>
+      public MibValue Value
+      {
+         get
+         {
+            return this.value;
+         }
+      }
+
+      /// <summary>
+      /// Gets the parent symbol in the OID tree. This is a
+      /// convenience method for value symbols that have object
+      /// identifier values. 
+      /// </summary>
+      public MibValueSymbol Parent
+      {
+         get
+         {
+            if (this.value is ObjectIdentifierValue objIdVal)
             {
-                return this.type;
-            }
-        }
-
-        /// <summary>
-        /// Gets the symbol value
-        /// </summary>
-        public MibValue Value
-        {
-            get
-            {
-                return this.value;
-            }
-        }
-
-        /// <summary>
-        /// Gets the parent symbol in the OID tree. This is a
-        /// convenience method for value symbols that have object
-        /// identifier values. 
-        /// </summary>
-        public MibValueSymbol Parent
-        {
-            get
-            {
-                ObjectIdentifierValue oid;
-
-                if (this.value is ObjectIdentifierValue)
-                {
-                    oid = ((ObjectIdentifierValue)this.value).Parent;
-                    if (oid != null)
-                    {
-                        return oid.Symbol;
-                    }
-                }
-
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Gets the number of child symbols in the OID tree. This is a
-        /// convenience method for value symbols that have object
-        /// identifier values. 
-        /// </summary>
-        public int ChildCount
-        {
-            get
-            {
-                ObjectIdentifierValue oiv = this.value as ObjectIdentifierValue;
-                if (oiv == null)
-                {
-                    return 0;
-                }
-                
-                return oiv.ChildCount;
-            }
-        }
-
-        /// <summary>
-        /// Gets all child symbols in the OID tree. This is a
-        /// convenience method for value symbols that have object
-        /// identifier values. 
-        /// </summary>
-        public MibValueSymbol[] Children
-        {
-            get
-            {
-                MibValueSymbol[] children;
-
-                ObjectIdentifierValue oid = this.value as ObjectIdentifierValue;
-
-                if (oid == null)
-                {
-                    return new MibValueSymbol[0];
-                }
-
-                children = new MibValueSymbol[oid.ChildCount];
-
-                for (int i = 0; i < oid.ChildCount; i++)
-                {
-                    children[i] = oid.GetChild(i).Symbol;
-                }
-
-                return children;
-            }
-        }
-
-        /// <summary>
-        /// Returns a specific child symbol in the OID tree. This is a
-        /// convenience method for value symbols that have object
-        /// identifier values. 
-        /// </summary>
-        /// <param name="index">The child position</param>
-        /// <returns>
-        /// The child symbol in the OID tree, or
-        /// null if not found or not applicable
-        /// </returns>
-        /// <see cref="ObjectIdentifierValue"/>
-        public MibValueSymbol GetChild(int index)
-        {
-            ObjectIdentifierValue child;
-
-            ObjectIdentifierValue oiv = this.value as ObjectIdentifierValue;
-
-            if (oiv == null)
-            {
-                return null;
-            }
-
-            child = oiv.GetChild(index);
-            if (child != null)
-            {
-                return child.Symbol;
+               ObjectIdentifierValue oid = objIdVal.Parent;
+               if (oid != null)
+               {
+                  return oid.Symbol;
+               }
             }
 
             return null;
-        }
+         }
+      }
 
-        /// <summary>
-        /// Initializes the MIB symbol. This will remove all levels of
-        /// indirection present, such as references to types or values. No
-        /// information is lost by this operation. This method may modify
-        /// this object as a side-effect.
-        /// </summary>
-        /// NOTE: This is an internal method that should
-        /// only be called by the MIB loader.
-        /// <param name="log">The MIB loader log</param>
-        /// <exception cref="MibException">
-        /// If an error was encountered during the initialization
-        /// </exception>
-        public override void Initialize(MibLoaderLog log)
-        {
-            ObjectIdentifierValue oid;
+      /// <summary>
+      /// Gets the number of child symbols in the OID tree. This is a
+      /// convenience method for value symbols that have object
+      /// identifier values. 
+      /// </summary>
+      public int ChildCount { get => (this.value is ObjectIdentifierValue oiv) ? oiv.ChildCount : 0; }
 
-            if (this.type != null)
+      /// <summary>
+      /// Gets all child symbols in the OID tree. This is a
+      /// convenience method for value symbols that have object
+      /// identifier values. 
+      /// </summary>
+      public MibValueSymbol[] Children
+      {
+         get
+         {
+            MibValueSymbol[] children;
+
+
+            if (!(this.value is ObjectIdentifierValue oid))
             {
-                try
-                {
-                    this.type = this.type.Initialize(this, log);
-                }
-                catch (MibException e)
-                {
-                    log.AddError(e.Location, e.Message);
-                    this.type = null;
-                }
+               return new MibValueSymbol[0];
             }
 
-            if (this.value != null)
+            children = new MibValueSymbol[oid.ChildCount];
+
+            for (int i = 0; i < oid.ChildCount; i++)
             {
-                try
-                {
-                    this.value = this.value.Initialize(log, this.type);
-                }
-                catch (MibException e)
-                {
-                    log.AddError(e.Location, e.Message);
-                    this.value = null;
-                }
+               children[i] = oid.GetChild(i).Symbol;
             }
 
-            if (this.type != null && this.value != null && !this.type.IsCompatible(this.value))
+            return children;
+         }
+      }
+
+      /// <summary>
+      /// Returns a specific child symbol in the OID tree. This is a
+      /// convenience method for value symbols that have object
+      /// identifier values. 
+      /// </summary>
+      /// <param name="index">The child position</param>
+      /// <returns>
+      /// The child symbol in the OID tree, or
+      /// null if not found or not applicable
+      /// </returns>
+      /// <see cref="ObjectIdentifierValue"/>
+      public MibValueSymbol GetChild(int index)
+      {
+         if (!(this.value is ObjectIdentifierValue oiv))
+         {
+            return null;
+         }
+
+         ObjectIdentifierValue child = oiv.GetChild(index);
+         if (child != null)
+         {
+            return child.Symbol;
+         }
+
+         return null;
+      }
+
+      /// <summary>
+      /// Initializes the MIB symbol. This will remove all levels of
+      /// indirection present, such as references to types or values. No
+      /// information is lost by this operation. This method may modify
+      /// this object as a side-effect.
+      /// </summary>
+      /// NOTE: This is an internal method that should
+      /// only be called by the MIB loader.
+      /// <param name="log">The MIB loader log</param>
+      /// <exception cref="MibException">
+      /// If an error was encountered during the initialization
+      /// </exception>
+      public override void Initialize(MibLoaderLog log)
+      {
+         if (this.type != null)
+         {
+            try
             {
-                log.AddError(this.Location, "value is not compatible with type");
+               this.type = this.type.Initialize(this, log);
             }
-
-            if (this.value is ObjectIdentifierValue)
+            catch (MibException e)
             {
-                oid = (ObjectIdentifierValue)this.value;
-                if (oid.Symbol == null)
-                {
-                    oid.Symbol = this;
-                }
+               log.AddError(e.Location, e.Message);
+               this.type = null;
             }
-        }
+         }
 
-        /// <summary>
-        /// Clears and prepares this MIB symbol for garbage collection.
-        /// This method will recursively clear any associated types or
-        /// values, making sure that no data structures references this
-        /// symbol.
-        /// </summary>
-        public override void Clear()
-        {
-            this.type = null;
-            if (this.value != null)
+         if (this.value != null)
+         {
+            try
             {
-                this.value.Clear();
+               this.value = this.value.Initialize(log, this.type);
             }
+            catch (MibException e)
+            {
+               log.AddError(e.Location, e.Message);
+               this.value = null;
+            }
+         }
 
-            this.value = null;
-        }
+         if (this.type != null && this.value != null && !this.type.IsCompatible(this.value))
+         {
+            log.AddError(this.Location, "value is not compatible with type");
+         }
 
-        /// <summary>
-        /// Get a string representation of this symbol
-        /// </summary>
-        /// <returns>A string representation of this symbol</returns>
-        public override string ToString()
-        {
-            StringBuilder buffer = new StringBuilder();
+         if (this.value is ObjectIdentifierValue oid)
+         {
+            if (oid.Symbol == null)
+            {
+               oid.Symbol = this;
+            }
+         }
+      }
 
-            buffer.Append("VALUE ");
-            buffer.Append(this.Name);
-            buffer.Append(" ");
-            buffer.Append(this.Type);
-            buffer.Append("\n    ::= ");
-            buffer.Append(this.Value);
-            return buffer.ToString();
-        }
-    }
+      /// <summary>
+      /// Clears and prepares this MIB symbol for garbage collection.
+      /// This method will recursively clear any associated types or
+      /// values, making sure that no data structures references this
+      /// symbol.
+      /// </summary>
+      public override void Clear()
+      {
+         this.type = null;
+         if (this.value != null)
+         {
+            this.value.Clear();
+         }
+
+         this.value = null;
+      }
+
+      /// <summary>
+      /// Get a string representation of this symbol
+      /// </summary>
+      /// <returns>A string representation of this symbol</returns>
+      public override string ToString()
+      {
+         StringBuilder buffer = new StringBuilder();
+
+         buffer.Append("VALUE ");
+         buffer.Append(this.Name);
+         buffer.Append(" ");
+         buffer.Append(this.Type);
+         buffer.Append("\n    ::= ");
+         buffer.Append(this.Value);
+         return buffer.ToString();
+      }
+   }
 }

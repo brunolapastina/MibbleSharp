@@ -15,340 +15,339 @@
 
 namespace PerCederberg.Grammatica.Runtime
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
- 
-    /// <summary>
-    /// A production pattern alternative. This class represents a list of
-    /// production pattern elements. In order to provide productions that
-    /// cannot be represented with the element occurrence counters, multiple
-    /// alternatives must be created and added to the same production
-    /// pattern. A production pattern alternative is always contained
-    /// within a production pattern.
-    /// </summary>  
-    public class ProductionPatternAlternative
-    {
-        /// <summary>
-        /// The production pattern.
-        /// </summary>
-        private ProductionPattern pattern;
+   using System.Collections.Generic;
+   using System.Linq;
+   using System.Text;
 
-        /// <summary>
-        /// The element list.
-        /// </summary>
-        private readonly List<ProductionPatternElement> elements = new List<ProductionPatternElement>();
+   /// <summary>
+   /// A production pattern alternative. This class represents a list of
+   /// production pattern elements. In order to provide productions that
+   /// cannot be represented with the element occurrence counters, multiple
+   /// alternatives must be created and added to the same production
+   /// pattern. A production pattern alternative is always contained
+   /// within a production pattern.
+   /// </summary>  
+   public class ProductionPatternAlternative
+   {
+      /// <summary>
+      /// The production pattern.
+      /// </summary>
+      private ProductionPattern pattern;
 
-        /// <summary>
-        /// The look-ahead set associated with this alternative.
-        /// </summary> 
-        private LookAheadSet lookAhead = null;
+      /// <summary>
+      /// The element list.
+      /// </summary>
+      private readonly List<ProductionPatternElement> elements = new List<ProductionPatternElement>();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ProductionPatternAlternative"/> class.
-        /// </summary> 
-        public ProductionPatternAlternative()
-        {
-        }
+      /// <summary>
+      /// The look-ahead set associated with this alternative.
+      /// </summary> 
+      private LookAheadSet lookAhead = null;
 
-        /// <summary>
-        /// Gets or sets the production pattern. This property
-        /// contains the pattern having this alternative.
-        /// </summary>
-        public ProductionPattern Pattern
-        {
-            get
+      /// <summary>
+      /// Initializes a new instance of the <see cref="ProductionPatternAlternative"/> class.
+      /// </summary> 
+      public ProductionPatternAlternative()
+      {
+      }
+
+      /// <summary>
+      /// Gets or sets the production pattern. This property
+      /// contains the pattern having this alternative.
+      /// </summary>
+      public ProductionPattern Pattern
+      {
+         get
+         {
+            return this.pattern;
+         }
+
+         set
+         {
+            this.pattern = value;
+         }
+      }
+
+      /// <summary>
+      /// Gets the production pattern element count (read-only).
+      /// </summary>
+      public int Count
+      {
+         get
+         {
+            return this.elements.Count;
+         }
+      }
+
+      /// <summary>
+      /// Gets a value indicating whether this alternative is 
+      /// recursive on the left-hand side. This method checks 
+      /// all the possible left side elements and returns true 
+      /// if the pattern itself is among them.
+      /// </summary>
+      public bool IsLeftRecursive
+      {
+         get
+         {
+            foreach (var elem in this.elements)
             {
-                return this.pattern;
+               if (elem.Id == this.pattern.Id)
+               {
+                  return true;
+               }
+               else if (elem.MinCount > 0)
+               {
+                  break;
+               }
             }
 
-            set
-            {
-                this.pattern = value;
-            }
-        }
+            return false;
+         }
+      }
 
-        /// <summary>
-        /// Gets the production pattern element count (read-only).
-        /// </summary>
-        public int Count
-        {
-            get
+      /// <summary>
+      /// Gets a value indicating whether this alternative is 
+      /// recursive on the right-hand side. This method checks 
+      /// all the possible right side elements and returns true 
+      /// if the pattern itself is among them.
+      /// </summary>
+      public bool IsRightRecursive
+      {
+         get
+         {
+            foreach (var elem in this.elements.Reverse<ProductionPatternElement>())
             {
-                return this.elements.Count;
-            }
-        }
-        
-        /// <summary>
-        /// Gets a value indicating whether this alternative is 
-        /// recursive on the left-hand side. This method checks 
-        /// all the possible left side elements and returns true 
-        /// if the pattern itself is among them.
-        /// </summary>
-        public bool IsLeftRecursive
-        {
-            get
-            {
-                foreach (var elem in this.elements)
-                {
-                    if (elem.Id == this.pattern.Id)
-                    {
-                        return true;
-                    }
-                    else if (elem.MinCount > 0)
-                    {
-                        break;
-                    }
-                }
-
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether this alternative is 
-        /// recursive on the right-hand side. This method checks 
-        /// all the possible right side elements and returns true 
-        /// if the pattern itself is among them.
-        /// </summary>
-        public bool IsRightRecursive
-        {
-            get
-            {
-                foreach (var elem in this.elements.Reverse<ProductionPatternElement>())
-                {
-                    if (elem.Id == this.pattern.Id)
-                    {
-                        return true;
-                    }
-                    else if (elem.MinCount > 0)
-                    {
-                        break;
-                    }
-                }
-
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether this alternative would 
-        /// match an empty stream of tokens. This check is equivalent 
-        /// of getMinElementCount() returning zero (0).
-        /// </summary>
-        public bool IsMatchingEmpty
-        {
-            get
-            {
-                return this.MinElementCount == 0;
-            }
-        }
-
-        /// <summary>
-        /// Gets the minimum number of elements needed to satisfy
-        /// this alternative. The value returned is the sum of all the
-        /// elements minimum count.
-        /// </summary>
-        public int MinElementCount
-        {
-            get
-            {
-                return this.elements.Select(e => e.MinCount).Sum();
-            }
-        }
-
-        /// <summary>
-        /// Gets the maximum number of elements needed to satisfy
-        /// this alternative. The value returned is the sum of all the
-        /// elements maximum count.
-        /// </summary>
-        public int MaxElementCount
-        {
-            get
-            {
-                try
-                {
-                    return this.elements.Select(e => e.MaxCount).Sum();
-                }
-                catch (System.OverflowException)
-                {
-                    return int.MaxValue;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the look-ahead set . This property contains the
-        /// look-ahead set associated with this alternative.
-        /// </summary>
-        internal LookAheadSet LookAhead
-        {
-            get
-            {
-                return this.lookAhead;
+               if (elem.Id == this.pattern.Id)
+               {
+                  return true;
+               }
+               else if (elem.MinCount > 0)
+               {
+                  break;
+               }
             }
 
-            set
+            return false;
+         }
+      }
+
+      /// <summary>
+      /// Gets a value indicating whether this alternative would 
+      /// match an empty stream of tokens. This check is equivalent 
+      /// of getMinElementCount() returning zero (0).
+      /// </summary>
+      public bool IsMatchingEmpty
+      {
+         get
+         {
+            return this.MinElementCount == 0;
+         }
+      }
+
+      /// <summary>
+      /// Gets the minimum number of elements needed to satisfy
+      /// this alternative. The value returned is the sum of all the
+      /// elements minimum count.
+      /// </summary>
+      public int MinElementCount
+      {
+         get
+         {
+            return this.elements.Select(e => e.MinCount).Sum();
+         }
+      }
+
+      /// <summary>
+      /// Gets the maximum number of elements needed to satisfy
+      /// this alternative. The value returned is the sum of all the
+      /// elements maximum count.
+      /// </summary>
+      public int MaxElementCount
+      {
+         get
+         {
+            try
             {
-                this.lookAhead = value;
+               return this.elements.Select(e => e.MaxCount).Sum();
             }
-        }
-        
-        /// <summary>
-        /// The production pattern element index (read-only).
-        /// </summary>
-        /// <param name="index">The element index</param>
-        /// <returns>The element found</returns>
-        public ProductionPatternElement this[int index]
-        {
-            get
+            catch (System.OverflowException)
             {
-                return this.elements[index];
+               return int.MaxValue;
             }
-        }
+         }
+      }
 
-        /// <summary>
-        /// Adds a token to this alternative. The token is appended to
-        /// the end of the element list. The multiplicity values
-        /// specified define if the token is optional or required, and
-        /// if it can be repeated.
-        /// </summary>
-        /// <param name="id">The token (pattern) id</param>
-        /// <param name="min">The minimum number of occurrences</param>
-        /// <param name="max">
-        /// The maximum number of occurrences, or -1 for infinite
-        /// </param>
-        public void AddToken(int id, int min, int max)
-        {
-            this.AddElement(new ProductionPatternElement(true, id, min, max));
-        }
+      /// <summary>
+      /// Gets or sets the look-ahead set . This property contains the
+      /// look-ahead set associated with this alternative.
+      /// </summary>
+      internal LookAheadSet LookAhead
+      {
+         get
+         {
+            return this.lookAhead;
+         }
 
-        /// <summary>
-        /// Adds a production to this alternative. The production is
-        /// appended to the end of the element list. The multiplicity
-        /// values specified define if the production is optional or
-        /// required, and if it can be repeated.
-        /// </summary>
-        /// <param name="id">The production (pattern) id</param>
-        /// <param name="min">The minimum number of occurrences</param>
-        /// <param name="max">
-        /// The maximum number of occurrences, or -1 for infinite
-        /// </param>
-        public void AddProduction(int id, int min, int max)
-        {
-            this.AddElement(new ProductionPatternElement(false, id, min, max));
-        }
+         set
+         {
+            this.lookAhead = value;
+         }
+      }
 
-        /// <summary>
-        /// Adds a production pattern element to this alternative. The
-        /// element is appended to the end of the element list.
-        /// </summary>
-        /// <param name="elem">The production pattern element</param>
-        public void AddElement(ProductionPatternElement elem)
-        {
-            this.elements.Add(elem);
-        }
+      /// <summary>
+      /// The production pattern element index (read-only).
+      /// </summary>
+      /// <param name="index">The element index</param>
+      /// <returns>The element found</returns>
+      public ProductionPatternElement this[int index]
+      {
+         get
+         {
+            return this.elements[index];
+         }
+      }
 
-        /// <summary>
-        /// Adds a production pattern element to this alternative. The
-        /// multiplicity values in the element will be overridden with
-        /// the specified values. The element is appended to the end of
-        /// the element list.
-        /// </summary>
-        /// <param name="elem">The production pattern element</param>
-        /// <param name="min">The minimum number of occurrences</param>
-        /// <param name="max">
-        /// The maximum number of occurrences, or -1 for infinite
-        /// </param>        
-        public void AddElement(ProductionPatternElement elem, int min, int max)
-        {
-            if (elem.IsToken)
+      /// <summary>
+      /// Adds a token to this alternative. The token is appended to
+      /// the end of the element list. The multiplicity values
+      /// specified define if the token is optional or required, and
+      /// if it can be repeated.
+      /// </summary>
+      /// <param name="id">The token (pattern) id</param>
+      /// <param name="min">The minimum number of occurrences</param>
+      /// <param name="max">
+      /// The maximum number of occurrences, or -1 for infinite
+      /// </param>
+      public void AddToken(int id, int min, int max)
+      {
+         this.AddElement(new ProductionPatternElement(true, id, min, max));
+      }
+
+      /// <summary>
+      /// Adds a production to this alternative. The production is
+      /// appended to the end of the element list. The multiplicity
+      /// values specified define if the production is optional or
+      /// required, and if it can be repeated.
+      /// </summary>
+      /// <param name="id">The production (pattern) id</param>
+      /// <param name="min">The minimum number of occurrences</param>
+      /// <param name="max">
+      /// The maximum number of occurrences, or -1 for infinite
+      /// </param>
+      public void AddProduction(int id, int min, int max)
+      {
+         this.AddElement(new ProductionPatternElement(false, id, min, max));
+      }
+
+      /// <summary>
+      /// Adds a production pattern element to this alternative. The
+      /// element is appended to the end of the element list.
+      /// </summary>
+      /// <param name="elem">The production pattern element</param>
+      public void AddElement(ProductionPatternElement elem)
+      {
+         this.elements.Add(elem);
+      }
+
+      /// <summary>
+      /// Adds a production pattern element to this alternative. The
+      /// multiplicity values in the element will be overridden with
+      /// the specified values. The element is appended to the end of
+      /// the element list.
+      /// </summary>
+      /// <param name="elem">The production pattern element</param>
+      /// <param name="min">The minimum number of occurrences</param>
+      /// <param name="max">
+      /// The maximum number of occurrences, or -1 for infinite
+      /// </param>        
+      public void AddElement(ProductionPatternElement elem, int min, int max)
+      {
+         if (elem.IsToken)
+         {
+            this.AddToken(elem.Id, min, max);
+         }
+         else
+         {
+            this.AddProduction(elem.Id, min, max);
+         }
+      }
+
+      /// <summary>
+      /// Checks if this object is equal to another. This method only
+      /// returns true for another production pattern alternative
+      /// with identical elements in the same order.
+      /// </summary>
+      /// <param name="obj">The object to compare with</param>
+      /// <returns>
+      /// True if the object is identical to this one, or false otherwise
+      /// </returns>
+      public override bool Equals(object obj)
+      {
+         if (obj is ProductionPatternAlternative prodPatAltObj)
+         {
+            return this.Equals(prodPatAltObj);
+         }
+         else
+         {
+            return false;
+         }
+      }
+
+      /// <summary>
+      /// Checks if this alternative is equal to another. This method
+      /// returns true if the other production pattern alternative
+      /// has identical elements in the same order.
+      /// </summary>
+      /// <param name="alt">The alternative to compare with</param>
+      /// <returns>
+      /// True if the object is identical to this one, or false otherwise
+      /// </returns>
+      public bool Equals(ProductionPatternAlternative alt)
+      {
+         if (this.elements.Count != alt.elements.Count)
+         {
+            return false;
+         }
+
+         for (int i = 0; i < this.elements.Count; i++)
+         {
+            if (!this.elements[i].Equals(alt.elements[i]))
             {
-                this.AddToken(elem.Id, min, max);
+               return false;
             }
-            else
+         }
+
+         return true;
+      }
+
+      /// <summary>
+      /// Returns a hash code for this object.
+      /// </summary>
+      /// <returns>A hash code for this object</returns>         
+      public override int GetHashCode()
+      {
+         return this.elements.Count.GetHashCode();
+      }
+
+      /// <summary>
+      /// Returns a string representation of this object.
+      /// </summary>
+      /// <returns>A token string representation</returns>
+      public override string ToString()
+      {
+         StringBuilder buffer = new StringBuilder();
+
+         for (int i = 0; i < this.elements.Count; i++)
+         {
+            if (i > 0)
             {
-                this.AddProduction(elem.Id, min, max);
-            }
-        }
-
-        /// <summary>
-        /// Checks if this object is equal to another. This method only
-        /// returns true for another production pattern alternative
-        /// with identical elements in the same order.
-        /// </summary>
-        /// <param name="obj">The object to compare with</param>
-        /// <returns>
-        /// True if the object is identical to this one, or false otherwise
-        /// </returns>
-        public override bool Equals(object obj)
-        {
-            if (obj is ProductionPatternAlternative)
-            {
-                return this.Equals((ProductionPatternAlternative)obj);
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Checks if this alternative is equal to another. This method
-        /// returns true if the other production pattern alternative
-        /// has identical elements in the same order.
-        /// </summary>
-        /// <param name="alt">The alternative to compare with</param>
-        /// <returns>
-        /// True if the object is identical to this one, or false otherwise
-        /// </returns>
-        public bool Equals(ProductionPatternAlternative alt)
-        {
-            if (this.elements.Count != alt.elements.Count)
-            {
-                return false;
+               buffer.Append(" ");
             }
 
-            for (int i = 0; i < this.elements.Count; i++)
-            {
-                if (!this.elements[i].Equals(alt.elements[i]))
-                {
-                    return false;
-                }
-            }
+            buffer.Append(this.elements[i]);
+         }
 
-            return true;
-        }
-
-        /// <summary>
-        /// Returns a hash code for this object.
-        /// </summary>
-        /// <returns>A hash code for this object</returns>         
-        public override int GetHashCode()
-        {
-            return this.elements.Count.GetHashCode();
-        }
-
-        /// <summary>
-        /// Returns a string representation of this object.
-        /// </summary>
-        /// <returns>A token string representation</returns>
-        public override string ToString()
-        {
-            StringBuilder buffer = new StringBuilder();
-
-            for (int i = 0; i < this.elements.Count; i++)
-            {
-                if (i > 0)
-                {
-                    buffer.Append(" ");
-                }
-
-                buffer.Append(this.elements[i]);
-            }
-
-            return buffer.ToString();
-        }
-    }
+         return buffer.ToString();
+      }
+   }
 }

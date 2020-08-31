@@ -15,96 +15,96 @@
 
 namespace PerCederberg.Grammatica.Runtime
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Runtime.Serialization;
-    using System.Security.Permissions;
+   using System;
+   using System.Collections.Generic;
+   using System.Runtime.Serialization;
+   using System.Security.Permissions;
 
-    /// <summary>
-    /// A parser log exception. This class contains a list of all the 
-    /// parse errors encountered while parsing.
-    /// </summary>
-    [Serializable]
-    public class ParserLogException : Exception
-    {
-        /// <summary>
-        /// The list of parse errors
-        /// </summary>
-        private readonly List<ParseException> errors = new List<ParseException>();
+   /// <summary>
+   /// A parser log exception. This class contains a list of all the 
+   /// parse errors encountered while parsing.
+   /// </summary>
+   [Serializable]
+   public class ParserLogException : Exception
+   {
+      /// <summary>
+      /// The list of parse errors
+      /// </summary>
+      private readonly List<ParseException> errors = new List<ParseException>();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ParserLogException"/> class.
-        /// </summary>
-        public ParserLogException()
-        {
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="ParserLogException"/> class.
+      /// </summary>
+      public ParserLogException()
+      {
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ParserLogException"/> class
-        /// as part of a de-serialization
-        /// </summary>
-        /// <param name="info">The SerializationInfo object</param>
-        /// <param name="context">The StreamingContext object</param>
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
-        public ParserLogException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-            this.errors = (List<ParseException>)info.GetValue("Errors", typeof(List<ParseException>));
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="ParserLogException"/> class
+      /// as part of a de-serialization
+      /// </summary>
+      /// <param name="info">The SerializationInfo object</param>
+      /// <param name="context">The StreamingContext object</param>
+      [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+      public ParserLogException(SerializationInfo info, StreamingContext context)
+          : base(info, context)
+      {
+         this.errors = (List<ParseException>)info.GetValue("Errors", typeof(List<ParseException>));
+      }
 
-        /// <summary>
-        /// The message property (read-only). This property contains the
-        /// detailed exception error message.
-        /// </summary>
-        public override string Message
-        {
-            get
-            {
-                return string.Join("\n", this.errors);
-            }
-        }
+      /// <summary>
+      /// The message property (read-only). This property contains the
+      /// detailed exception error message.
+      /// </summary>
+      public override string Message
+      {
+         get
+         {
+            return string.Join("\n", this.errors);
+         }
+      }
 
-        /// <summary>
-        /// Gets the number of errors in the log
-        /// </summary>
-        public int Count
-        {
-            get
-            {
-                return this.errors.Count;
-            }
-        }
+      /// <summary>
+      /// Gets the number of errors in the log
+      /// </summary>
+      public int Count
+      {
+         get
+         {
+            return this.errors.Count;
+         }
+      }
 
-        /// <summary>
-        /// Gets an enumeration of the ParseException objects in the log
-        /// </summary>
-        public IEnumerable<ParseException> Errors
-        {
-            get
-            {
-                return this.errors;
-            }
-        }
+      /// <summary>
+      /// Gets an enumeration of the ParseException objects in the log
+      /// </summary>
+      public IEnumerable<ParseException> Errors
+      {
+         get
+         {
+            return this.errors;
+         }
+      }
 
-        /// <summary>
-        /// Add a ParseException to the log
-        /// </summary>
-        /// <param name="e">The ParseException to be added</param>
-        public void AddError(ParseException e)
-        {
-            this.errors.Add(e);
-        }
+      /// <summary>
+      /// Add a ParseException to the log
+      /// </summary>
+      /// <param name="e">The ParseException to be added</param>
+      public void AddError(ParseException e)
+      {
+         this.errors.Add(e);
+      }
 
-        /// <summary>
-        /// Serialize a ParserLogException
-        /// </summary>
-        /// <param name="info">The SerializationInfo object</param>
-        /// <param name="context">The StreamingContext object</param>
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("Errors", this.errors);
-            base.GetObjectData(info, context);
-        }
-    }
+      /// <summary>
+      /// Serialize a ParserLogException
+      /// </summary>
+      /// <param name="info">The SerializationInfo object</param>
+      /// <param name="context">The StreamingContext object</param>
+      [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+      public override void GetObjectData(SerializationInfo info, StreamingContext context)
+      {
+         info.AddValue("Errors", this.errors);
+         base.GetObjectData(info, context);
+      }
+   }
 }

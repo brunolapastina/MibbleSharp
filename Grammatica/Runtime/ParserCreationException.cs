@@ -15,294 +15,294 @@
 
 namespace PerCederberg.Grammatica.Runtime
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Runtime.Serialization;
-    using System.Security.Permissions;
-    using System.Text;
+   using System;
+   using System.Collections.Generic;
+   using System.Runtime.Serialization;
+   using System.Security.Permissions;
+   using System.Text;
 
-    /// <summary>
-    /// A parser creation exception. This exception is used for signaling
-    /// an error in the token or production patterns, making it impossible
-    /// to create a working parser or tokenizer.
-    /// </summary>
-    [Serializable]
-    public class ParserCreationException : Exception
-    {
-        /// <summary>
-        /// The error type
-        /// </summary>
-        private readonly ErrorType type;
+   /// <summary>
+   /// A parser creation exception. This exception is used for signaling
+   /// an error in the token or production patterns, making it impossible
+   /// to create a working parser or tokenizer.
+   /// </summary>
+   [Serializable]
+   public class ParserCreationException : Exception
+   {
+      /// <summary>
+      /// The error type
+      /// </summary>
+      private readonly ErrorType type;
 
-        /// <summary>
-        /// The token or production pattern name. This variable is only
-        /// set for some error types.
-        /// </summary>
-        private readonly string name;
+      /// <summary>
+      /// The token or production pattern name. This variable is only
+      /// set for some error types.
+      /// </summary>
+      private readonly string name;
 
-        /// <summary>
-        /// The additional error information string. This variable is only
-        /// set for some error types.
-        /// </summary>
-        private readonly string info;
+      /// <summary>
+      /// The additional error information string. This variable is only
+      /// set for some error types.
+      /// </summary>
+      private readonly string info;
 
-        /// <summary>
-        /// The error details list. This variable is only set for some
-        /// error types.
-        /// </summary>
-        private readonly IList<string> details;
+      /// <summary>
+      /// The error details list. This variable is only set for some
+      /// error types.
+      /// </summary>
+      private readonly IList<string> details;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ParserCreationException"/> class.
-        /// </summary>
-        /// <param name="type">The parse error type</param>
-        /// <param name="info">The additional error information</param>
-        public ParserCreationException(ErrorType type, string info)
-            : this(type, null, info)
-        {
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="ParserCreationException"/> class.
+      /// </summary>
+      /// <param name="type">The parse error type</param>
+      /// <param name="info">The additional error information</param>
+      public ParserCreationException(ErrorType type, string info)
+          : this(type, null, info)
+      {
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ParserCreationException"/> class.
-        /// </summary>
-        /// <param name="type">The parse error type</param>
-        /// <param name="name">The token or production pattern name</param>
-        /// <param name="info">The additional error information</param>
-        public ParserCreationException(
-            ErrorType type,
-            string name,
-            string info)
-            : this(type, name, info, null)
-        {
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="ParserCreationException"/> class.
+      /// </summary>
+      /// <param name="type">The parse error type</param>
+      /// <param name="name">The token or production pattern name</param>
+      /// <param name="info">The additional error information</param>
+      public ParserCreationException(
+          ErrorType type,
+          string name,
+          string info)
+          : this(type, name, info, null)
+      {
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ParserCreationException"/> class.
-        /// </summary>
-        /// <param name="type">The parse error type</param>
-        /// <param name="name">The token or production pattern name</param>
-        /// <param name="info">The additional error information</param>
-        /// <param name="details">The details of the errors</param>
-        public ParserCreationException(
-            ErrorType type,
-            string name,
-            string info,
-            IList<string> details)
-        {
-            this.type = type;
-            this.name = name;
-            this.info = info;
-            this.details = details;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="ParserCreationException"/> class.
+      /// </summary>
+      /// <param name="type">The parse error type</param>
+      /// <param name="name">The token or production pattern name</param>
+      /// <param name="info">The additional error information</param>
+      /// <param name="details">The details of the errors</param>
+      public ParserCreationException(
+          ErrorType type,
+          string name,
+          string info,
+          IList<string> details)
+      {
+         this.type = type;
+         this.name = name;
+         this.info = info;
+         this.details = details;
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ParserCreationException"/> class
-        /// for de-serialization.
-        /// </summary>
-        /// <param name="info">The SerializationInfo object</param>
-        /// <param name="context">The StreamingContext object</param>
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
-        public ParserCreationException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-            this.name = info.GetString("Name");
-            this.type = (ErrorType)info.GetInt32("Type");
-            this.info = info.GetString("Info");
-            this.details = (IList<string>)info.GetValue("Details", typeof(IList<string>));
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="ParserCreationException"/> class
+      /// for de-serialization.
+      /// </summary>
+      /// <param name="info">The SerializationInfo object</param>
+      /// <param name="context">The StreamingContext object</param>
+      [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+      public ParserCreationException(SerializationInfo info, StreamingContext context)
+          : base(info, context)
+      {
+         this.name = info.GetString("Name");
+         this.type = (ErrorType)info.GetInt32("Type");
+         this.info = info.GetString("Info");
+         this.details = (IList<string>)info.GetValue("Details", typeof(IList<string>));
+      }
 
-        /// <summary>
-        /// The error type enumeration.
-        /// </summary>
-        public enum ErrorType
-        {
-            /// <summary>
-            /// The internal error type is only used to signal an
-            /// error that is a result of a bug in the parser or
-            /// tokenizer code.
-            /// </summary>
-            Internal,
+      /// <summary>
+      /// The error type enumeration.
+      /// </summary>
+      public enum ErrorType
+      {
+         /// <summary>
+         /// The internal error type is only used to signal an
+         /// error that is a result of a bug in the parser or
+         /// tokenizer code.
+         /// </summary>
+         Internal,
 
-            /// <summary>
-            /// The invalid parser error type is used when the parser
-            /// as such is invalid. This error is typically caused by
-            /// using a parser without any patterns.
-            /// </summary>
-            InvalidParser,
+         /// <summary>
+         /// The invalid parser error type is used when the parser
+         /// as such is invalid. This error is typically caused by
+         /// using a parser without any patterns.
+         /// </summary>
+         InvalidParser,
 
-            /// <summary>
-            /// The invalid token error type is used when a token
-            /// pattern is erroneous. This error is typically caused
-            /// by an invalid pattern type or an erroneous regular
-            /// expression.
-            /// </summary>
-            InvalidToken,
+         /// <summary>
+         /// The invalid token error type is used when a token
+         /// pattern is erroneous. This error is typically caused
+         /// by an invalid pattern type or an erroneous regular
+         /// expression.
+         /// </summary>
+         InvalidToken,
 
-            /// <summary>
-            /// The invalid production error type is used when a
-            /// production pattern is erroneous. This error is
-            /// typically caused by referencing undeclared productions,
-            /// or violating some other production pattern constraint.
-            /// </summary>
-            InvalidProduction,
+         /// <summary>
+         /// The invalid production error type is used when a
+         /// production pattern is erroneous. This error is
+         /// typically caused by referencing undeclared productions,
+         /// or violating some other production pattern constraint.
+         /// </summary>
+         InvalidProduction,
 
-            /// <summary>
-            /// The infinite loop error type is used when an infinite
-            /// loop has been detected in the grammar. One of the
-            /// productions in the loop will be reported.
-            /// </summary>
-            InfiniteLoop,
+         /// <summary>
+         /// The infinite loop error type is used when an infinite
+         /// loop has been detected in the grammar. One of the
+         /// productions in the loop will be reported.
+         /// </summary>
+         InfiniteLoop,
 
-            /// <summary>
-            /// The inherent ambiguity error type is used when the set
-            /// of production patterns (i.e. the grammar) contains
-            /// ambiguities that cannot be resolved.
-            /// </summary>
-            InherentAmbiguity
-        }
+         /// <summary>
+         /// The inherent ambiguity error type is used when the set
+         /// of production patterns (i.e. the grammar) contains
+         /// ambiguities that cannot be resolved.
+         /// </summary>
+         InherentAmbiguity
+      }
 
-        /// <summary>
-        /// Gets the specific ErrorType
-        /// </summary>
-        public ErrorType Type
-        {
-            get
+      /// <summary>
+      /// Gets the specific ErrorType
+      /// </summary>
+      public ErrorType Type
+      {
+         get
+         {
+            return this.type;
+         }
+      }
+
+      /// <summary>
+      /// Gets the token or production name
+      /// </summary>
+      public string Name
+      {
+         get
+         {
+            return this.name;
+         }
+      }
+
+      /// <summary>
+      /// Gets the additional error information (read-only).
+      /// </summary>
+      public string Info
+      {
+         get
+         {
+            return this.info;
+         }
+      }
+
+      /// <summary>
+      /// Gets the detailed error information (read-only).
+      /// </summary>
+      public string Details
+      {
+         get
+         {
+            StringBuilder buffer = new StringBuilder();
+
+            if (this.details == null)
             {
-                return this.type;
+               return null;
             }
-        }
 
-        /// <summary>
-        /// Gets the token or production name
-        /// </summary>
-        public string Name
-        {
-            get
+            for (int i = 0; i < this.details.Count; i++)
             {
-                return this.name;
-            }
-        }
+               if (i > 0)
+               {
+                  buffer.Append(", ");
+                  if (i + 1 == this.details.Count)
+                  {
+                     buffer.Append("and ");
+                  }
+               }
 
-        /// <summary>
-        /// Gets the additional error information (read-only).
-        /// </summary>
-        public string Info
-        {
-            get
+               buffer.Append(this.details[i]);
+            }
+
+            return buffer.ToString();
+         }
+      }
+
+      /// <summary>
+      /// Gets the error message (read-only). This property contains the
+      /// detailed exception error message.
+      /// </summary>
+      public override string Message
+      {
+         get
+         {
+            StringBuilder buffer = new StringBuilder();
+
+            switch (this.type)
             {
-                return this.info;
+               case ErrorType.InvalidParser:
+                  buffer.Append("parser is invalid, as ");
+                  buffer.Append(this.info);
+                  break;
+               case ErrorType.InvalidToken:
+                  buffer.Append("token '");
+                  buffer.Append(this.name);
+                  buffer.Append("' is invalid, as ");
+                  buffer.Append(this.info);
+                  break;
+               case ErrorType.InvalidProduction:
+                  buffer.Append("production '");
+                  buffer.Append(this.name);
+                  buffer.Append("' is invalid, as ");
+                  buffer.Append(this.info);
+                  break;
+               case ErrorType.InfiniteLoop:
+                  buffer.Append("infinite loop found in production pattern '");
+                  buffer.Append(this.name);
+                  buffer.Append("'");
+                  break;
+               case ErrorType.InherentAmbiguity:
+                  buffer.Append("inherent ambiguity in production '");
+                  buffer.Append(this.name);
+                  buffer.Append("'");
+                  if (this.info != null)
+                  {
+                     buffer.Append(" ");
+                     buffer.Append(this.info);
+                  }
+
+                  if (this.details != null)
+                  {
+                     buffer.Append(" starting with ");
+                     if (this.details.Count > 1)
+                     {
+                        buffer.Append("tokens ");
+                     }
+                     else
+                     {
+                        buffer.Append("token ");
+                     }
+
+                     buffer.Append(this.Details);
+                  }
+
+                  break;
+               default:
+                  buffer.Append("internal error");
+                  break;
             }
-        }
 
-        /// <summary>
-        /// Gets the detailed error information (read-only).
-        /// </summary>
-        public string Details
-        {
-            get
-            {
-                StringBuilder buffer = new StringBuilder();
+            return buffer.ToString();
+         }
+      }
 
-                if (this.details == null)
-                {
-                    return null;
-                }
-
-                for (int i = 0; i < this.details.Count; i++)
-                {
-                    if (i > 0)
-                    {
-                        buffer.Append(", ");
-                        if (i + 1 == this.details.Count)
-                        {
-                            buffer.Append("and ");
-                        }
-                    }
-
-                    buffer.Append(this.details[i]);
-                }
-
-                return buffer.ToString();
-            }
-        }
-
-        /// <summary>
-        /// Gets the error message (read-only). This property contains the
-        /// detailed exception error message.
-        /// </summary>
-        public override string Message
-        {
-            get
-            {
-                StringBuilder buffer = new StringBuilder();
-
-                switch (this.type)
-                {
-                    case ErrorType.InvalidParser:
-                        buffer.Append("parser is invalid, as ");
-                        buffer.Append(this.info);
-                        break;
-                    case ErrorType.InvalidToken:
-                        buffer.Append("token '");
-                        buffer.Append(this.name);
-                        buffer.Append("' is invalid, as ");
-                        buffer.Append(this.info);
-                        break;
-                    case ErrorType.InvalidProduction:
-                        buffer.Append("production '");
-                        buffer.Append(this.name);
-                        buffer.Append("' is invalid, as ");
-                        buffer.Append(this.info);
-                        break;
-                    case ErrorType.InfiniteLoop:
-                        buffer.Append("infinite loop found in production pattern '");
-                        buffer.Append(this.name);
-                        buffer.Append("'");
-                        break;
-                    case ErrorType.InherentAmbiguity:
-                        buffer.Append("inherent ambiguity in production '");
-                        buffer.Append(this.name);
-                        buffer.Append("'");
-                        if (this.info != null)
-                        {
-                            buffer.Append(" ");
-                            buffer.Append(this.info);
-                        }
-
-                        if (this.details != null)
-                        {
-                            buffer.Append(" starting with ");
-                            if (this.details.Count > 1)
-                            {
-                                buffer.Append("tokens ");
-                            }
-                            else
-                            {
-                                buffer.Append("token ");
-                            }
-
-                            buffer.Append(this.Details);
-                        }
-
-                        break;
-                    default:
-                        buffer.Append("internal error");
-                        break;
-                }
-
-                return buffer.ToString();
-            }
-        }
-
-        /// <summary>
-        /// Serialize a ParserCreationException
-        /// </summary>
-        /// <param name="info">The SerializationInfo object</param>
-        /// <param name="context">The StreamingContext object</param>
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-        }
-    }
+      /// <summary>
+      /// Serialize a ParserCreationException
+      /// </summary>
+      /// <param name="info">The SerializationInfo object</param>
+      /// <param name="context">The StreamingContext object</param>
+      [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+      public override void GetObjectData(SerializationInfo info, StreamingContext context)
+      {
+         base.GetObjectData(info, context);
+      }
+   }
 }

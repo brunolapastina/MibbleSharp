@@ -15,371 +15,370 @@
 
 namespace PerCederberg.Grammatica.Runtime
 {
-    using System;
-    using System.Text;
+   using System.Text;
 
-    /// <summary>
-    /// A deterministic finite state automaton for matching exact strings.
-    /// It uses a sorted binary tree representation of the state
-    /// transitions in order to enable quick matches with a minimal memory
-    /// footprint. It only supports a single character transition between
-    /// states, but may be run in an all case-insensitive mode.
-    /// </summary>
-    internal class TokenStringDFA
-    {
-        /// <summary>
-        /// The lookup table for root states, indexed by the first ASCII
-        /// character. This array is used to for speed optimizing the
-        /// first step in the match.
-        /// </summary>
-        private DFAState[] ascii = new DFAState[128];
+   /// <summary>
+   /// A deterministic finite state automaton for matching exact strings.
+   /// It uses a sorted binary tree representation of the state
+   /// transitions in order to enable quick matches with a minimal memory
+   /// footprint. It only supports a single character transition between
+   /// states, but may be run in an all case-insensitive mode.
+   /// </summary>
+   internal class TokenStringDFA
+   {
+      /// <summary>
+      /// The lookup table for root states, indexed by the first ASCII
+      /// character. This array is used to for speed optimizing the
+      /// first step in the match.
+      /// </summary>
+      private readonly DFAState[] ascii = new DFAState[128];
 
-        /// <summary>
-        /// The automaton state transition tree for non-ASCII characters.
-        /// Each transition from one state to another is added to the tree
-        /// with the corresponding character.
-        /// </summary> 
-        private DFAState nonAscii = new DFAState();
+      /// <summary>
+      /// The automaton state transition tree for non-ASCII characters.
+      /// Each transition from one state to another is added to the tree
+      /// with the corresponding character.
+      /// </summary> 
+      private readonly DFAState nonAscii = new DFAState();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TokenStringDFA"/> class, empty.
-        /// </summary>
-        public TokenStringDFA()
-        {
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="TokenStringDFA"/> class, empty.
+      /// </summary>
+      public TokenStringDFA()
+      {
+      }
 
-        /// <summary>
-        /// Adds a string match to this automaton. New states and
-        /// transitions will be added to extend this automaton to
-        /// support the specified string.
-        /// </summary>
-        /// <param name="str">The string to match</param>
-        /// <param name="caseInsensitive">The case-insensitive flag</param>
-        /// <param name="value">The match value</param>
-        public void AddMatch(string str, bool caseInsensitive, TokenPattern value)
-        {
-            DFAState state;
-            DFAState next;
-            char c = str[0];
-            int start = 0;
+      /// <summary>
+      /// Adds a string match to this automaton. New states and
+      /// transitions will be added to extend this automaton to
+      /// support the specified string.
+      /// </summary>
+      /// <param name="str">The string to match</param>
+      /// <param name="caseInsensitive">The case-insensitive flag</param>
+      /// <param name="value">The match value</param>
+      public void AddMatch(string str, bool caseInsensitive, TokenPattern value)
+      {
+         DFAState state;
+         DFAState next;
+         char c = str[0];
+         int start = 0;
 
-            if (caseInsensitive)
+         if (caseInsensitive)
+         {
+            c = char.ToLower(c);
+         }
+
+         if (c < 128)
+         {
+            state = this.ascii[c];
+            if (state == null)
             {
-                c = char.ToLower(c);
+               state = this.ascii[c] = new DFAState();
             }
 
-            if (c < 128)
-            {
-                state = this.ascii[c];
-                if (state == null)
-                {
-                    state = this.ascii[c] = new DFAState();
-                }
+            start++;
+         }
+         else
+         {
+            state = this.nonAscii;
+         }
 
-                start++;
+         for (int i = start; i < str.Length; i++)
+         {
+            next = state.Tree.Find(str[i], caseInsensitive);
+            if (next == null)
+            {
+               next = new DFAState();
+               state.Tree.Add(str[i], caseInsensitive, next);
+            }
+
+            state = next;
+         }
+
+         // TODO: check that this is useful.
+         state.Value = value;
+      }
+
+      /// <summary>
+      /// Checks if the automaton matches an input stream. The
+      /// matching will be performed from a specified position. This
+      /// method will not read any characters from the stream, just
+      /// peek ahead. The comparison can be done either in
+      /// case-sensitive or case-insensitive mode.
+      /// </summary>
+      /// <param name="buffer">The buffer to read from</param>
+      /// <param name="caseInsensitive">The case-insensitive flag</param>
+      /// <returns>The match value, or null if no match found</returns>
+      /// <exception cref="System.IO.IOException">
+      /// If an I/O error occurred
+      /// </exception>
+      public TokenPattern Match(ReaderBuffer buffer, bool caseInsensitive)
+      {
+         TokenPattern result = null;
+         DFAState state;
+         int pos = 0;
+         int c;
+
+         c = buffer.Peek(0);
+         if (c < 0)
+         {
+            return null;
+         }
+
+         if (caseInsensitive)
+         {
+            c = char.ToLower((char)c);
+         }
+
+         if (c < 128)
+         {
+            state = this.ascii[c];
+            if (state == null)
+            {
+               return null;
+            }
+            else if (state.Value != null)
+            {
+               result = state.Value;
+            }
+
+            pos++;
+         }
+         else
+         {
+            state = this.nonAscii;
+         }
+
+         while ((c = buffer.Peek(pos)) >= 0)
+         {
+            state = state.Tree.Find((char)c, caseInsensitive);
+            if (state == null)
+            {
+               break;
+            }
+            else if (state.Value != null)
+            {
+               result = state.Value;
+            }
+
+            pos++;
+         }
+
+         return result;
+      }
+
+      /// <summary>
+      /// Returns a detailed string representation of this automaton.
+      /// </summary>
+      /// <returns>A detailed string representation of this automaton</returns>
+      public override string ToString()
+      {
+         StringBuilder buffer = new StringBuilder();
+
+         for (int i = 0; i < this.ascii.Length; i++)
+         {
+            if (this.ascii[i] != null)
+            {
+               buffer.Append((char)i);
+               if (this.ascii[i].Value != null)
+               {
+                  buffer.Append(": ");
+                  buffer.Append(this.ascii[i].Value);
+                  buffer.Append("\n");
+               }
+
+               this.ascii[i].Tree.PrintTo(buffer, " ");
+            }
+         }
+
+         this.nonAscii.Tree.PrintTo(buffer, string.Empty);
+         return buffer.ToString();
+      }
+
+      /// <summary>
+      /// An automaton state. This class represents a state in the DFA
+      /// graph.
+      /// </summary>
+      internal class DFAState
+      {
+         /// <summary>
+         /// The token pattern matched at this state.
+         /// </summary> 
+         private TokenPattern value = null;
+
+         /// <summary>
+         /// The automaton state transition tree. Each transition from one
+         /// state to another is added to the tree with the corresponding
+         /// character.
+         /// </summary>
+         private TransitionTree tree = new TransitionTree();
+
+         /// <summary>
+         /// Gets or sets the token pattern matched at this state
+         /// </summary>
+         internal TokenPattern Value
+         {
+            get
+            {
+               return this.value;
+            }
+
+            set
+            {
+               this.value = value;
+            }
+         }
+
+         /// <summary>
+         /// Gets or sets the automaton state transition tree.
+         /// </summary>
+         internal TransitionTree Tree
+         {
+            get
+            {
+               return this.tree;
+            }
+
+            set
+            {
+               this.tree = value;
+            }
+         }
+      }
+
+      /// <summary>
+      /// An automaton state transition tree. This class contains a
+      /// binary search tree for the automaton transitions from one
+      /// state to another. All transitions are linked to a single
+      /// character.
+      /// </summary>
+      internal class TransitionTree
+      {
+         /// <summary>
+         /// The transition character. If this value is set to the zero
+         /// character ('\0'), this tree is empty.
+         /// </summary>
+         private char value = '\0';
+
+         /// <summary>
+         /// The transition target state.
+         /// </summary>
+         private DFAState state = null;
+
+         /// <summary>
+         /// The left sub-tree.
+         /// </summary>
+         private TransitionTree left = null;
+
+         /// <summary>
+         /// The right sub-tree.
+         /// </summary>
+         private TransitionTree right = null;
+
+         /// <summary>
+         /// Initializes a new instance of the <see cref="TransitionTree"/> class, empty.
+         /// </summary>
+         public TransitionTree()
+         {
+         }
+
+         /// <summary>
+         /// Finds an automaton state from the specified transition
+         /// character. This method searches this transition tree for a
+         /// matching transition. The comparison can optionally be done
+         /// with a lower-case conversion of the character.
+         /// </summary>
+         /// <param name="c">The character to search for</param>
+         /// <param name="lowerCase">The lower-case conversion flag</param>
+         /// <returns>The automaton state if found, or null if not</returns>
+         public DFAState Find(char c, bool lowerCase)
+         {
+            if (lowerCase)
+            {
+               c = char.ToLower(c);
+            }
+
+            if (this.value == '\0' || this.value == c)
+            {
+               return this.state;
+            }
+            else if (this.value > c)
+            {
+               return this.left.Find(c, false);
             }
             else
             {
-                state = this.nonAscii;
+               return this.right.Find(c, false);
+            }
+         }
+
+         /// <summary>
+         /// Adds a transition to this tree. If the lower-case flag is
+         /// set, the character will be converted to lower-case before
+         /// being added.
+         /// </summary>
+         /// <param name="c">The character to transition for</param>
+         /// <param name="lowerCase">The lower-case conversion flag</param>
+         /// <param name="state">The state to transition to</param>
+         public void Add(char c, bool lowerCase, DFAState state)
+         {
+            if (lowerCase)
+            {
+               c = char.ToLower(c);
             }
 
-            for (int i = start; i < str.Length; i++)
+            if (this.value == '\0')
             {
-                next = state.Tree.Find(str[i], caseInsensitive);
-                if (next == null)
-                {
-                    next = new DFAState();
-                    state.Tree.Add(str[i], caseInsensitive, next);
-                }
-
-                state = next;
+               this.value = c;
+               this.state = state;
+               this.left = new TransitionTree();
+               this.right = new TransitionTree();
             }
-
-            // TODO: check that this is useful.
-            state.Value = value;
-        }
-
-        /// <summary>
-        /// Checks if the automaton matches an input stream. The
-        /// matching will be performed from a specified position. This
-        /// method will not read any characters from the stream, just
-        /// peek ahead. The comparison can be done either in
-        /// case-sensitive or case-insensitive mode.
-        /// </summary>
-        /// <param name="buffer">The buffer to read from</param>
-        /// <param name="caseInsensitive">The case-insensitive flag</param>
-        /// <returns>The match value, or null if no match found</returns>
-        /// <exception cref="System.IO.IOException">
-        /// If an I/O error occurred
-        /// </exception>
-        public TokenPattern Match(ReaderBuffer buffer, bool caseInsensitive)
-        {
-            TokenPattern result = null;
-            DFAState state;
-            int pos = 0;
-            int c;
-
-            c = buffer.Peek(0);
-            if (c < 0)
+            else if (this.value > c)
             {
-                return null;
-            }
-
-            if (caseInsensitive)
-            {
-                c = char.ToLower((char)c);
-            }
-
-            if (c < 128)
-            {
-                state = this.ascii[c];
-                if (state == null)
-                {
-                    return null;
-                }
-                else if (state.Value != null)
-                {
-                    result = state.Value;
-                }
-
-                pos++;
+               this.left.Add(c, false, state);
             }
             else
             {
-                state = this.nonAscii;
+               this.right.Add(c, false, state);
             }
+         }
 
-            while ((c = buffer.Peek(pos)) >= 0)
+         /// <summary>
+         /// Prints the automaton tree to the specified string buffer.
+         /// </summary>
+         /// <param name="buffer">The string buffer</param>
+         /// <param name="indent">The current indentation</param>
+         public void PrintTo(StringBuilder buffer, string indent)
+         {
+            if (this.left != null)
             {
-                state = state.Tree.Find((char)c, caseInsensitive);
-                if (state == null)
-                {
-                    break;
-                }
-                else if (state.Value != null)
-                {
-                    result = state.Value;
-                }
-
-                pos++;
+               this.left.PrintTo(buffer, indent);
             }
 
-            return result;
-        }
-
-        /// <summary>
-        /// Returns a detailed string representation of this automaton.
-        /// </summary>
-        /// <returns>A detailed string representation of this automaton</returns>
-        public override string ToString()
-        {
-            StringBuilder buffer = new StringBuilder();
-
-            for (int i = 0; i < this.ascii.Length; i++)
+            if (this.value != '\0')
             {
-                if (this.ascii[i] != null)
-                {
-                    buffer.Append((char)i);
-                    if (this.ascii[i].Value != null)
-                    {
-                        buffer.Append(": ");
-                        buffer.Append(this.ascii[i].Value);
-                        buffer.Append("\n");
-                    }
+               if (buffer.Length > 0 && buffer[buffer.Length - 1] == '\n')
+               {
+                  buffer.Append(indent);
+               }
 
-                    this.ascii[i].Tree.PrintTo(buffer, " ");
-                }
+               buffer.Append(this.value);
+
+               if (this.state.Value != null)
+               {
+                  buffer.Append(": ");
+                  buffer.Append(this.state.Value);
+                  buffer.Append("\n");
+               }
+
+               this.state.Tree.PrintTo(buffer, indent + " ");
             }
 
-            this.nonAscii.Tree.PrintTo(buffer, string.Empty);
-            return buffer.ToString();
-        }
-
-        /// <summary>
-        /// An automaton state. This class represents a state in the DFA
-        /// graph.
-        /// </summary>
-        internal class DFAState
-        {
-            /// <summary>
-            /// The token pattern matched at this state.
-            /// </summary> 
-            private TokenPattern value = null;
-
-            /// <summary>
-            /// The automaton state transition tree. Each transition from one
-            /// state to another is added to the tree with the corresponding
-            /// character.
-            /// </summary>
-            private TransitionTree tree = new TransitionTree();
-
-            /// <summary>
-            /// Gets or sets the token pattern matched at this state
-            /// </summary>
-            internal TokenPattern Value
+            if (this.right != null)
             {
-                get
-                {
-                    return this.value;
-                }
-
-                set
-                {
-                    this.value = value;
-                }
+               this.right.PrintTo(buffer, indent);
             }
-            
-            /// <summary>
-            /// Gets or sets the automaton state transition tree.
-            /// </summary>
-            internal TransitionTree Tree
-            {
-                get
-                {
-                    return this.tree;
-                }
-
-                set
-                {
-                    this.tree = value;
-                }
-            }
-        }
-
-        /// <summary>
-        /// An automaton state transition tree. This class contains a
-        /// binary search tree for the automaton transitions from one
-        /// state to another. All transitions are linked to a single
-        /// character.
-        /// </summary>
-        internal class TransitionTree
-        {
-            /// <summary>
-            /// The transition character. If this value is set to the zero
-            /// character ('\0'), this tree is empty.
-            /// </summary>
-            private char value = '\0';
-
-            /// <summary>
-            /// The transition target state.
-            /// </summary>
-            private DFAState state = null;
-
-            /// <summary>
-            /// The left sub-tree.
-            /// </summary>
-            private TransitionTree left = null;
-
-            /// <summary>
-            /// The right sub-tree.
-            /// </summary>
-            private TransitionTree right = null;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="TransitionTree"/> class, empty.
-            /// </summary>
-            public TransitionTree()
-            {
-            }
-
-            /// <summary>
-            /// Finds an automaton state from the specified transition
-            /// character. This method searches this transition tree for a
-            /// matching transition. The comparison can optionally be done
-            /// with a lower-case conversion of the character.
-            /// </summary>
-            /// <param name="c">The character to search for</param>
-            /// <param name="lowerCase">The lower-case conversion flag</param>
-            /// <returns>The automaton state if found, or null if not</returns>
-            public DFAState Find(char c, bool lowerCase)
-            {
-                if (lowerCase)
-                {
-                    c = char.ToLower(c);
-                }
-
-                if (this.value == '\0' || this.value == c)
-                {
-                    return this.state;
-                }
-                else if (this.value > c)
-                {
-                    return this.left.Find(c, false);
-                }
-                else
-                {
-                    return this.right.Find(c, false);
-                }
-            }
-
-            /// <summary>
-            /// Adds a transition to this tree. If the lower-case flag is
-            /// set, the character will be converted to lower-case before
-            /// being added.
-            /// </summary>
-            /// <param name="c">The character to transition for</param>
-            /// <param name="lowerCase">The lower-case conversion flag</param>
-            /// <param name="state">The state to transition to</param>
-            public void Add(char c, bool lowerCase, DFAState state)
-            {
-                if (lowerCase)
-                {
-                    c = char.ToLower(c);
-                }
-
-                if (this.value == '\0')
-                {
-                    this.value = c;
-                    this.state = state;
-                    this.left = new TransitionTree();
-                    this.right = new TransitionTree();
-                }
-                else if (this.value > c)
-                {
-                    this.left.Add(c, false, state);
-                }
-                else
-                {
-                    this.right.Add(c, false, state);
-                }
-            }
-
-            /// <summary>
-            /// Prints the automaton tree to the specified string buffer.
-            /// </summary>
-            /// <param name="buffer">The string buffer</param>
-            /// <param name="indent">The current indentation</param>
-            public void PrintTo(StringBuilder buffer, string indent)
-            {
-                if (this.left != null)
-                {
-                    this.left.PrintTo(buffer, indent);
-                }
-
-                if (this.value != '\0')
-                {
-                    if (buffer.Length > 0 && buffer[buffer.Length - 1] == '\n')
-                    {
-                        buffer.Append(indent);
-                    }
-
-                    buffer.Append(this.value);
-
-                    if (this.state.Value != null)
-                    {
-                        buffer.Append(": ");
-                        buffer.Append(this.state.Value);
-                        buffer.Append("\n");
-                    }
-
-                    this.state.Tree.PrintTo(buffer, indent + " ");
-                }
-
-                if (this.right != null)
-                {
-                    this.right.PrintTo(buffer, indent);
-                }
-            }
-        }
-    }
+         }
+      }
+   }
 }

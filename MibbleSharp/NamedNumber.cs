@@ -21,157 +21,157 @@
 
 namespace MibbleSharp
 {
-    using System.Numerics;
-    using MibbleSharp.Value;
+   using MibbleSharp.Value;
+   using System.Numerics;
 
-    /// <summary>
-    /// A named number. This class is used for storing intermediate values
-    /// during the parsing.
-    /// </summary>
-    public class NamedNumber
-    {
-        /// <summary>
-        /// The value name
-        /// </summary>
-        private readonly string name = null;
+   /// <summary>
+   /// A named number. This class is used for storing intermediate values
+   /// during the parsing.
+   /// </summary>
+   public class NamedNumber
+   {
+      /// <summary>
+      /// The value name
+      /// </summary>
+      private readonly string name = null;
 
-        /// <summary>
-        /// The numeric value
-        /// </summary>
-        private BigInteger? number = null;
+      /// <summary>
+      /// The numeric value
+      /// </summary>
+      private BigInteger? number = null;
 
-        /// <summary>
-        /// The value reference
-        /// </summary>
-        private readonly ValueReference reference = null;
+      /// <summary>
+      /// The value reference
+      /// </summary>
+      private readonly ValueReference reference = null;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NamedNumber"/> class.
-        /// </summary>
-        /// <param name="number">The numeric value</param>
-        public NamedNumber(BigInteger number) : this(null, number)
-        {
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="NamedNumber"/> class.
+      /// </summary>
+      /// <param name="number">The numeric value</param>
+      public NamedNumber(BigInteger number) : this(null, number)
+      {
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NamedNumber"/> class.
-        /// </summary>
-        /// <param name="name">The value name</param>
-        /// <param name="number">The numeric value</param>
-        public NamedNumber(string name, BigInteger number)
-        {
-            this.name = name;
-            this.number = number;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="NamedNumber"/> class.
+      /// </summary>
+      /// <param name="name">The value name</param>
+      /// <param name="number">The numeric value</param>
+      public NamedNumber(string name, BigInteger number)
+      {
+         this.name = name;
+         this.number = number;
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NamedNumber"/> class.
-        /// </summary>
-        /// <param name="reference">A reference to the represented value</param>
-        public NamedNumber(ValueReference reference) : this(null, reference)
-        { 
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="NamedNumber"/> class.
+      /// </summary>
+      /// <param name="reference">A reference to the represented value</param>
+      public NamedNumber(ValueReference reference) : this(null, reference)
+      {
+      }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NamedNumber"/> class.
-        /// </summary>
-        /// <param name="name">The named number's name</param>
-        /// <param name="reference">A reference to the value</param>
-        public NamedNumber(string name, ValueReference reference)
-        {
-            this.name = name;
-            this.reference = reference;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="NamedNumber"/> class.
+      /// </summary>
+      /// <param name="name">The named number's name</param>
+      /// <param name="reference">A reference to the value</param>
+      public NamedNumber(string name, ValueReference reference)
+      {
+         this.name = name;
+         this.reference = reference;
+      }
 
-        /// <summary>
-        /// Gets a value indicating whether this named number has a name component
-        /// </summary>
-        public bool HasName
-        {
-            get
+      /// <summary>
+      /// Gets a value indicating whether this named number has a name component
+      /// </summary>
+      public bool HasName
+      {
+         get
+         {
+            return this.name != null;
+         }
+      }
+
+      /// <summary>
+      /// Gets a value indicating whether this named number has a number component
+      /// </summary>
+      public bool HasNumber
+      {
+         get
+         {
+            return this.number != null;
+         }
+      }
+
+      /// <summary>
+      /// Gets a value indicating whether this named number has a value reference
+      /// </summary>
+      public bool HasReference
+      {
+         get
+         {
+            return this.reference != null;
+         }
+      }
+
+      /// <summary>
+      /// Gets the name of this value
+      /// </summary>
+      public string Name
+      {
+         get
+         {
+            return this.name;
+         }
+      }
+
+      /// <summary>
+      /// Gets the value of this number
+      /// </summary>
+      public BigInteger Number
+      {
+         get
+         {
+            if (this.number == null)
             {
-                return this.name != null;
+               return 0;
             }
-        }
 
-        /// <summary>
-        /// Gets a value indicating whether this named number has a number component
-        /// </summary>
-        public bool HasNumber
-        {
-            get
-            {
-                return this.number != null;
-            }
-        }
+            return (BigInteger)this.number;
+         }
+      }
 
-        /// <summary>
-        /// Gets a value indicating whether this named number has a value reference
-        /// </summary>
-        public bool HasReference
-        {
-            get
+      /// <summary>
+      /// Gets an integer value of the number
+      /// </summary>
+      /// <remarks>
+      /// The property will return <c>int.MaxValue</c> if the value
+      /// of number is larger than that.
+      /// </remarks>
+      public int IntValue
+      {
+         get
+         {
+            if (this.number > int.MaxValue)
             {
-                return this.reference != null;
+               return int.MaxValue;
             }
-        }
 
-        /// <summary>
-        /// Gets the name of this value
-        /// </summary>
-        public string Name
-        {
-            get
-            {
-                return this.name;
-            }
-        }
+            return (int)this.number;
+         }
+      }
 
-        /// <summary>
-        /// Gets the value of this number
-        /// </summary>
-        public BigInteger Number
-        {
-            get
-            {
-                if (this.number == null)
-                {
-                    return 0;
-                }
-                    
-                return (BigInteger)this.number;
-            }
-        }
-
-        /// <summary>
-        /// Gets an integer value of the number
-        /// </summary>
-        /// <remarks>
-        /// The property will return <c>int.MaxValue</c> if the value
-        /// of number is larger than that.
-        /// </remarks>
-        public int IntValue
-        {
-            get
-            {
-                if (this.number > int.MaxValue)
-                {
-                    return int.MaxValue;
-                }
-                    
-                return (int)this.number;
-            }
-        }
-
-        /// <summary>
-        /// Gets the value reference
-        /// </summary>
-        public ValueReference Reference
-        {
-            get
-            {
-                return this.reference;
-            }
-        }
-    }
+      /// <summary>
+      /// Gets the value reference
+      /// </summary>
+      public ValueReference Reference
+      {
+         get
+         {
+            return this.reference;
+         }
+      }
+   }
 }

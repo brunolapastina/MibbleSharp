@@ -21,69 +21,69 @@
 
 namespace MibbleSharp.Snmp
 {
-    /// <summary>
-    /// An SNMP status value. This class is used to encapsulate the status
-    /// value constants used in several SNMP macro types. Note that, due
-    /// to the support for both SMIv1 and SMIv2, not all of the constants
-    /// defined in this class can be present in all files. Please see the
-    /// comments for each individual constant regarding the support for
-    /// different SMI versions.
-    /// </summary>
-    public class SnmpStatus
-    {
-        /// <summary>
-        /// The mandatory SNMP status. This status is only used in SMIv1.
-        /// </summary>
-        public static readonly SnmpStatus MANDATORY =
-            new SnmpStatus("mandatory");
+   /// <summary>
+   /// An SNMP status value. This class is used to encapsulate the status
+   /// value constants used in several SNMP macro types. Note that, due
+   /// to the support for both SMIv1 and SMIv2, not all of the constants
+   /// defined in this class can be present in all files. Please see the
+   /// comments for each individual constant regarding the support for
+   /// different SMI versions.
+   /// </summary>
+   public class SnmpStatus
+   {
+      /// <summary>
+      /// The mandatory SNMP status. This status is only used in SMIv1.
+      /// </summary>
+      public static readonly SnmpStatus MANDATORY =
+          new SnmpStatus("mandatory");
 
-        /// <summary>
-        /// The optional SNMP status. This status is only used in SMIv1.
-        /// </summary>
-        public static readonly SnmpStatus OPTIONAL =
-            new SnmpStatus("optional");
+      /// <summary>
+      /// The optional SNMP status. This status is only used in SMIv1.
+      /// </summary>
+      public static readonly SnmpStatus OPTIONAL =
+          new SnmpStatus("optional");
 
-        /// <summary>
-        /// The current SNMP status. This status is only used in SMIv2
-        /// and later.
-        /// </summary>
-        public static readonly SnmpStatus CURRENT =
-            new SnmpStatus("current");
+      /// <summary>
+      /// The current SNMP status. This status is only used in SMIv2
+      /// and later.
+      /// </summary>
+      public static readonly SnmpStatus CURRENT =
+          new SnmpStatus("current");
 
-        /// <summary>
-        /// The deprecated SNMP status. This status is only used in SMIv2
-        /// and later.
-        /// </summary>
-        public static readonly SnmpStatus DEPRECATED =
-            new SnmpStatus("deprecated");
+      /// <summary>
+      /// The deprecated SNMP status. This status is only used in SMIv2
+      /// and later.
+      /// </summary>
+      public static readonly SnmpStatus DEPRECATED =
+          new SnmpStatus("deprecated");
 
-        /// <summary>
-        /// The obsolete SNMP status.
-        /// </summary>
-        public static readonly SnmpStatus OBSOLETE =
-            new SnmpStatus("obsolete");
+      /// <summary>
+      /// The obsolete SNMP status.
+      /// </summary>
+      public static readonly SnmpStatus OBSOLETE =
+          new SnmpStatus("obsolete");
 
-        /// <summary>
-        /// The status description.
-        /// </summary>
-        private readonly string description;
+      /// <summary>
+      /// The status description.
+      /// </summary>
+      private readonly string description;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SnmpStatus"/> class.
-        /// </summary>
-        /// <param name="description">The status description</param>
-        private SnmpStatus(string description)
-        {
-            this.description = description;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="SnmpStatus"/> class.
+      /// </summary>
+      /// <param name="description">The status description</param>
+      private SnmpStatus(string description)
+      {
+         this.description = description;
+      }
 
-        /// <summary>
-        /// Returns a string representation of this object.
-        /// </summary>
-        /// <returns>A string representation of this object</returns>
-        public override string ToString()
-        {
-            return this.description;
-        }
-    }
+      /// <summary>
+      /// Returns a string representation of this object.
+      /// </summary>
+      /// <returns>A string representation of this object</returns>
+      public override string ToString()
+      {
+         return this.description;
+      }
+   }
 }

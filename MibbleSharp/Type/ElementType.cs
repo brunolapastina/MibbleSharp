@@ -21,89 +21,89 @@
 
 namespace MibbleSharp.Type
 {
-    using System.Text;
+   using System.Text;
 
-    /// <summary>
-    /// A compound element MIB type. This type is used inside various
-    /// compound types, storing a reference to the type and an optional
-    /// name.
-    /// </summary>
-    public class ElementType : MibType
-    {
-        /// <summary>
-        /// The element type.
-        /// </summary>
-        private MibType type;
+   /// <summary>
+   /// A compound element MIB type. This type is used inside various
+   /// compound types, storing a reference to the type and an optional
+   /// name.
+   /// </summary>
+   public class ElementType : MibType
+   {
+      /// <summary>
+      /// The element type.
+      /// </summary>
+      private MibType type;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ElementType"/> class.
-        /// </summary>
-        /// <param name="name">The optional element name</param>
-        /// <param name="type">The element type</param>
-        public ElementType(string name, MibType type) : base(string.Empty, false)
-        {
-            this.Name = name;
-            this.type = type;
-        }
+      /// <summary>
+      /// Initializes a new instance of the <see cref="ElementType"/> class.
+      /// </summary>
+      /// <param name="name">The optional element name</param>
+      /// <param name="type">The element type</param>
+      public ElementType(string name, MibType type) : base(string.Empty, false)
+      {
+         this.Name = name;
+         this.type = type;
+      }
 
-        /// <summary>Gets the referenced MIB type.</summary>
-        /// <returns>The referenced MIB type</returns>
-        public MibType Type
-        {
-            get
-            {
-                return this.type;
-            }
-        }
+      /// <summary>Gets the referenced MIB type.</summary>
+      /// <returns>The referenced MIB type</returns>
+      public MibType Type
+      {
+         get
+         {
+            return this.type;
+         }
+      }
 
-        /// <summary>
-        /// Initializes the MIB type. This will remove all levels of
-        /// indirection present, such as references to types or values. No
-        /// information is lost by this operation. This method may modify
-        /// this object as a side-effect, and will return the basic
-        /// type.
-        /// NOTE: This is an internal method that should
-        /// only be called by the MIB loader.
-        /// </summary>
-        /// <param name="symbol">The MIB symbol containing this type</param>
-        /// <param name="log">The MIB loader log</param>
-        /// <returns>The basic MIB type</returns>
-        public override MibType Initialize(MibSymbol symbol, MibLoaderLog log)
-        {
-            this.type = this.type.Initialize(symbol, log);
-            return this;
-        }
+      /// <summary>
+      /// Initializes the MIB type. This will remove all levels of
+      /// indirection present, such as references to types or values. No
+      /// information is lost by this operation. This method may modify
+      /// this object as a side-effect, and will return the basic
+      /// type.
+      /// NOTE: This is an internal method that should
+      /// only be called by the MIB loader.
+      /// </summary>
+      /// <param name="symbol">The MIB symbol containing this type</param>
+      /// <param name="log">The MIB loader log</param>
+      /// <returns>The basic MIB type</returns>
+      public override MibType Initialize(MibSymbol symbol, MibLoaderLog log)
+      {
+         this.type = this.type.Initialize(symbol, log);
+         return this;
+      }
 
-        /// <summary>
-        /// Checks if the specified value is compatible with this type.
-        /// The value is considered compatible with this type, if it is
-        /// compatible with the underlying type.
-        /// </summary>
-        /// <param name="value">The value to check</param>
-        /// <returns>true if the value is compatible, false otherwise</returns>
-        public override bool IsCompatible(MibValue value)
-        {
-            return this.type.IsCompatible(value);
-        }
+      /// <summary>
+      /// Checks if the specified value is compatible with this type.
+      /// The value is considered compatible with this type, if it is
+      /// compatible with the underlying type.
+      /// </summary>
+      /// <param name="value">The value to check</param>
+      /// <returns>true if the value is compatible, false otherwise</returns>
+      public override bool IsCompatible(MibValue value)
+      {
+         return this.type.IsCompatible(value);
+      }
 
-        /// <summary>
-        /// Returns a string representation of this object.
-        /// </summary>
-        /// <returns>A string representation of this object</returns>
-        public override string ToString()
-        {
-            StringBuilder builder = new StringBuilder();
+      /// <summary>
+      /// Returns a string representation of this object.
+      /// </summary>
+      /// <returns>A string representation of this object</returns>
+      public override string ToString()
+      {
+         StringBuilder builder = new StringBuilder();
 
-            builder.Append(base.ToString());
+         builder.Append(base.ToString());
 
-            if (this.Name != null)
-            {
-                builder.Append(this.Name);
-                builder.Append(" ");
-            }
+         if (this.Name != null)
+         {
+            builder.Append(this.Name);
+            builder.Append(" ");
+         }
 
-            builder.Append(this.type.ToString());
-            return builder.ToString();
-        }
-    }
+         builder.Append(this.type.ToString());
+         return builder.ToString();
+      }
+   }
 }

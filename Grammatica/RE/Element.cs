@@ -15,52 +15,52 @@
 
 namespace PerCederberg.Grammatica.Runtime.RE
 {
-    using System;
-    using System.IO;
-    using PerCederberg.Grammatica.Runtime;
+   using PerCederberg.Grammatica.Runtime;
+   using System;
+   using System.IO;
 
-    /// <summary>
-    /// A regular expression element. This is the common base class for
-    /// all regular expression elements, i.e.the parts of the regular
-    /// expression.
-    /// </summary>
-    internal abstract class Element : ICloneable
-    {
-        /// <summary>
-        /// Creates a copy of this element. The copy will be an
-        /// instance of the same class matching the same strings.
-        /// Copies of elements are necessary to allow elements to cache
-        /// intermediate results while matching strings without
-        /// interfering with other threads.
-        /// </summary>
-        /// <returns>A copy of the element</returns>
-        public abstract object Clone();
+   /// <summary>
+   /// A regular expression element. This is the common base class for
+   /// all regular expression elements, i.e.the parts of the regular
+   /// expression.
+   /// </summary>
+   internal abstract class Element : ICloneable
+   {
+      /// <summary>
+      /// Creates a copy of this element. The copy will be an
+      /// instance of the same class matching the same strings.
+      /// Copies of elements are necessary to allow elements to cache
+      /// intermediate results while matching strings without
+      /// interfering with other threads.
+      /// </summary>
+      /// <returns>A copy of the element</returns>
+      public abstract object Clone();
 
-        /// <summary>
-        /// Returns the length of a matching string starting at the
-        /// specified position.The number of matches to skip can also
-        /// be specified, but numbers higher than zero (0) cause a
-        /// failed match for any element that doesn't attempt to
-        /// combine other elements.
-        /// </summary>
-        /// <param name="m">the matcher being used</param>
-        /// <param name="buffer">the input character buffer to match</param>
-        /// <param name="start">The starting position</param>
-        /// <param name="skip">the number of matches to skip</param>
-        /// <returns>
-        /// the length of the matching string, or -1 if no match was found
-        /// </returns>
-        public abstract int Match(
-            Matcher m,
-            ReaderBuffer buffer,
-            int start,
-            int skip);
+      /// <summary>
+      /// Returns the length of a matching string starting at the
+      /// specified position.The number of matches to skip can also
+      /// be specified, but numbers higher than zero (0) cause a
+      /// failed match for any element that doesn't attempt to
+      /// combine other elements.
+      /// </summary>
+      /// <param name="m">the matcher being used</param>
+      /// <param name="buffer">the input character buffer to match</param>
+      /// <param name="start">The starting position</param>
+      /// <param name="skip">the number of matches to skip</param>
+      /// <returns>
+      /// the length of the matching string, or -1 if no match was found
+      /// </returns>
+      public abstract int Match(
+          Matcher m,
+          ReaderBuffer buffer,
+          int start,
+          int skip);
 
-        /// <summary>
-        /// Prints this element to the specified output stream.
-        /// </summary>
-        /// <param name="output">The output stream to write to</param>
-        /// <param name="indent">The current indentation</param>
-        public abstract void PrintTo(TextWriter output, string indent);
-    }
+      /// <summary>
+      /// Prints this element to the specified output stream.
+      /// </summary>
+      /// <param name="output">The output stream to write to</param>
+      /// <param name="indent">The current indentation</param>
+      public abstract void PrintTo(TextWriter output, string indent);
+   }
 }
