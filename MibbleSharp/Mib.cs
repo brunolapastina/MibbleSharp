@@ -366,12 +366,11 @@ namespace MibbleSharp
       /// <returns>The MIB value symbol, or null if not found</returns>
       public MibValueSymbol GetSymbolByOid(string oid)
       {
-         MibValueSymbol sym;
          int pos;
 
          do
          {
-            sym = this.GetSymbolByValue(oid);
+            MibValueSymbol sym = this.GetSymbolByValue(oid);
             if (sym != null)
             {
                return sym;

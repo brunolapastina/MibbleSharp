@@ -33,11 +33,6 @@ namespace MibbleSharp
    /// </summary>
    public class MibValueSymbol : MibSymbol
    {
-      /// <summary>The symbol type.</summary>
-      private MibType type;
-
-      /// <summary>The symbol value.</summary>
-      private MibValue value;
 
       /// <summary>
       /// Initializes a new instance of the <see cref="MibValueSymbol"/> class.
@@ -49,16 +44,11 @@ namespace MibbleSharp
       /// <param name="name">The symbol name</param>
       /// <param name="type">The symbol type</param>
       /// <param name="value">The symbol value</param>
-      public MibValueSymbol(
-          FileLocation location,
-          Mib mib,
-          string name,
-          MibType type,
-          MibValue value)
-          : base(location, mib, name)
+      public MibValueSymbol(FileLocation location, Mib mib, string name, MibType type, MibValue value) : 
+         base(location, mib, name)
       {
-         this.type = type;
-         this.value = value;
+         this.Type = type;
+         this.Value = value;
       }
 
       /// <summary>Gets a value indicating whether this symbol corresponds to a scalar. A symbol is
@@ -69,14 +59,7 @@ namespace MibbleSharp
       /// <see cref="IsTableRow"/>
       /// <see cref="IsTableColumn"/>
       /// <see cref="Snmp.SnmpObjectType"/>
-      public bool IsScalar
-      {
-         get
-         {
-            return this.type is SnmpObjectType
-            && !this.IsTable && !this.IsTableRow && !this.IsTableColumn;
-         }
-      }
+      public bool IsScalar => (this.Type is SnmpObjectType) && !this.IsTable && !this.IsTableRow && !this.IsTableColumn;
 
       /// <summary>
       /// Gets a value indicating whether this symbol corresponds to a table. A symbol is
@@ -87,21 +70,7 @@ namespace MibbleSharp
       /// <see cref="IsTableRow"/>
       /// <see cref="IsTableColumn"/>
       /// <see cref="Snmp.SnmpObjectType"/>
-      public bool IsTable
-      {
-         get
-         {
-            if (this.type is SnmpObjectType snmpObjTp)
-            {
-               MibType syntax = snmpObjTp.Syntax;
-               return syntax is SequenceOfType;
-            }
-            else
-            {
-               return false;
-            }
-         }
-      }
+      public bool IsTable => (this.Type is SnmpObjectType snmpObjTp) && (snmpObjTp.Syntax is SequenceOfType);
 
       /// <summary>
       /// Gets a value indicating whether this symbol corresponds to a table row (or entry). A
@@ -112,21 +81,7 @@ namespace MibbleSharp
       /// <see cref="IsTableRow"/>
       /// <see cref="IsTableColumn"/>
       /// <see cref="Snmp.SnmpObjectType"/>
-      public bool IsTableRow
-      {
-         get
-         {
-            if (this.type is SnmpObjectType snmpObjTp)
-            {
-               MibType syntax = snmpObjTp.Syntax;
-               return syntax is SequenceType;
-            }
-            else
-            {
-               return false;
-            }
-         }
-      }
+      public bool IsTableRow => (this.Type is SnmpObjectType snmpObjTp) && (snmpObjTp.Syntax is SequenceType);
 
       /// <summary>
       /// Gets a value indicating whether this symbol corresponds to a table column. A symbol
@@ -137,39 +92,17 @@ namespace MibbleSharp
       /// <see cref="isTable"/>
       /// <see cref="IsTableRow"/>
       /// <see cref="Snmp.SnmpObjectType"/>
-      public bool IsTableColumn
-      {
-         get
-         {
-            MibValueSymbol par = this.Parent;
-
-            return this.type is SnmpObjectType
-            && par != null
-            && par.IsTableRow;
-         }
-      }
+      public bool IsTableColumn => this.Type is SnmpObjectType && this.Parent != null && this.Parent.IsTableRow;
 
       /// <summary>
       /// Gets the symbol type
       /// </summary>
-      public MibType Type
-      {
-         get
-         {
-            return this.type;
-         }
-      }
+      public MibType Type { get; private set; }
 
       /// <summary>
       /// Gets the symbol value
       /// </summary>
-      public MibValue Value
-      {
-         get
-         {
-            return this.value;
-         }
-      }
+      public MibValue Value { get; private set; }
 
       /// <summary>
       /// Gets the parent symbol in the OID tree. This is a
@@ -180,7 +113,7 @@ namespace MibbleSharp
       {
          get
          {
-            if (this.value is ObjectIdentifierValue objIdVal)
+            if (this.Value is ObjectIdentifierValue objIdVal)
             {
                ObjectIdentifierValue oid = objIdVal.Parent;
                if (oid != null)
@@ -198,7 +131,7 @@ namespace MibbleSharp
       /// convenience method for value symbols that have object
       /// identifier values. 
       /// </summary>
-      public int ChildCount { get => (this.value is ObjectIdentifierValue oiv) ? oiv.ChildCount : 0; }
+      public int ChildCount => (this.Value is ObjectIdentifierValue oiv) ? oiv.ChildCount : 0;
 
       /// <summary>
       /// Gets all child symbols in the OID tree. This is a
@@ -209,16 +142,12 @@ namespace MibbleSharp
       {
          get
          {
-            MibValueSymbol[] children;
-
-
-            if (!(this.value is ObjectIdentifierValue oid))
+            if (!(this.Value is ObjectIdentifierValue oid))
             {
                return new MibValueSymbol[0];
             }
 
-            children = new MibValueSymbol[oid.ChildCount];
-
+            MibValueSymbol[] children = new MibValueSymbol[oid.ChildCount];
             for (int i = 0; i < oid.ChildCount; i++)
             {
                children[i] = oid.GetChild(i).Symbol;
@@ -241,7 +170,7 @@ namespace MibbleSharp
       /// <see cref="ObjectIdentifierValue"/>
       public MibValueSymbol GetChild(int index)
       {
-         if (!(this.value is ObjectIdentifierValue oiv))
+         if (!(this.Value is ObjectIdentifierValue oiv))
          {
             return null;
          }
@@ -269,38 +198,38 @@ namespace MibbleSharp
       /// </exception>
       public override void Initialize(MibLoaderLog log)
       {
-         if (this.type != null)
+         if (this.Type != null)
          {
             try
             {
-               this.type = this.type.Initialize(this, log);
+               this.Type = this.Type.Initialize(this, log);
             }
             catch (MibException e)
             {
                log.AddError(e.Location, e.Message);
-               this.type = null;
+               this.Type = null;
             }
          }
 
-         if (this.value != null)
+         if (this.Value != null)
          {
             try
             {
-               this.value = this.value.Initialize(log, this.type);
+               this.Value = this.Value.Initialize(log, this.Type);
             }
             catch (MibException e)
             {
                log.AddError(e.Location, e.Message);
-               this.value = null;
+               this.Value = null;
             }
          }
 
-         if (this.type != null && this.value != null && !this.type.IsCompatible(this.value))
+         if (this.Type != null && this.Value != null && !this.Type.IsCompatible(this.Value))
          {
             log.AddError(this.Location, "value is not compatible with type");
          }
 
-         if (this.value is ObjectIdentifierValue oid)
+         if (this.Value is ObjectIdentifierValue oid)
          {
             if (oid.Symbol == null)
             {
@@ -317,13 +246,12 @@ namespace MibbleSharp
       /// </summary>
       public override void Clear()
       {
-         this.type = null;
-         if (this.value != null)
+         this.Type = null;
+         if (this.Value != null)
          {
-            this.value.Clear();
+            this.Value.Clear();
+            this.Value = null;
          }
-
-         this.value = null;
       }
 
       /// <summary>

@@ -105,25 +105,13 @@ namespace MibbleSharp
       /// of directories has been added, all the individual directories
       /// will be returned by this method.
       /// </summary>
-      public IList<string> Dirs
-      {
-         get
-         {
-            return this.dirCaches.Select(d => d.Dir).ToList();
-         }
-      }
+      public IList<string> Dirs => this.dirCaches.Select(d => d.Dir).ToList();
 
       /// <summary>
       /// Gets the default MIB context. This context contains the
       /// symbols that are predefined for all MIB:s (such as 'iso').
       /// </summary>
-      public IMibContext DefaultContext
-      {
-         get
-         {
-            return this.context;
-         }
-      }
+      public IMibContext DefaultContext => this.context;
 
       /// <summary>Gets the root object identifier value (OID). This OID is
       /// the "iso" symbol.
@@ -132,11 +120,8 @@ namespace MibbleSharp
       {
          get
          {
-            MibSymbol symbol;
-            MibValue value;
-
-            symbol = this.context.FindSymbol(MibbleSharp.DefaultContext.ISO, false);
-            value = ((MibValueSymbol)symbol).Value;
+            MibSymbol symbol = this.context.FindSymbol(MibbleSharp.DefaultContext.ISO, false);
+            MibValue value = ((MibValueSymbol)symbol).Value;
             return (ObjectIdentifierValue)value;
          }
       }
@@ -303,18 +288,12 @@ namespace MibbleSharp
       /// </exception>
       public Mib Load(string name)
       {
-         MibSource src;
-         Mib mib;
-
-         mib = this.GetMib(name);
+         Mib mib = this.GetMib(name);
          if (mib == null)
          {
-            src = this.Locate(name);
-            if (src == null)
+            if (!this.Locate(name, out MibSource src))
             {
-               throw new FileNotFoundException(
-                   "couldn't locate MIB: '" +
-                   name + "'");
+               throw new FileNotFoundException("couldn't locate MIB: '" + name + "'");
             }
 
             mib = this.Load(src);
@@ -500,8 +479,7 @@ namespace MibbleSharp
          for (int i = 0; i < nameQueue.Count; i++)
          {
             string name = nameQueue[i];
-            MibSource src = this.Locate(name);
-            if (src == null)
+            if (!this.Locate(name, out MibSource src))
             {
                continue;
             }
@@ -569,27 +547,28 @@ namespace MibbleSharp
       /// </summary>
       /// <param name="name">The MIB name</param>
       /// <returns>The MIB found, or null if none was found</returns>
-      private MibSource Locate(string name)
+      private bool Locate(string name, out MibSource src)
       {
-         string file;
-
          foreach (var dir in this.dirCaches)
          {
-            file = dir.FindByName(name);
+            string file = dir.FindByName(name);
             if (file != null)
             {
-               return new MibSource(file);
+               src = new MibSource(file);
+               return true;
             }
 
             file = dir.FindByContent(name);
 
             if (file != null)
             {
-               return new MibSource(file);
+               src = new MibSource(file);
+               return true;
             }
          }
 
-         return null;
+         src = new MibSource();
+         return false;
       }
 
       /// <summary>
@@ -606,14 +585,12 @@ namespace MibbleSharp
       /// </exception>
       private Mib Load(MibSource src)
       {
-         MibLoaderLog log;
-
          this.sourceQueue.Clear();
          this.sourceQueue.Add(src);
 
          int position = mibs.Count;
 
-         log = this.LoadQueue();
+         MibLoaderLog log = this.LoadQueue();
          if (log.ErrorCount > 0)
          {
             throw new MibLoaderException(log);
@@ -626,30 +603,24 @@ namespace MibbleSharp
       /// A MIB input source. This class encapsulates the two different
       /// ways of locating a MIB file, either through a file or a URL.
       /// </summary>
-      private class MibSource
+      private struct MibSource
       {
          /// <summary>
          /// The singleton ASN.1 parser used by all MIB sources.
          /// </summary>
-         private static Asn1Parser parser = null;
-
-         /// <summary>
-         /// The MIB file. This variable is only set if the MIB is read
-         /// from file, or if the MIB name is known.
-         /// </summary>
-         private readonly string file = null;
+         private static Asn1Parser parser;
 
          /// <summary>
          /// The MIB URL location. This variable is only set if the MIB
          /// is read from a URL.
          /// </summary>
-         private readonly Uri url = null;
+         private readonly Uri url;
 
          /// <summary>
          /// The MIB reader. This variable is only set if the MIB
          /// is read from an input stream.
          /// </summary>
-         private System.IO.TextReader input = null;
+         private System.IO.TextReader input;
 
          /// <summary>
          /// Initializes a new instance of the <see cref="MibSource"/> class.
@@ -658,7 +629,11 @@ namespace MibbleSharp
          /// <param name="file">The file to read from</param>
          public MibSource(string file)
          {
-            this.file = file;
+            this.File = file;
+
+            parser = null;
+            url = null;
+            input = null;
          }
 
          /// <summary>
@@ -669,6 +644,10 @@ namespace MibbleSharp
          public MibSource(Uri url)
          {
             this.url = url;
+
+            parser = null;
+            input = null;
+            File = null;
          }
 
          /// <summary>
@@ -681,7 +660,7 @@ namespace MibbleSharp
          /// <param name="url">The URL to read from</param>
          public MibSource(string name, Uri url) : this(url)
          {
-            this.file = name;
+            this.File = name;
          }
 
          /// <summary>
@@ -693,6 +672,10 @@ namespace MibbleSharp
          public MibSource(TextReader input)
          {
             this.input = input;
+
+            parser = null;
+            url = null;
+            File = null;
          }
 
          /// <summary>
@@ -701,13 +684,7 @@ namespace MibbleSharp
          /// unique reference to the MIB.
          /// </summary>
          /// <returns>The MIB file</returns>
-         public string File
-         {
-            get
-            {
-               return this.file;
-            }
-         }
+         public string File { get; }
 
          /// <summary>
          /// Checks if this object is equal to another. This method
@@ -727,9 +704,9 @@ namespace MibbleSharp
             {
                return this.url.Equals(src.url);
             }
-            else if (this.file != null)
+            else if (this.File != null)
             {
-               return this.file.Equals(src.file);
+               return this.File.Equals(src.File);
             }
 
             return false;
@@ -747,9 +724,9 @@ namespace MibbleSharp
             {
                return this.url.GetHashCode();
             }
-            else if (this.file != null)
+            else if (this.File != null)
             {
-               return this.file.GetHashCode();
+               return this.File.GetHashCode();
             }
             else
             {
@@ -771,8 +748,6 @@ namespace MibbleSharp
          /// </exception>
          public IList<Mib> ParseMib(MibLoader loader, MibLoaderLog log)
          {
-            MibAnalyzer analyzer;
-            string msg;
             string result = string.Empty;
 
             // Open input stream
@@ -789,7 +764,7 @@ namespace MibbleSharp
             }
             else
             {
-               using (TextReader reader = System.IO.File.OpenText(this.file))
+               using (TextReader reader = System.IO.File.OpenText(this.File))
                {
                   result = reader.ReadToEnd();
                }
@@ -798,7 +773,7 @@ namespace MibbleSharp
             using (this.input = new StringReader(result))
             {
                // Parse input stream
-               analyzer = new MibAnalyzer(this.file, loader, log);
+               MibAnalyzer analyzer = new MibAnalyzer(this.File, loader, log);
                try
                {
                   if (parser == null)
@@ -817,15 +792,13 @@ namespace MibbleSharp
                }
                catch (ParserCreationException e)
                {
-                  msg = "parser creation error in ASN.1 parser: " +
-                        e.Message;
-                  log.AddInternalError(this.file, msg);
+                  log.AddInternalError(this.File, "parser creation error in ASN.1 parser: " + e.Message);
                   analyzer.Reset();
                   throw new MibLoaderException(log);
                }
                catch (ParserLogException e)
                {
-                  log.AddAll(this.file, e);
+                  log.AddAll(this.File, e);
                   analyzer.Reset();
                   throw new MibLoaderException(log);
                }
