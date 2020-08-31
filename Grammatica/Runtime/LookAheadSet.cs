@@ -632,7 +632,9 @@ namespace PerCederberg.Grammatica.Runtime
          /// </summary>
          /// <param name="repeat">The repeat flag value</param>
          /// <param name="token">The token to add</param>
+#pragma warning disable IDE0060 // Remove unused parameter
          public Sequence(bool repeat, int token)
+#pragma warning restore IDE0060 // Remove unused parameter
          {
             this.repeat = false;
             this.tokens = new List<int>

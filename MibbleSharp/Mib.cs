@@ -37,50 +37,15 @@ namespace MibbleSharp
    /// </seealso>
    public class Mib : IMibContext
    {
-      /// <summary>The file to be read</summary>
-      private string file;
-
-      /// <summary>The loader used for this MIB.</summary>
-      private MibLoader loader;
-
-      /// <summary>The loader log used for loading this MIB.</summary>
-      private MibLoaderLog log;
-
-      /// <summary>
-      /// The explicitly loaded flag. This flag is set when a MIB is
-      /// loaded by a direct call to the MibLoader, in contrast to when
-      /// it is loaded as the result of an import.
-      /// </summary>
-      private bool loaded = false;
 
       /// <summary>The MIB name.</summary>
       private string name = null;
-
-      /// <summary>The SMI version.</summary>
-      private int smiVersion = 1;
-
-      /// <summary>The MIB file header comment.</summary>
-      private string headerComment = null;
-
-      /// <summary>The MIB file footer comment.</summary>
-      private string footerComment = null;
-
-      /// <summary>
-      /// The references to imported MIB files.
-      /// </summary>
-      private IList<MibImport> imports = new List<MibImport>();
-
-      /// <summary>
-      /// The MIB symbol list. This list contains the MIB symbol objects
-      /// in the order they were added (i.e. present in the file).
-      /// </summary>
-      private IList<MibSymbol> symbolList = new List<MibSymbol>();
 
       /// <summary>
       /// The MIB symbol name map. This maps the symbol names to their
       /// respective MIB symbol objects.
       /// </summary>
-      private Dictionary<string, MibSymbol> symbolNameMap = new Dictionary<string, MibSymbol>();
+      private readonly Dictionary<string, MibSymbol> symbolNameMap = new Dictionary<string, MibSymbol>();
 
       /// <summary>
       /// The MIB symbol value map. This maps the symbol values to their
@@ -88,7 +53,7 @@ namespace MibbleSharp
       /// either a number or an object identifier value is present in
       /// this map.
       /// </summary>
-      private Dictionary<string, MibValueSymbol> symbolValueMap = new Dictionary<string, MibValueSymbol>();
+      private readonly Dictionary<string, MibValueSymbol> symbolValueMap = new Dictionary<string, MibValueSymbol>();
 
       /// <summary>
       /// Initializes a new instance of the <see cref="Mib"/> class.
@@ -105,9 +70,9 @@ namespace MibbleSharp
       /// <see cref="Initialize"/>
       public Mib(string file, MibLoader loader, MibLoaderLog log)
       {
-         this.file = file;
-         this.loader = loader;
-         this.log = log;
+         this.File = file;
+         this.Loader = loader;
+         this.Log = log;
       }
 
       /// <summary>
@@ -120,18 +85,7 @@ namespace MibbleSharp
       /// <returns> true if this MIB module was explicitly loaded, or false 
       /// otherwise
       /// </returns>
-      public bool Loaded
-      {
-         get
-         {
-            return this.loaded;
-         }
-
-         set
-         {
-            this.loaded = value;
-         }
-      }
+      public bool Loaded { get; set; } = false;
 
       /// <summary>
       /// Gets or sets the MIB name. This is sometimes also referred to as
@@ -149,9 +103,9 @@ namespace MibbleSharp
          set
          {
             this.name = value;
-            if (this.file == null)
+            if (this.File == null)
             {
-               this.file = value;
+               this.File = value;
             }
          }
       }
@@ -159,35 +113,17 @@ namespace MibbleSharp
       /// <summary>
       /// Gets the filename
       /// </summary>
-      public string File
-      {
-         get
-         {
-            return this.file;
-         }
-      }
+      public string File { get; private set; }
 
       /// <summary>
       /// Gets the MIB loader used when loading this MIB.
       /// </summary>
-      public MibLoader Loader
-      {
-         get
-         {
-            return this.loader;
-         }
-      }
+      public MibLoader Loader { get; }
 
       /// <summary>
       /// Gets the loader log used when loading this MIB.
       /// </summary>
-      public MibLoaderLog Log
-      {
-         get
-         {
-            return this.log;
-         }
-      }
+      public MibLoaderLog Log { get; }
 
       /// <summary>
       /// Gets or sets the SMI version used for defining this MIB. This
@@ -195,72 +131,27 @@ namespace MibbleSharp
       /// based on which macros are used in the MIB file. The setter
       /// should only be called by the MIB analysis classes.
       /// </summary>
-      public int SmiVersion
-      {
-         get
-         {
-            return this.smiVersion;
-         }
-
-         set
-         {
-            this.smiVersion = value;
-         }
-      }
+      public int SmiVersion { get; set; } = 1;
 
       /// <summary>
       /// Gets or sets the Mib file's header comment
       /// </summary>
-      public string HeaderComment
-      {
-         get
-         {
-            return this.headerComment;
-         }
-
-         set
-         {
-            this.headerComment = value;
-         }
-      }
+      public string HeaderComment { get; set; } = null;
 
       /// <summary>
       /// Gets or sets the Mib file's footer comment
       /// </summary>
-      public string FooterComment
-      {
-         get
-         {
-            return this.footerComment;
-         }
-
-         set
-         {
-            this.footerComment = value;
-         }
-      }
+      public string FooterComment { get; set; } = null;
 
       /// <summary>
       /// Gets all imports for the Mib
       /// </summary>
-      public IList<MibImport> Imports
-      {
-         get
-         {
-            return this.imports;
-         }
-      }
+      public IList<MibImport> Imports { get; } = new List<MibImport>();
 
       /// <summary>
       /// Gets all symbols for the Mib
       /// </summary>
-      public IList<MibSymbol> Symbols
-      {
-         get
-         {
-            return this.symbolList;
-         }
-      }
+      public IList<MibSymbol> Symbols { get; } = new List<MibSymbol>();
 
       /// <summary>
       /// Gets all MIB:s that are dependant on this one. The search
@@ -268,15 +159,10 @@ namespace MibbleSharp
       /// import this one.
       /// </summary>
       /// <see cref="MibLoader"/>
-      public IList<Mib> ImportingMibs
-      {
-         get
-         {
-            return this.loader.AllMibs
-                .Where(m => m != this && m.GetImport(this.name) != null)
-                .ToList();
-         }
-      }
+      public IList<Mib> ImportingMibs => 
+         this.Loader.AllMibs
+         .Where(m => m != this && m.GetImport(this.name) != null)
+         .ToList();
 
       /// <summary>
       /// Initializes the MIB file. This will resolve all imported MIB
@@ -290,25 +176,25 @@ namespace MibbleSharp
       /// <see cref="Validate"/>
       public void Initialize()
       {
-         int errors = this.log.ErrorCount;
+         int errors = this.Log.ErrorCount;
 
          // Resolve imported MIB files
-         foreach (MibImport imp in this.imports)
+         foreach (MibImport imp in this.Imports)
          {
             try
             {
-               imp.Initialize(this.log);
+               imp.Initialize(this.Log);
             }
             catch (MibException e)
             {
-               this.log.AddError(e.Location, e.Message);
+               this.Log.AddError(e.Location, e.Message);
             }
          }
 
          // Check for errors
-         if (errors != this.log.ErrorCount)
+         if (errors != this.Log.ErrorCount)
          {
-            throw new MibLoaderException(this.log);
+            throw new MibLoaderException(this.Log);
          }
       }
 
@@ -324,30 +210,30 @@ namespace MibbleSharp
       /// </exception>
       public void Validate()
       {
-         int errors = this.log.ErrorCount;
+         int errors = this.Log.ErrorCount;
 
          // Validate all symbols
-         for (int i = 0; i < this.symbolList.Count; ++i)
+         for (int i = 0; i < this.Symbols.Count; ++i)
          {
             try
             {
-               symbolList[i].Initialize(this.log);
+               Symbols[i].Initialize(this.Log);
             }
             catch (MibException e)
             {
-               this.log.AddError(e.Location, e.Message);
+               this.Log.AddError(e.Location, e.Message);
             }
 
-            if ((symbolList[i] is MibValueSymbol value) && (value.Value is NumberValue || value.Value is ObjectIdentifierValue))
+            if ((Symbols[i] is MibValueSymbol value) && (value.Value is NumberValue || value.Value is ObjectIdentifierValue))
             {
                this.symbolValueMap.Add(value.Value.ToString(), value);
             }
          }
 
          // Check for errors
-         if (errors != this.log.ErrorCount)
+         if (errors != this.Log.ErrorCount)
          {
-            throw new MibLoaderException(this.log);
+            throw new MibLoaderException(this.Log);
          }
       }
 
@@ -360,40 +246,16 @@ namespace MibbleSharp
       /// </summary>
       public void Clear()
       {
-         this.loader = null;
-         this.log = null;
-
-         if (this.imports != null)
+         this.Imports.Clear();
+         
+         foreach (MibSymbol symbol in this.Symbols)
          {
-            this.imports.Clear();
+            symbol.Clear();
          }
 
-         this.imports = null;
-         if (this.symbolList != null)
-         {
-            foreach (MibSymbol symbol in this.symbolList)
-            {
-               symbol.Clear();
-            }
-
-            this.symbolList.Clear();
-         }
-
-         this.symbolList = null;
-
-         if (this.symbolNameMap != null)
-         {
-            this.symbolNameMap.Clear();
-         }
-
-         this.symbolNameMap = null;
-
-         if (this.symbolValueMap != null)
-         {
-            this.symbolValueMap.Clear();
-         }
-
-         this.symbolValueMap = null;
+         this.Symbols.Clear();
+         this.symbolNameMap.Clear();
+         this.symbolValueMap.Clear();
       }
 
       /// <summary>
@@ -438,7 +300,7 @@ namespace MibbleSharp
       /// </returns>
       public MibImport GetImport(string name)
       {
-         foreach (MibImport imp in this.imports)
+         foreach (MibImport imp in this.Imports)
          {
             if (imp.Name.Equals(name))
             {
@@ -455,7 +317,7 @@ namespace MibbleSharp
       /// <param name="impRef">The import reference to be added</param>
       public void AddImport(MibImport impRef)
       {
-         this.imports.Add(impRef);
+         this.Imports.Add(impRef);
       }
 
       /// <summary>
@@ -537,7 +399,7 @@ namespace MibbleSharp
          MibValueSymbol root = null;
          MibValueSymbol parent;
 
-         root = this.symbolList.Where(s => s is MibValueSymbol).FirstOrDefault() as MibValueSymbol;
+         root = this.Symbols.Where(s => s is MibValueSymbol).FirstOrDefault() as MibValueSymbol;
          /*
          foreach (MibSymbol m in this.symbolList)
          {
@@ -567,7 +429,7 @@ namespace MibbleSharp
       /// <param name="symbol">The symbol to add</param>
       public void AddSymbol(MibSymbol symbol)
       {
-         this.symbolList.Add(symbol);
+         this.Symbols.Add(symbol);
          this.symbolNameMap.Add(symbol.Name, symbol);
       }
 

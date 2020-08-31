@@ -2,9 +2,9 @@
 
 namespace MibbleBrowser
 {
-   public partial class frmSnmpSettings : Form
+   public partial class FrmSnmpSettings : Form
    {
-      public frmSnmpSettings()
+      public FrmSnmpSettings()
       {
          InitializeComponent();
       }

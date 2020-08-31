@@ -192,7 +192,7 @@ namespace MibbleValidator
       /// </summary>
       /// <param name="url">The URL that was not found</param>
       /// <param name="e">The detailed exception</param>
-      private static void PrintError(string url, IOException e)
+      private static void PrintError(string url, IOException _)
       {
          StringBuilder builder = new StringBuilder();
 

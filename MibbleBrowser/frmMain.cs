@@ -5,9 +5,9 @@ using System.Windows.Forms;
 
 namespace MibbleBrowser
 {
-   public partial class frmMain : Form
+   public partial class FrmMain : Form
    {
-      public frmMain()
+      public FrmMain()
       {
          InitializeComponent();
          mibTreeBuilder = new MibTreeBuilder(treeMibs);
@@ -15,22 +15,22 @@ namespace MibbleBrowser
          mibTreeBuilder.LoadMibFile("HOST-RESOURCES-MIB");
       }
 
-      private void splitContainer1_Panel1_Paint(object sender, PaintEventArgs e)
+      private void SplitContainer1_Panel1_Paint(object sender, PaintEventArgs e)
       {
 
       }
 
-      private void fIleToolStripMenuItem_Click(object sender, EventArgs e)
+      private void FIleToolStripMenuItem_Click(object sender, EventArgs e)
       {
 
       }
 
-      private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+      private void DataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
       {
 
       }
 
-      private void loadMIBToolStripMenuItem_Click(object sender, EventArgs e)
+      private void LoadMIBToolStripMenuItem_Click(object sender, EventArgs e)
       {
          DialogResult result = openFileDialogMain.ShowDialog();
          if (result == DialogResult.OK) // Test result.
@@ -40,10 +40,9 @@ namespace MibbleBrowser
          }
       }
 
-      private void treeMibs_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+      private void TreeMibs_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
       {
-         MibNode n = e.Node as MibNode;
-         if (n == null)
+         if (!(e.Node is MibNode n))
          {
             return;
          }

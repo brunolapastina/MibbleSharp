@@ -145,13 +145,7 @@ namespace MibbleSharp
       /// Gets all previously loaded MIB files. If no MIB files have
       /// been loaded an empty array will be returned.
       /// </summary>
-      public IEnumerable<Mib> AllMibs
-      {
-         get
-         {
-            return this.mibs;
-         }
-      }
+      public IEnumerable<Mib> AllMibs => this.mibs;
 
       /// <summary>
       /// Checks if a directory is in the MIB search path. If a file is

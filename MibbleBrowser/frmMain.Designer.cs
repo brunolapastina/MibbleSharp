@@ -1,6 +1,6 @@
 ﻿namespace MibbleBrowser
 {
-    partial class frmMain
+    partial class FrmMain
     {
         /// <summary>
         /// Required designer variable.
@@ -80,14 +80,14 @@
             this.fIleToolStripMenuItem.Name = "fIleToolStripMenuItem";
             this.fIleToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fIleToolStripMenuItem.Text = "File";
-            this.fIleToolStripMenuItem.Click += new System.EventHandler(this.fIleToolStripMenuItem_Click);
+            this.fIleToolStripMenuItem.Click += new System.EventHandler(this.FIleToolStripMenuItem_Click);
             // 
             // loadMIBToolStripMenuItem
             // 
             this.loadMIBToolStripMenuItem.Name = "loadMIBToolStripMenuItem";
             this.loadMIBToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.loadMIBToolStripMenuItem.Text = "Load MIB";
-            this.loadMIBToolStripMenuItem.Click += new System.EventHandler(this.loadMIBToolStripMenuItem_Click);
+            this.loadMIBToolStripMenuItem.Click += new System.EventHandler(this.LoadMIBToolStripMenuItem_Click);
             // 
             // optionsToolStripMenuItem
             // 
@@ -143,7 +143,7 @@
             this.dataGridView1.RowHeadersVisible = false;
             this.dataGridView1.Size = new System.Drawing.Size(523, 349);
             this.dataGridView1.TabIndex = 0;
-            this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
+            this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridView1_CellContentClick);
             // 
             // colOID
             // 
@@ -217,7 +217,7 @@
             this.treeMibs.Name = "treeMibs";
             this.treeMibs.Size = new System.Drawing.Size(262, 236);
             this.treeMibs.TabIndex = 1;
-            this.treeMibs.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeMibs_NodeMouseClick);
+            this.treeMibs.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.TreeMibs_NodeMouseClick);
             // 
             // txtNodeInfo
             // 

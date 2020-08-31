@@ -28,19 +28,24 @@ namespace MibbleSharp
    /// </summary>
    public abstract class MibSymbol
    {
-      /// <summary>The symbol location.</summary>
-      private readonly FileLocation location;
+      /// <summary>
+      /// Gets the file location of the symbol
+      /// </summary>
+      public FileLocation Location { get; }
 
       /// <summary>
-      /// The MIB containing this symbol.
+      /// Gets the symbol MIB file. This is the MIB file where the
+      /// symbol is defined.
       /// </summary>
-      private readonly Mib mib;
+      public Mib Mib { get; }
 
-      /// <summary>The symbol name.</summary>
-      private readonly string name;
+      /// <summary>
+      /// Gets the symbol name
+      /// </summary>
+      public string Name { get; }
 
-      /// <summary>The symbol comment.</summary>
-      private string comment;
+      /// <summary>Gets or sets the symbol comment.</summary>
+      public string Comment { get; set; }
 
       /// <summary>
       /// Initializes a new instance of the <see cref="MibSymbol"/> class
@@ -51,54 +56,13 @@ namespace MibbleSharp
       /// <param name="name">The symbol name</param>
       public MibSymbol(FileLocation location, Mib mib, string name)
       {
-         this.location = location;
-         this.mib = mib;
-         this.name = name;
+         this.Location = location;
+         this.Mib = mib;
+         this.Name = name;
          if (mib != null)
          {
             mib.AddSymbol(this);
          }
-      }
-
-      /// <summary>
-      /// Gets the symbol name
-      /// </summary>
-      public string Name
-      {
-         get
-         {
-            return this.name;
-         }
-      }
-
-      /// <summary>
-      /// Gets the file location of the symbol
-      /// </summary>
-      public FileLocation Location
-      {
-         get
-         {
-            return this.location;
-         }
-      }
-
-      /// <summary>
-      /// Gets the symbol MIB file. This is the MIB file where the
-      /// symbol is defined.
-      /// </summary>
-      public Mib Mib
-      {
-         get
-         {
-            return this.mib;
-         }
-      }
-
-      /// <summary>Gets or sets the symbol comment.</summary>
-      public string Comment
-      {
-         get { return this.comment; }
-         set { this.comment = value; }
       }
 
       /// <summary>

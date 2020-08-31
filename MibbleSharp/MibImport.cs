@@ -116,7 +116,9 @@ namespace MibbleSharp
       /// <exception cref="MibException">if an error was encountered during the
       /// initialization
       /// </exception>
+#pragma warning disable IDE0060 // Remove unused parameter
       public void Initialize(MibLoaderLog log)
+#pragma warning restore IDE0060 // Remove unused parameter
       {
          string message;
 

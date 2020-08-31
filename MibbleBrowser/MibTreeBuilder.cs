@@ -97,15 +97,12 @@ namespace MibbleBrowser
       /// <param name="sym"></param>
       private void AddSymbol(MibSymbol sym)
       {
-         MibValueSymbol valSym = sym as MibValueSymbol;
-         if (valSym == null)
+         if (!(sym is MibValueSymbol valSym))
          {
             return;
          }
 
-         ObjectIdentifierValue oiv = valSym.Value as ObjectIdentifierValue;
-
-         if (oiv == null)
+         if (!(valSym.Value is ObjectIdentifierValue oiv))
          {
             return;
          }

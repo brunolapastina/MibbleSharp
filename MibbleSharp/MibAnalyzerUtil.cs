@@ -84,10 +84,8 @@ namespace MibbleSharp
       public static string GetComments(Node node)
       {
          string comment = string.Empty;
-         string str;
-         Token token;
 
-         str = GetCommentsBefore(node);
+         string str = GetCommentsBefore(node);
          if (str != null)
          {
             comment = str;
@@ -104,7 +102,7 @@ namespace MibbleSharp
             comment += str;
          }
 
-         token = GetCommentTokenSameLine(node);
+         Token token = GetCommentTokenSameLine(node);
          if (token != null)
          {
             if (comment.Length > 0)
@@ -145,14 +143,12 @@ namespace MibbleSharp
       private static string GetCommentsBefore(Node node)
       {
          Token token = GetFirstToken(node);
-         List<string> comments = new List<string>();
-         StringBuilder builder = new StringBuilder();
-
          if (token != null)
          {
             token = token.Previous;
          }
 
+         List<string> comments = new List<string>();
          while (token != null)
          {
             if (token.Id == (int)Asn1Constants.WHITESPACE)
@@ -173,6 +169,7 @@ namespace MibbleSharp
             token = token.Previous;
          }
 
+         StringBuilder builder = new StringBuilder();
          for (int i = comments.Count - 1; i >= 0; i--)
          {
             builder.Append(comments[i]);
@@ -192,14 +189,12 @@ namespace MibbleSharp
       private static string GetCommentsAfter(Node node)
       {
          Token token = GetLastToken(node);
-         StringBuilder comment = new StringBuilder();
-         string res;
-
          if (token != null)
          {
             token = token.Next;
          }
 
+         StringBuilder comment = new StringBuilder();
          while (token != null)
          {
             if (token.Id == (int)Asn1Constants.WHITESPACE)
@@ -220,7 +215,7 @@ namespace MibbleSharp
             token = token.Next;
          }
 
-         res = comment.ToString().Trim();
+         string res = comment.ToString().Trim();
          return res.Length <= 0 ? null : res;
       }
 
@@ -236,8 +231,6 @@ namespace MibbleSharp
          Token token = GetFirstToken(node);
          Token last = GetLastToken(node);
          StringBuilder comment = new StringBuilder();
-         string res;
-
          while (token != null && token != last)
          {
             if (token.Id == (int)Asn1Constants.COMMENT &&
@@ -251,7 +244,7 @@ namespace MibbleSharp
             token = token.Next;
          }
 
-         res = comment.ToString().Trim();
+         string res = comment.ToString().Trim();
          return res.Length <= 0 ? null : res;
       }
 
@@ -262,14 +255,12 @@ namespace MibbleSharp
       private static Token GetCommentTokenSameLine(Node node)
       {
          Token last = GetLastToken(node);
-         Token token;
-
          if (last == null)
          {
             return null;
          }
 
-         token = last.Next;
+         Token token = last.Next;
          while (token != null)
          {
             switch ((Asn1Constants)token.Id)
@@ -331,13 +322,12 @@ namespace MibbleSharp
       /// <returns>A string containing zero or more line breaks.</returns>
       private static string GetLineBreaks(string str)
       {
-         StringBuilder res = new StringBuilder();
-
          if (str == null)
          {
             return null;
          }
 
+         StringBuilder res = new StringBuilder();
          for (int i = 0; i < str.Length; i++)
          {
             if (str[i] == '\n')

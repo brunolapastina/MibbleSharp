@@ -40,7 +40,7 @@ namespace MibbleBrowser.SnmpSettings
       /// <summary>
       /// The various Snmp v3 security levels, per RFC 3411 item 3.4.3
       /// </summary>
-      public enum v3SecurityLevel
+      public enum V3SecurityLevel
       {
          NoAuthNoPriv = 0,
          AuthNoPriv,
@@ -52,7 +52,7 @@ namespace MibbleBrowser.SnmpSettings
       /// MD5 and SHA1 usage are specified in RFC 3414.
       /// SHA2 usage is specified in RFC 7860
       /// </summary>
-      public enum v3AuthProtocol
+      public enum V3AuthProtocol
       {
          /// <summary>
          /// No authentication is used. This is the default value
@@ -97,7 +97,7 @@ namespace MibbleBrowser.SnmpSettings
       /// <summary>
       /// 
       /// </summary>
-      public enum v3PrivProtocol
+      public enum V3PrivProtocol
       {
          /// <summary>
          /// No privacy protocol

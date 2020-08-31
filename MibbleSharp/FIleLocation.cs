@@ -31,19 +31,19 @@ namespace MibbleSharp
    public class FileLocation
    {
       /// <summary>
-      /// The file to which the location refers.
+      /// Gets the File Location's filename
       /// </summary>
-      private readonly string file;
+      public string File { get; }
 
       /// <summary>
-      /// The line number within the file (optional)
+      /// Gets the File Location's line number
       /// </summary>
-      private readonly int line;
+      public int LineNumber { get; }
 
       /// <summary>
-      /// The column number within the file (optional)
+      /// Gets the File Location's column Number
       /// </summary>
-      private readonly int column;
+      public int ColumnNumber { get; }
 
       /// <summary>
       /// Initializes a new instance of the <see cref="FileLocation"/> class
@@ -67,42 +67,9 @@ namespace MibbleSharp
       /// <param name="column">Column number of location. Negative values are reset to -1</param>
       public FileLocation(string file, int line, int column)
       {
-         this.file = file;
-         this.line = line < -1 ? -1 : line;
-         this.column = column < -1 ? -1 : column;
-      }
-
-      /// <summary>
-      /// Gets the File Location's filename
-      /// </summary>
-      public string File
-      {
-         get
-         {
-            return this.file;
-         }
-      }
-
-      /// <summary>
-      /// Gets the File Location's line number
-      /// </summary>
-      public int LineNumber
-      {
-         get
-         {
-            return this.line;
-         }
-      }
-
-      /// <summary>
-      /// Gets the File Location's column Number
-      /// </summary>
-      public int ColumnNumber
-      {
-         get
-         {
-            return this.column;
-         }
+         this.File = file;
+         this.LineNumber = line < -1 ? -1 : line;
+         this.ColumnNumber = column < -1 ? -1 : column;
       }
 
       /// <summary>
@@ -119,17 +86,17 @@ namespace MibbleSharp
          int count = 1;
          int ch;
 
-         if (this.file == null || this.line < 0)
+         if (this.File == null || this.LineNumber < 0)
          {
             return null;
          }
 
-         using (System.IO.StreamReader sr = System.IO.File.OpenText(this.file))
+         using (System.IO.StreamReader sr = System.IO.File.OpenText(this.File))
          {
             // Only count line-feed characters in files with invalid line
             // termination sequences. The default readLine() method doesn't
             // quite do the right thing in those cases... (bug #16252)
-            while (count < this.line && (ch = sr.Read()) >= 0)
+            while (count < this.LineNumber && (ch = sr.Read()) >= 0)
             {
                if (ch == '\n')
                {
@@ -149,7 +116,7 @@ namespace MibbleSharp
       /// <returns>A string representation of the FileLocation object</returns>
       public override string ToString()
       {
-         return "File: " + this.file + ", Line: " + this.line + ", Column: " + this.column;
+         return "File: " + this.File + ", Line: " + this.LineNumber + ", Column: " + this.ColumnNumber;
       }
    }
 }

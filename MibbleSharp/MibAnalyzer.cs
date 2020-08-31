@@ -378,9 +378,7 @@ namespace MibbleSharp
       public override Node ExitSymbolsFromModule(Production node)
       {
          // Create MIB reference
-         Node child = this.GetChildAt(node, 0);
-
-         child = this.GetChildAt(node, 2);
+         Node child = this.GetChildAt(node, 2);
          string module = this.GetStringValue(child, 0);
          MibImport imp = new MibImport(this.loader, this.GetLocation(child), module, new List<MibSymbol>());
 
@@ -437,7 +435,7 @@ namespace MibbleSharp
          }
 
          // Create macro symbol
-         MibMacroSymbol symbol = new MibMacroSymbol(
+         _ = new MibMacroSymbol(
              this.GetLocation(node),
              this.currentMib,
              name)
@@ -479,9 +477,7 @@ namespace MibbleSharp
 
          if (!char.IsUpper(name[0]))
          {
-            string warning = "type identifier '" + name + "' doesn't " +
-                "start with an uppercase character";
-            this.log.AddWarning(this.GetLocation(node), warning);
+            this.log.AddWarning(this.GetLocation(node), "type identifier '" + name + "' doesn't " + "start with an uppercase character");
          }
 
          // Create type symbol
@@ -494,7 +490,7 @@ namespace MibbleSharp
                 node.StartColumn);
          }
 
-         MibTypeSymbol symbol = new MibTypeSymbol(
+         _ = new MibTypeSymbol(
              this.GetLocation(node),
              this.currentMib,
              name,
@@ -1349,7 +1345,7 @@ namespace MibbleSharp
          // Create value symbol
          MibType type = (MibType)this.GetValue(this.GetChildAt(node, 1), 0);
          MibValue value = (MibValue)this.GetValue(this.GetChildAt(node, 3), 0);
-         MibValueSymbol symbol = new MibValueSymbol(
+         _ = new MibValueSymbol(
              this.GetLocation(node),
              this.currentMib,
              name,

@@ -294,12 +294,6 @@ namespace MibbleSharp.Value
       }
 
       /// <summary>
-      /// Gets the MIB that this object identifier is connected to.
-      /// This method simply returns the symbol MIB.
-      /// </summary>
-      private Mib Mib { get => symbol?.Mib; }
-
-      /// <summary>
       /// Initializes the MIB value. This will remove all levels of
       /// indirection present, such as references to other values. No
       /// value information is lost by this operation. This method may

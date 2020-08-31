@@ -26,19 +26,19 @@ namespace MibbleBrowser.SnmpSettings
    [Serializable()]
    class SettingsNode : ISerializable
    {
-      private readonly SettingsNode parent;
+      //private readonly SettingsNode parent;
 
       private readonly List<SettingsNode> children = new List<SettingsNode>();
 
       public SettingsNode()
       {
-         this.parent = null;
+         //this.parent = null;
       }
 
-      public SettingsNode(SettingsNode parent)
-      {
-         this.parent = parent;
-      }
+      //public SettingsNode(SettingsNode parent)
+      //{
+         //this.parent = parent;
+      //}
 
       public SettingsNode(SerializationInfo info, StreamingContext ctxt)
       {

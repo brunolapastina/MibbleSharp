@@ -333,7 +333,6 @@ namespace MibbleSharp
       public override string ToString()
       {
          StringBuilder buffer = new StringBuilder();
-
          buffer.Append("VALUE ");
          buffer.Append(this.Name);
          buffer.Append(" ");
